@@ -12,11 +12,11 @@
   ],
   "license": "AGPL-3.0-only",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
     "start": "node index",
     "server": "npm run build && npm run start",
-    "docker:build": "docker build . --tag diep-local",
-    "docker:start": "docker run -p ${PORT:-8080}:8080 --env PORT=8080 --env ORIGIN_URL --env SERVER_INFO --env APP_KEY --env NODE_ENV --rm --interactive --tty diep-local",
+    "docker:build": "docker build --tag diep-local .",
+    "docker:start": "docker run --pull never --rm --publish ${PORT:-8080}:8080 --env PORT=8080 --env ORIGIN_URL --env SERVER_INFO --env APP_KEY --env NODE_ENV --init --interactive --tty diep-local",
     "docker": "npm run docker:build && npm run docker:start"
   },
   "engines": {
