@@ -22,9 +22,7 @@ All pull requests should be made to fix such related issues.
 
 ## License
 
-All files are GNU AGPLv3 except for:
- - `robin_hood.h` within SpatialHashing folder. License is MIT (see information [here](https://github.com/martinus/robin-hood-hashing/blob/master/LICENSE))
-
+All files are GNU AGPLv3
 > DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
 > Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
 > 
