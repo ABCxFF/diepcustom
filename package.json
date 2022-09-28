@@ -1,0 +1,34 @@
+{
+  "name": "diep-local",
+  "version": "1.0.0",
+  "description": "Private local diep server",
+  "main": "index.js",
+  "contributors": [
+    "ABC <github.com/ABCxFF>",
+    "Binary <github.com/binary-person>",
+    "Crabby <github.com/Craabby>",
+    "diep.io <github.com/diepiodiscord>"
+  ],
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "build": "tsc",
+    "start": "node index",
+    "server": "npm run build && npm run start",
+    "docker:build": "docker build . --tag diep-local",
+    "docker:start": "docker run -p ${PORT:-8080}:8080 --env PORT=8080 --env ORIGIN_URL --env SERVER_INFO --env APP_KEY --env NODE_ENV --rm --interactive --tty diep-local",
+    "docker": "npm run docker:build && npm run docker:start"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "dependencies": {
+    "@types/node": "^16.4.0",
+    "@types/ws": "^8.0.0",
+    "chalk": "^4.1.1",
+    "tweetnacl": "^1.0.3",
+    "ws": "^8.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.2"
+  }
+}

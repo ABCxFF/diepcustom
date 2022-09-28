@@ -1,0 +1,9 @@
+lib/
+node_modules/
+prev/
+build/
+.DS_Store
+package-lock.json
+ext/
+.vscode/
+package/
