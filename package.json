@@ -1,13 +1,14 @@
 {
-  "name": "diep-local",
+  "name": "diepcustom",
   "version": "1.0.0",
-  "description": "Private local diep server",
+  "description": "A recreation of diep's physics, protocol, and backend, in Typescript",
   "main": "index.js",
   "contributors": [
     "ABC <github.com/ABCxFF>",
     "Binary <github.com/binary-person>",
     "Crabby <github.com/Craabby>",
-    "diep.io <github.com/diepiodiscord>"
+    "diep.io <github.com/diepiodiscord>",
+    "xScripty <github.com/c86ec23b-fef1-4979-b2fa-b9adc351b8cc>"
   ],
   "license": "AGPL-3.0-only",
   "scripts": {
