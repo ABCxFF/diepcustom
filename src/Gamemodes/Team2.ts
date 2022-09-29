@@ -27,10 +27,10 @@ import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import { Colors } from "../Const/Enums";
 import ShapeManager from "../Entity/Shape/Manager";
 
-// const arenaSize = 11150;
-// const baseWidth = 2007;
-const arenaSize = 2000;
-const baseWidth = 407;
+ const arenaSize = 11150;
+ const baseWidth = 2007;
+// const arenaSize = 2000;
+// const baseWidth = 407;
 
 /**
  * Teams2 Gamemode Arena
@@ -41,11 +41,11 @@ export default class Teams2Arena extends ArenaEntity {
     /** Red Team entity */
     public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed);
     /** Limits shape count 100 */
-	protected shapes: ShapeManager = new class extends ShapeManager {
-        protected get wantedShapes() {
-            return 64;
-        }
-    }(this);
+   //     protected shapes: ShapeManager = new class extends ShapeManager {
+   //     protected get wantedShapes() {
+   //         return 64;
+   //     }
+   // }(this);
     
     public constructor(game: GameServer) {
         super(game);
