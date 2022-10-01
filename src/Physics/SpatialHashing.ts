@@ -31,10 +31,12 @@ export default class SpatialHashing implements CollisionManager {
     insertEntity(entity: ObjectEntity) {
         const physics = entity.physics;
         const position = entity.position;
-        const startX = position.x >> this.cellSize;
-        const startY = position.y >> this.cellSize;
-        const endX = ((position.x + (physics.sides === 2 ? physics.size / 2 : physics.size)) >> this.cellSize);
-        const endY = ((position.y + (physics.sides === 2 ? physics.width / 2 : physics.size)) >> this.cellSize);
+        const radiW = (physics.sides === 2 ? physics.size / 2 : physics.size);
+        const radiH = (physics.sides === 2 ? physics.width / 2 : physics.size);
+        const startX = ((position.x - radiW) >> this.cellSize);
+        const startY = ((position.y - radiH) >> this.cellSize);
+        const endX = ((position.x + radiW) >> this.cellSize);
+        const endY = ((position.y + radiH) >> this.cellSize);
 
         // Iterating over the y axis first is more cache friendly.
         for (let y = startY; y <= endY; y++) {
