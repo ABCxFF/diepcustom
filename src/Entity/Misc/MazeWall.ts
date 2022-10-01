@@ -37,6 +37,7 @@ export default class MazeWall extends ObjectEntity {
         this.physics.values.pushFactor = 2;
         this.physics.values.absorbtionFactor = 0;
 
+        this.style.values.borderThickness = 640;
         this.style.values.color = Colors.Box;
     }
 }
