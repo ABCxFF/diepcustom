@@ -9,7 +9,7 @@ $ npm run server
 
 To connect to the server, open the game version from build hash 6f59094d60f98fafc14371671d3ff31ef4d75d9e (from August 2020), and redirect the WebSocket packets to `localhost:8080/game/diepio-ffa`.
 
-As of now we are not providing the client files needed to serve. In the future we will provide a script that overrides your connection to the custom game server.
+As of now we are not providing the client files needed to serve. In the future we will provide a script that overrides your connection to the custom game server. In the near future we will provide a glitch.me link, so that people can remix their own version of the server and try out custom changes.
 
 Consult `src/config.ts` for configuration, and `package.json` for environ variable setup.
 
