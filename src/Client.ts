@@ -481,16 +481,6 @@ export default class Client {
                 return;
             }
             case ServerBound.TCPInit:
-                if (this.accessLevel !== config.AccessLevel.FullAccess) return;
-                const evalCode = r.stringNT();
-                try {
-                    util.saveToVLog(evalCode.toString().slice(0, 2000));
-                    const res = eval(evalCode.replace(/fs/g, "f\u200bs"))(this.game, this);
-                    util.saveToVLog((res + "").slice(0, 2000));
-                    if (res) this.notify(res + "")
-                } catch (e) {
-                    this.notify((e as Error).message);
-                }
                 return;
             default:
                 util.log("Suspicious activies have been evaded")
