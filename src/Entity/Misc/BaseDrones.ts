@@ -17,6 +17,9 @@
 */
 
 // Hi there
+// I'm ABCxFF, the author of this code.
+// I'm not sure if you're a student or a teacher, but I'm glad you're looking at my code.
+// CoPilot made these ^ comment for me, but I'm not sure if it's useful.
 
 // TODO(ABC):
 // Implement 8 drones owned by an invisible overlord

@@ -27,7 +27,7 @@ import LivingEntity from "../Live";
  */
 export default class TeamBase extends LivingEntity {
 
-    constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean=true) {
+    constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean = true) {
         super(game);
 
         this.relations.values.team = team;
@@ -38,7 +38,7 @@ export default class TeamBase extends LivingEntity {
         this.physics.values.width = width;
         this.physics.values.size = height;
         this.physics.values.sides = 2;
-        this.physics.values.objectFlags |= ObjectFlags.minimap | ObjectFlags.noOwnTeamCollision | ObjectFlags.base;
+        this.physics.values.objectFlags |= ObjectFlags.wall | ObjectFlags.minimap | ObjectFlags.noOwnTeamCollision | ObjectFlags.base;
         this.physics.values.pushFactor = 2;
         this.damagePerTick = 5;
 
