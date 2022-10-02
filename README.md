@@ -1,13 +1,19 @@
-# diepcustom
+<br><br>
+<div align="center">
+<img src="./icon.png" width="20%" />
+<h3> diep custom </h3>
+<p> A recreation of diep's physics, protocol, and backend in Typescript </p>
+</div>
+<br>
 
-A recreation of diep's physics, protocol, and backend in Typescript.
+## Running backend
 
 Starting a simple server instance (builds and runs):
 ```bash
 $ npm run server
 ```
 
-To connect to the server, open the game version from build hash 6f59094d60f98fafc14371671d3ff31ef4d75d9e (from August 2020), and redirect the WebSocket packets to `localhost:8080/game/diepio-ffa`.
+To connect to the server, open up a diep.io client from the version, build hash [`6f59094d60f98fafc14371671d3ff31ef4d75d9e`](https://static.diep.io/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js) (August 2020), and redirect the WebSocket messages to `localhost:8080/game/diepio-ffa`.
 
 As of now we are not providing the client files needed to serve. In the future we will provide a script that overrides your connection to the custom game server. In the near future we will provide a glitch.me link, so that people can remix their own version of the server and try out custom changes.
 
