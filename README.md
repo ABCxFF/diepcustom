@@ -19,12 +19,16 @@ As of now we are not providing the client files needed to serve. In the future w
 
 Consult `src/config.ts` for configuration, and `package.json` for environ variable setup.
 
+## Discord Chat
+
+For support or discussion, please join our [online Discord chat](https://discord.gg/SyxWdxgHnT).
+
 
 ## Contribution
 
 All issues should be relate to critical bugs, stat related inconsistencies, or undefined or misdefined behavior.
 
-All pull requests should be made to fix such related issues.
+All pull requests should be made to address these issues.
 
 ## License
 
