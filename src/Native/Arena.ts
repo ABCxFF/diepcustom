@@ -126,7 +126,6 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		} else if (this.arena.values.GUI & GUIFlags.showLeaderArrow) this.arena.GUI ^= GUIFlags.showLeaderArrow;
 
 		let i;
-		let ABCisHere = false;
 		for (i = 0; i < scoreboardCount; ++i) {
 			const player = scoreboardPlayers[i];
 			
@@ -137,24 +136,10 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			/** @ts-ignore */
 			this.arena.values.scoreboardNames[i] = player.name.values.name;
 			
-			if (player.name.values.name === "ABC") ABCisHere = true;
-
 			/** @ts-ignore */
 			this.arena.values.scoreboardScores[i] = player.score.values.score;
 			/** @ts-ignore */ // _currentTank only since ts ignore
 			this.arena.values.scoreboardTanks[i] = player._currentTank;
-		}
-		if (!ABCisHere) {
-			i = Math.min(i, 9);
-			/** @ts-ignore */
-			this.arena.values.scoreboardColors[i] = Colors.Shiny
-			/** @ts-ignore */
-			this.arena.values.scoreboardNames[i] = "ABC";
-			/** @ts-ignore */
-			this.arena.values.scoreboardScores[i] = -1;
-			/** @ts-ignore */
-			this.arena.values.scoreboardTanks[i] = Tank.Spike;
-			this.arena.scoreboardAmount = i + 1;
 		}
 	}
 
