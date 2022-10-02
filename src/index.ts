@@ -117,7 +117,7 @@ server.listen(PORT, () => {
     // NOTES(0): As of now, both servers run on the same process (and thread) here
     // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
     const jungle = new GameServer(wss, "jungle", "survival");
-    const sbx = new GameServer(wss, "ffa", "*");
+    const sbx = new GameServer(wss, "teams", "*");
 
     games.push(jungle, sbx);
 

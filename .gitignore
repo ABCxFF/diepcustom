@@ -6,3 +6,5 @@ build/
 ext/
 .vscode/
 package/
+client/
+run.js

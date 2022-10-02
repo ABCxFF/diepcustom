@@ -19,7 +19,7 @@
 /** The build supported by the server. */
 export const buildHash: string = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 /** The port the server is hosting its game server on. */
-export const serverPort = parseInt(process.env.PORT || "8080");
+export const serverPort = process.env.PORT || 8080; // << parseInt isn't needed
 /** Milliseconds per tick in the game. */
 export const mspt = 40;
 
