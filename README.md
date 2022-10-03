@@ -8,14 +8,17 @@
 
 ## Running backend
 
-Starting a simple server instance (builds and runs):
+First, download the client with
+```bash
+$ node client/pull.js
+```
+
+Then run the server with (builds and runs):
 ```bash
 $ npm run server
 ```
 
-To connect to the server, open up a diep.io client from the version, build hash [`6f59094d60f98fafc14371671d3ff31ef4d75d9e`](https://static.diep.io/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js) (August 2020), and redirect the WebSocket messages to `localhost:8080/game/diepio-ffa`.
-
-As of now we are not providing the client files needed to serve. In the future we will provide a script that overrides your connection to the custom game server. In the near future we will provide a glitch.me link, so that people can remix their own version of the server and try out custom changes.
+After downloading the client and running the server, go to `localhost:8080` on your computer. Port will default to 8080, override it with environ.PORT.
 
 Consult `src/config.ts` for configuration, and `package.json` for environ variable setup.
 
@@ -28,7 +31,13 @@ For support or discussion, please join our [online Discord chat](https://discord
 
 All issues should be relate to critical bugs, stat related inconsistencies, or undefined or misdefined behavior.
 
-All pull requests should be made to address these issues.
+### Pull Requests
+
+When making a pull request, please indicate whether you are either:
+  1. Patching an issue documented in Issues
+  2. Fixing a documentation related error (grammar, syntax, etc in markdown or comments)
+  3. Or, something else
+Then summarize the changes you made.
 
 ## License
 
