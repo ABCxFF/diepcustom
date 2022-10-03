@@ -21,22 +21,24 @@ import * as fs from "fs";
 import * as WebSocket from "ws";
 import * as config from "./config"
 import * as util from "./util";
-
 import GameServer from "./Game";
 import auth from "./Auth";
-import { createHash } from "crypto";
+import { join } from "path";
 
 
 const PORT = config.serverPort;
 
-const staticFilePath = __dirname + "/../public"
-
+const staticFilePath = join(__dirname, "/../client/public");
+const isHostingClient = fs.existsSync(staticFilePath);
 const games: GameServer[] = [];
-
+if (isHostingClient) {
+    util.log("Client files exist and are now being hosted (" + staticFilePath + ")");
+}
 const server = http.createServer((req, res) => {
     util.log("Incoming request to " + req.url);
 
-    /**** For hosting the frontend ****
+    // For hosting the frontend
+    if (isHostingClient) {
         let path = "";
         if (req.url?.startsWith("/api/interactions") && auth) {
             util.saveToVLog("someone attempting /claim");
@@ -78,7 +80,7 @@ const server = http.createServer((req, res) => {
             }
         }
 
-        fs.readFile(staticFilePath + path, function (err, data) {
+        fs.readFile(join(staticFilePath, path), function (err, data) {
             if (err) {
                 res.writeHead(500);
                 res.end(JSON.stringify(err));
@@ -88,9 +90,10 @@ const server = http.createServer((req, res) => {
 
             res.end(data);
         });
-    */
-    res.writeHead(404)
-    res.end();
+    } else {
+        res.writeHead(404)
+        res.end();
+    }
 });
 
 const wss = new WebSocket.Server({
