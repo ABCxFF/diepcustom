@@ -7,8 +7,7 @@ Thank you for helping out with diepcustom! Please submit the form below so that 
 Closes [issue link]
 
 ### Summarize what's being changed (include any screenshots, code, or other media if available):
-<!-- Let us know what you are changing. Share anything that could provide the most context.
-If you made changes to the `content` directory, a table will populate in a comment below with links to the preview and current production articles. -->
+<!-- Let us know what you are changing. Share anything that could provide the most context. -->
 ### Confirm the following:
 - [ ] I have tested these changes (by compiling, running, and playing) and have seen no differences in gameplay
 
