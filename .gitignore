@@ -6,3 +6,4 @@ build/
 ext/
 .vscode/
 package/
+client/public/
