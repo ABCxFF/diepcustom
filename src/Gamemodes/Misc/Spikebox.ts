@@ -16,10 +16,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import MazeWall from "../../Entity/Misc/MazeWall";
 import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
-
 import ShapeManager from "../../Entity/Shape/Manager";
 import { Inputs } from "../../Entity/AI";
 import { CameraEntity } from "../../Native/Camera";
@@ -32,14 +30,14 @@ import { SandboxShapeManager } from "../Sandbox";
  */
 export default class SpikeboxArena extends ArenaEntity {
     /** Limits shape count to floor(12.5 * player count) */
-	protected shapes: ShapeManager = new SandboxShapeManager(this);
+    protected shapes: ShapeManager = new SandboxShapeManager(this);
 
     public constructor(game: GameServer) {
         super(game);
 
-		this.updateBounds(2500, 2500);
+	this.updateBounds(2500, 2500);
 
-		const spike = new TankBody(this.game, new CameraEntity(this.game), new Inputs());
+	const spike = new TankBody(this.game, new CameraEntity(this.game), new Inputs());
 
         spike.cameraEntity.camera.player = spike;
         spike.setTank(Tank.Spike);
@@ -60,8 +58,8 @@ export default class SpikeboxArena extends ArenaEntity {
     }
 
     public tick(tick: number) {
-		const arenaSize = Math.floor(25 * Math.sqrt(Math.max(this.game.clients.size, 1))) * 100;
-		if (this.width !== arenaSize || this.height !== arenaSize) this.updateBounds(arenaSize, arenaSize);
+	const arenaSize = Math.floor(25 * Math.sqrt(Math.max(this.game.clients.size, 1))) * 100;
+	if (this.width !== arenaSize || this.height !== arenaSize) this.updateBounds(arenaSize, arenaSize);
 
         super.tick(tick);
     }
