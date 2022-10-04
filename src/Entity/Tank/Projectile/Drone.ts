@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, Tank } from "../../../Const/Enums";
+import { ObjectFlags, Tank, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AI, AIState } from "../../AI";
@@ -55,6 +55,7 @@ export default class Drone extends Bullet {
         this.physics.values.sides = 3;
         if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
         this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
+        this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
 
         // TOD(ABCO:
         // No hardcoded - unless it is hardcoded in diep (all signs show that it might be so far)
