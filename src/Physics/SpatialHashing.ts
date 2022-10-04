@@ -82,8 +82,8 @@ export default class SpatialHashing implements CollisionManager {
         return this.retrieve(
             position.x,
             position.y,
-            entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size,
-            entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size);
+            physics.values.sides === 2 ? physics.values.size / 2 : physics.values.size,
+            physics.values.sides === 2 ? physics.values.width / 2 : physics.values.size);
     }
 
     reset() {
