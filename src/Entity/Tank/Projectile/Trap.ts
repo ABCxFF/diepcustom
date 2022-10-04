@@ -40,6 +40,7 @@ export default class Trap extends Bullet {
         if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
         this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
         this.style.values.styleFlags |= StyleFlags.trap | StyleFlags.star;
+        this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
 
         this.collisionEnd = this.lifeLength >> 3;
         this.lifeLength = (600 * barrel.definition.bullet.lifeLength) >> 3;
