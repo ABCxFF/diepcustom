@@ -155,7 +155,7 @@ export default class AbstractBoss extends LivingEntity {
             .u8(ClientBound.Notification)
             .stringNT(`The ${this.name.values.name} has been defeated by ${killerName}!`)
             .u32(0x000000)
-            .float(4000)
+            .float(10000)
             .stringNT("").send();
     }
 
