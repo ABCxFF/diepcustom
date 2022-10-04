@@ -17,7 +17,6 @@
 */
 
 import * as util from "../../util";
-import * as config from "../../config";
 
 import Square from "../Shape/Square";
 import NecromancerSquare from "./Projectile/NecromancerSquare";
