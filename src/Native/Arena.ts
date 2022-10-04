@@ -196,8 +196,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 	/** Spawns the boss into the arena */
 	protected spawnBoss() {
-		const TBoss = [Guardian, FallenOverlord, FallenBooster, FallenSpike, FallenMegaTrapper]
-			[~~(Math.random() * 5)];
+		const TBoss = [Guardian, FallenOverlord, FallenBooster, FallenSpike, FallenMegaTrapper][~~(Math.random() * 5)];
 		
 		this.boss = new TBoss(this.game);
 		if (~~(Math.random() * 100) === 0) this.boss.name.values.name = "FZ Broadcasts is OP"
