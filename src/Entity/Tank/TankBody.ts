@@ -34,7 +34,6 @@ import { Addon, AddonById } from "./Addons";
 import { getTankById, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
 import { Inputs } from "../AI";
-import AbstractShape from "../Shape/AbstractShape";
 
 /**
  * Abstract type of entity which barrels can connect to.
