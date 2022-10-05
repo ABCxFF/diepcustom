@@ -22,8 +22,6 @@ export const buildHash: string = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 export const serverPort = parseInt(process.env.PORT || "8080");
 /** Milliseconds per tick in the game. */
 export const mspt = 40;
-/** Amount of IP Connections allowed. 0 for infinite. */
-export const ipLimit: number = 4;
 
 /** Host id to be sent to client. */
 export const host: string = process.env.SERVER_INFO || (process.env.NODE_ENV === "development" ? "localhost" : "");
