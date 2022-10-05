@@ -13,12 +13,13 @@ First, download the client with
 $ node client/pull.js
 ```
 
-Then run the server with (builds and runs):
+Then run the server with:
 ```bash
 $ npm run server
 ```
+This builds and runs the server.
 
-After downloading the client and running the server, go to `localhost:8080` on your computer. Port will default to 8080, override it with environ.PORT.
+After downloading the client and running the server, content will be served at `localhost:8080` on your computer. The port will default to 8080, and you may override it with `process.env.PORT`.
 
 Consult `src/config.ts` for configuration, and `package.json` for environ variable setup.
 
@@ -29,15 +30,15 @@ For support or discussion, please join our [online Discord chat](https://discord
 
 ## Contribution
 
-All issues should be relate to critical bugs, stat related inconsistencies, or undefined or misdefined behavior.
+All issues should be relate to critical bugs, stat related inconsistencies, or undefined/misdefined behavior.
 
 ### Pull Requests
 
 When making a pull request, please indicate whether you are either:
   1. Patching an issue documented in Issues
   2. Fixing a documentation related error (grammar, syntax, etc in markdown or comments)
-  3. Or, something else
-Then summarize the changes you made.
+  
+If the reason for your pull request differs from these two, then summarize both the issue and the changes you made.
 
 ## License
 
