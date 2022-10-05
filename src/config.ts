@@ -60,7 +60,8 @@ export const enum AccessLevel {
     NoAccess     = -1
 }
 
-export const banMinimum: AccessLevel = AccessLevel.BetaAccess;
+// Every access level, including and above this one is unbannable via client.ban()
+export const unbannableLevelMinimum: AccessLevel = AccessLevel.FullAccess;
 
 /** The developer tokens by role (UNNECESSARY UNLESS DISCORD INTEGRATION) */
 export const devTokens: Record<string, AccessLevel> = {
