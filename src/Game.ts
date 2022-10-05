@@ -200,10 +200,12 @@ const HOSTED_ENDPOINTS: string[] = [];
             if ((ip !== ipList[0] || !ip) && config.mode !== "development") return request.destroy(new Error("Client ips dont match."));
             
             if (!this.ipCache[ip]) this.ipCache[ip] = 1;
+            // When the player is banned, ipCache[ip] is boosted to infinity
+            else if (this.ipCache[ip] === Infinity) return request.destroy();
             else {
                 this.ipCache[ip] += 1;
 
-                if (this.ipCache[ip] > 4) {
+                if (config.connectionsPerIp !== -1 && this.ipCache[ip] > config.connectionsPerIp) {
                     this.ipCache[ip] -= 1;
                     return request.destroy();
                 }

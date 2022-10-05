@@ -19,9 +19,11 @@
 /** The build supported by the server. */
 export const buildHash: string = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 /** The port the server is hosting its game server on. */
-export const serverPort = parseInt(process.env.PORT || "8080");
+export const serverPort: number = parseInt(process.env.PORT || "8080");
 /** Milliseconds per tick in the game. */
-export const mspt = 40;
+export const mspt: number = 40;
+/** Max connections per ip. -1 = no limit */
+export const connectionsPerIp: number = -1;
 
 /** Host id to be sent to client. */
 export const host: string = process.env.SERVER_INFO || (process.env.NODE_ENV === "development" ? "localhost" : "");
@@ -58,7 +60,8 @@ export const enum AccessLevel {
     NoAccess     = -1
 }
 
-export const banMinimum: AccessLevel = AccessLevel.BetaAccess;
+// Every access level, including and above this one is unbannable via client.ban()
+export const unbannableLevelMinimum: AccessLevel = AccessLevel.FullAccess;
 
 /** The developer tokens by role (UNNECESSARY UNLESS DISCORD INTEGRATION) */
 export const devTokens: Record<string, AccessLevel> = {

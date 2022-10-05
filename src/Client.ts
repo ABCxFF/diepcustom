@@ -514,7 +514,7 @@ export default class Client {
     /** Bans the ip from all servers until restart. */
     public ban() {
         util.saveToLog("IP Banned", "Banned ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers.", 0xEE326A);
-        if (this.accessLevel >= config.banMinimum) {
+        if (this.accessLevel >= config.unbannableLevelMinimum) {
             util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers.", 0x6A32EE);
             return;
         }
