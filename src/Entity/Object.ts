@@ -210,7 +210,7 @@ export default class ObjectEntity extends Entity {
         let kbMagnitude = this.physics.values.absorbtionFactor * entity.physics.values.pushFactor;
         let kbAngle = 0;
 
-        if (entity.physics.values.objectFlags & ObjectFlags.wall) {
+        if (entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base) {
             if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
             } else if (this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
