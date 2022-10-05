@@ -201,10 +201,9 @@ const HOSTED_ENDPOINTS: string[] = [];
             
             if (!this.ipCache[ip]) this.ipCache[ip] = 1;
             else {
-                if (!config.ipLimit) return; // more efficient than === 0
                 this.ipCache[ip] += 1;
 
-                if (this.ipCache[ip] > config.ipLimit) {
+                if (this.ipCache[ip] > 4) {
                     this.ipCache[ip] -= 1;
                     return request.destroy();
                 }
