@@ -30,15 +30,19 @@ For support or discussion, please join our [online Discord chat](https://discord
 
 ## Contribution
 
-All issues should be relate to critical bugs, stat related inconsistencies, or undefined/misdefined behavior.
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for information on contributing.
 
-### Pull Requests
+<!-- OLD TEXT, saving here just for now
+  All issues should be relate to critical bugs, stat related inconsistencies, or undefined/misdefined behavior.
 
-When making a pull request, please indicate whether you are either:
-  1. Patching an issue documented in Issues
-  2. Fixing a documentation related error (grammar, syntax, etc in markdown or comments)
-  
-If the reason for your pull request differs from these two, then summarize both the issue and the changes you made.
+  ### Pull Requests
+
+  When making a pull request, please indicate whether you are either:
+    1. Patching an issue documented in Issues
+    2. Fixing a documentation related error (grammar, syntax, etc in markdown or comments)
+    
+  If the reason for your pull request differs from these two, then summarize both the issue and the changes you made.
+-->
 
 ## License
 
