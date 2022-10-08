@@ -7,3 +7,4 @@ ext/
 .vscode/
 package/
 client/public/
+replit.nix
