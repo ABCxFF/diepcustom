@@ -1,4 +1,3 @@
-This looks like a Markdown file.Beautify Now!No, thanks.
 <br><br>
     <div align="center">
         <img src="./icon.png" width="20%" />
