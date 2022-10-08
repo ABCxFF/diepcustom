@@ -2,7 +2,7 @@
 <div align="center">
 <img src="./icon.png" width="20%" />
 <h3> diep custom </h3>
-<p> A recreation of diep's physics, protocol, and backend in Typescript </p>
+<p> An open source diep.io custom private-server template </p>
 </div>
 <br>
 
