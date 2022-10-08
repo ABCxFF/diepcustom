@@ -171,7 +171,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	 */
 	public close() {
 		for (const client of this.game.clients) {
-			client.notify("Arena Closed: No players can join", 0xFF0000, -1);
+			client.notify("Arena closed: No players can join", 0xFF0000, -1);
 		}
 
 		this.arenaState = ArenaState.CLOSING;
