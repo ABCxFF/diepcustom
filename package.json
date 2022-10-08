@@ -1,7 +1,7 @@
 {
   "name": "diepcustom",
   "version": "1.0.0",
-  "description": "A recreation of diep's physics, protocol, and backend, in Typescript",
+  "description": "An open source diep.io custom private-server template",
   "main": "index.js",
   "contributors": [
     "ABC <github.com/ABCxFF>",
@@ -14,6 +14,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node index",
+    "preinstall": "node client/pull",
     "server": "npm run build && npm run start",
     "docker:build": "docker build --tag diep-local .",
     "docker:start": "docker run --pull never --rm --publish ${PORT:-8080}:8080 --env PORT=8080 --env ORIGIN_URL --env SERVER_INFO --env APP_KEY --env NODE_ENV --init --interactive --tty diep-local",
