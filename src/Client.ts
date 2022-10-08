@@ -310,7 +310,7 @@ export default class Client {
                         while (!DevTankDefinitions[tank] || DevTankDefinitions[tank].flags.devOnly === true && !isDeveloper) {
                             tank = (tank + 1) % DevTankDefinitions.length;
                         }
-                        tank = ~tank
+                        tank = ~tank;
                     }
 
                     player.setTank(tank);
@@ -359,8 +359,7 @@ export default class Client {
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
 
-                /** @ts-ignore: Entity.exists() is checked beforehand. */
-                if (this.cheater) camera.camera.values.player.name.nametag |= NametagFlags.cheats;
+                if (this.cheater) tank.name.values.nametag |= NametagFlags.cheats;
                 return;
             }
             case ServerBound.StatUpgrade: {
