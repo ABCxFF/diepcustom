@@ -178,7 +178,8 @@ export default class ObjectEntity extends Entity {
         this.velocity.add(this.accel);
 
         if (this.velocity.magnitude < 0.01) this.velocity.magnitude = 0;
-
+        // when being deleted, entities slow down half speed
+        else if (this.deletionAnimation) this.velocity.magnitude /= 2;
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
 
