@@ -103,6 +103,9 @@ export default class Client {
     /** The client's IP Address */
     public ipAddress: string;
 
+    /** Whether or not the player is cheating. */
+    public cheater = 0;
+
     /** Returns a new writer stream connected to the socket. */
     public write() {
         return new WSWriterStream(this.ws);
@@ -233,7 +236,7 @@ export default class Client {
             case ServerBound.Init: throw new Error('0x0::How?');
             case ServerBound.Ping: throw new Error('0x5::How?');
             case ServerBound.Input: {
-                // Beware, this code gets less obvious as you scroll
+                // Beware, this code gets less readable as you scroll
                 const previousFlags = this.inputs.flags;
                 const flags = this.inputs.flags = r.vu() | this.inputs.cachedFlags;
                 this.inputs.cachedFlags = 0;
@@ -275,7 +278,12 @@ export default class Client {
 
                 if ((flags & InputFlags.godmode) && (this.accessLevel >= config.AccessLevel.BetaAccess || true)) {
                     if (player.currentTank < 0) player.setTank(Tank.Basic);
-                    else player.setTank(DevTank.Developer);
+                    else { 
+                        player.name.nametag |= NametagFlags.cheats;
+                        this.cheater = 1;
+
+                        player.setTank(DevTank.Developer);
+                    }
                 }
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
                     player.position.x = this.inputs.mouse.x;
@@ -284,6 +292,9 @@ export default class Client {
                     player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.cheater = 1;
+                    
                     let tank = player.currentTank;
                     if (tank >= 0) {
                         tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
@@ -307,10 +318,15 @@ export default class Client {
                 if (flags & InputFlags.levelup) {
                     if ((this.accessLevel === config.AccessLevel.FullAccess) || camera.camera.values.level < 45) {
                         player.name.nametag |= NametagFlags.cheats;
+                        this.cheater = 1;
+                        
                         camera.setLevel(camera.camera.values.level + 1);
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.cheater = 1;
+                    
                     this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
                     camera.camera.killedBy = player.name.values.name;
                     player.destroy();
@@ -332,7 +348,7 @@ export default class Client {
                 const name = r.stringNT().slice(0, 16);
 
                 const tank = camera.camera.player = camera.relations.owner = camera.relations.parent = new TankBody(this.game, camera, this.inputs);
-                tank.setTank(Tank.Basic)
+                tank.setTank(Tank.Basic);
                 this.game.arena.spawnPlayer(tank, this);
                 camera.setLevel(camera.camera.values.respawnLevel);
 
@@ -342,6 +358,9 @@ export default class Client {
                 camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
+
+                /** @ts-ignore: Entity.exists() is checked beforehand. */
+                if (this.cheater) camera.camera.values.player.name.nametag |= NametagFlags.cheats;
                 return;
             }
             case ServerBound.StatUpgrade: {
