@@ -112,7 +112,6 @@ export default class Bullet extends LivingEntity {
         super.tick(tick);
 
         if (tick === this.spawnTick + 1) this.addAcceleration(this.movementAngle, this.baseSpeed);
-        else if (this.deletionAnimation) this.maintainVelocity(this.usePosAngle ? this.position.values.angle : this.movementAngle, this.baseAccel / 2);
         else this.maintainVelocity(this.usePosAngle ? this.position.values.angle : this.movementAngle, this.baseAccel);
 
         if (tick - this.spawnTick >= this.lifeLength) this.destroy(true);
