@@ -104,7 +104,7 @@ export default class Client {
     public ipAddress: string;
 
     /** Whether or not the player is cheating. */
-    public cheater = 0;
+    private cheater = 0;
 
     /** Returns a new writer stream connected to the socket. */
     public write() {
@@ -277,14 +277,12 @@ export default class Client {
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
 
                 if ((flags & InputFlags.godmode) && (this.accessLevel >= config.AccessLevel.BetaAccess || true)) {
-                    if (player.currentTank < 0) player.setTank(Tank.Basic);
-                    else { 
-                        player.name.nametag |= NametagFlags.cheats;
-                        this.cheater = 1;
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.cheater = 1;
 
-                        player.setTank(DevTank.Developer);
-                    }
+                    player.setTank(player.currentTank < 0 ? DevTank.Developer : Tank.Basic);
                 }
+
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
                     player.position.x = this.inputs.mouse.x;
                     player.position.y = this.inputs.mouse.y;
@@ -353,13 +351,12 @@ export default class Client {
                 camera.setLevel(camera.camera.values.respawnLevel);
 
                 tank.name.values.name = name;
+                if (this.cheater) tank.name.values.nametag |= NametagFlags.cheats;
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
-
-                if (this.cheater) tank.name.values.nametag |= NametagFlags.cheats;
                 return;
             }
             case ServerBound.StatUpgrade: {
