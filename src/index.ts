@@ -52,9 +52,10 @@ const server = http.createServer((req, res) => {
                     util.saveToVLog("someone opening up the page");
                     path = "/index.html";
                     break;
-                case "/c.js":
-                case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
+	            res.setHeader ("Content-Type", "application/wasm");
+                case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
+                case "/c.js":
                     path = req.url;
                     break;
                 case "/ext/token/":
@@ -62,8 +63,9 @@ const server = http.createServer((req, res) => {
                     path = "/ext/token.html";
                     break;
                 case "/app_store.svg":
+	            res.setHeader ("Content-Type", "image/svg+xml");
                 case "/google_play.png":
-                    return res.writeHead(200).end();
+                   // return res.writeHead(200).end();
                 case "/facebook.png":
                 case "/reddit.png":
                 case "/title.png":
