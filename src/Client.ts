@@ -187,7 +187,7 @@ export default class Client {
                 return;
             }
             // Hardcoded dev password
-            if (createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
+            if (!config.devPasswordHash || createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
                 this.accessLevel = config.AccessLevel.FullAccess;
                 util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.endpoint + "`) with `full` access.", 0x5A65EA);
             } else if (auth && pw) {
