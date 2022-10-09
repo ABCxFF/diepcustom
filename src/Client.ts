@@ -103,6 +103,9 @@ export default class Client {
     /** The client's IP Address */
     public ipAddress: string;
 
+    /** Whether or not the player has used in game dev cheats before (such as level up or godmode). */
+    private devCheatsUsed = 0;
+
     /** Returns a new writer stream connected to the socket. */
     public write() {
         return new WSWriterStream(this.ws);
@@ -233,7 +236,7 @@ export default class Client {
             case ServerBound.Init: throw new Error('0x0::How?');
             case ServerBound.Ping: throw new Error('0x5::How?');
             case ServerBound.Input: {
-                // Beware, this code gets less obvious as you scroll
+                // Beware, this code gets less readable as you scroll
                 const previousFlags = this.inputs.flags;
                 const flags = this.inputs.flags = r.vu() | this.inputs.cachedFlags;
                 this.inputs.cachedFlags = 0;
@@ -274,9 +277,12 @@ export default class Client {
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
 
                 if ((flags & InputFlags.godmode) && (this.accessLevel >= config.AccessLevel.BetaAccess || true)) {
-                    if (player.currentTank < 0) player.setTank(Tank.Basic);
-                    else player.setTank(DevTank.Developer);
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.devCheatsUsed = 1;
+
+                    player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
                 }
+
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
                     player.position.x = this.inputs.mouse.x;
                     player.position.y = this.inputs.mouse.y;
@@ -284,6 +290,9 @@ export default class Client {
                     player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.devCheatsUsed = 1;
+                    
                     let tank = player.currentTank;
                     if (tank >= 0) {
                         tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
@@ -299,7 +308,7 @@ export default class Client {
                         while (!DevTankDefinitions[tank] || DevTankDefinitions[tank].flags.devOnly === true && !isDeveloper) {
                             tank = (tank + 1) % DevTankDefinitions.length;
                         }
-                        tank = ~tank
+                        tank = ~tank;
                     }
 
                     player.setTank(tank);
@@ -307,10 +316,15 @@ export default class Client {
                 if (flags & InputFlags.levelup) {
                     if ((this.accessLevel === config.AccessLevel.FullAccess) || camera.camera.values.level < 45) {
                         player.name.nametag |= NametagFlags.cheats;
+                        this.devCheatsUsed = 1;
+                        
                         camera.setLevel(camera.camera.values.level + 1);
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
+                    player.name.nametag |= NametagFlags.cheats;
+                    this.devCheatsUsed = 1;
+                    
                     this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
                     camera.camera.killedBy = player.name.values.name;
                     player.destroy();
@@ -332,11 +346,12 @@ export default class Client {
                 const name = r.stringNT().slice(0, 16);
 
                 const tank = camera.camera.player = camera.relations.owner = camera.relations.parent = new TankBody(this.game, camera, this.inputs);
-                tank.setTank(Tank.Basic)
+                tank.setTank(Tank.Basic);
                 this.game.arena.spawnPlayer(tank, this);
                 camera.setLevel(camera.camera.values.respawnLevel);
 
                 tank.name.values.name = name;
+                if (this.devCheatsUsed) tank.name.values.nametag |= NametagFlags.cheats;
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
