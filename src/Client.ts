@@ -103,8 +103,8 @@ export default class Client {
     /** The client's IP Address */
     public ipAddress: string;
 
-    /** Whether or not the player is cheating. */
-    private cheater = 0;
+    /** Whether or not the player has used in game dev cheats before (such as level up or godmode). */
+    private devCheatsUsed = 0;
 
     /** Returns a new writer stream connected to the socket. */
     public write() {
@@ -278,9 +278,9 @@ export default class Client {
 
                 if ((flags & InputFlags.godmode) && (this.accessLevel >= config.AccessLevel.BetaAccess || true)) {
                     player.name.nametag |= NametagFlags.cheats;
-                    this.cheater = 1;
+                    this.devCheatsUsed = 1;
 
-                    player.setTank(player.currentTank < 0 ? DevTank.Developer : Tank.Basic);
+                    player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
                 }
 
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
@@ -291,7 +291,7 @@ export default class Client {
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
                     player.name.nametag |= NametagFlags.cheats;
-                    this.cheater = 1;
+                    this.devCheatsUsed = 1;
                     
                     let tank = player.currentTank;
                     if (tank >= 0) {
@@ -316,14 +316,14 @@ export default class Client {
                 if (flags & InputFlags.levelup) {
                     if ((this.accessLevel === config.AccessLevel.FullAccess) || camera.camera.values.level < 45) {
                         player.name.nametag |= NametagFlags.cheats;
-                        this.cheater = 1;
+                        this.devCheatsUsed = 1;
                         
                         camera.setLevel(camera.camera.values.level + 1);
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
                     player.name.nametag |= NametagFlags.cheats;
-                    this.cheater = 1;
+                    this.devCheatsUsed = 1;
                     
                     this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
                     camera.camera.killedBy = player.name.values.name;
@@ -351,7 +351,7 @@ export default class Client {
                 camera.setLevel(camera.camera.values.respawnLevel);
 
                 tank.name.values.name = name;
-                if (this.cheater) tank.name.values.nametag |= NametagFlags.cheats;
+                if (this.devCheatsUsed) tank.name.values.nametag |= NametagFlags.cheats;
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
