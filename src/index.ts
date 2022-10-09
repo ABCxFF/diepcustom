@@ -55,7 +55,6 @@ const server = http.createServer((req, res) => {
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
 	            res.setHeader ("Content-Type", "application/wasm");
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
-                case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
                 case "/c.js":
                     path = req.url;
                     break;
