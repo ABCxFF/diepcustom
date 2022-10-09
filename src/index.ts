@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
                     path = "/index.html";
                     break;
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
-	  res.setHeader ("Content-Type", "application/wasm");
+	            res.setHeader ("Content-Type", "application/wasm");
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
                 case "/c.js":
@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
                     path = "/ext/token.html";
                     break;
                 case "/app_store.svg":
-	      res.setHeader ("Content-Type", "image/svg+xml");
+	            res.setHeader ("Content-Type", "image/svg+xml");
                 case "/google_play.png":
                    // return res.writeHead(200).end();
                 case "/facebook.png":
