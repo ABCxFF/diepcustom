@@ -186,31 +186,29 @@ export default class Client {
                 setTimeout(() => this.terminate(), 100);
                 return;
             }
-            if (pw) {
-                // Hardcoded dev password
-                if (createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
-                    this.accessLevel = config.AccessLevel.FullAccess;
-                    util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.endpoint + "`) with `full` access.", 0x5A65EA);
-                } else if (auth) {
-                    if (!auth.verifyCode(pw)) return this.terminate();
+            // Hardcoded dev password
+            if (createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
+                this.accessLevel = config.AccessLevel.FullAccess;
+                util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.endpoint + "`) with `full` access.", 0x5A65EA);
+            } else if (auth && pw) {
+                if (!auth.verifyCode(pw)) return this.terminate();
 
-                    const [id, perm] = pw.split('v');
-                    this.discordId = id;
-                    this.accessLevel = config.devTokens[id] ?? parseInt(perm) ?? config.devTokens["*"];
+                const [id, perm] = pw.split('v');
+                this.discordId = id;
+                this.accessLevel = config.devTokens[id] ?? parseInt(perm) ?? config.devTokens["*"];
 
-                    util.saveToLog("Client Connected", "<@" + id + "> connected to the server (`" + this.game.endpoint + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
+                util.saveToLog("Client Connected", "<@" + id + "> connected to the server (`" + this.game.endpoint + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
 
-                    // Enforce 2 clients per account id
-                    if (!this.game.discordCache[id]) this.game.discordCache[id] = 1;
-                    else this.game.discordCache[id] += 1;
+                // Enforce 2 clients per account id
+                if (!this.game.discordCache[id]) this.game.discordCache[id] = 1;
+                else this.game.discordCache[id] += 1;
 
-                    util.saveToVLog(`<@${id}> client connecting. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
+                util.saveToVLog(`<@${id}> client connecting. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
 
-                    if (this.game.discordCache[id] > 2) {
-                        util.saveToVLog(`<@${id}> too many accounts!. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
-                        util.saveToLog("Client Kicked", "<@" + id + "> client count maximum reached at `" + this.game.endpoint + "`.", 0xEE326A);
-                        this.terminate();
-                    }
+                if (this.game.discordCache[id] > 2) {
+                    util.saveToVLog(`<@${id}> too many accounts!. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
+                    util.saveToLog("Client Kicked", "<@" + id + "> client count maximum reached at `" + this.game.endpoint + "`.", 0xEE326A);
+                    this.terminate();
                 }
             } else if (auth) {
                 util.saveToLog("Client Terminated", "Unknown client terminated due to lack of authentication", 0x6AEE32);
