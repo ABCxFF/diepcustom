@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
                     path = "/index.html";
                     break;
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
-	            res.setHeader ("Content-Type", "application/wasm");
+	                res.setHeader("Content-Type", "application/wasm");
                 case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
                 case "/c.js":
                     path = req.url;
@@ -63,9 +63,8 @@ const server = http.createServer((req, res) => {
                     path = "/ext/token.html";
                     break;
                 case "/app_store.svg":
-	            res.setHeader ("Content-Type", "image/svg+xml");
-                case "/google_play.png":
-                   // return res.writeHead(200).end();
+	                res.setHeader("Content-Type", "image/svg+xml");
+                case "/google_play.png": // return res.writeHead(200).end();
                 case "/facebook.png":
                 case "/reddit.png":
                 case "/title.png":
@@ -93,7 +92,7 @@ const server = http.createServer((req, res) => {
             res.end(data);
         });
     } else {
-        res.writeHead(404)
+        res.writeHead(404);
         res.end();
     }
 });
@@ -121,10 +120,10 @@ server.listen(PORT, () => {
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
     // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
-    const jungle = new GameServer(wss, "jungle", "survival");
-    const sbx = new GameServer(wss, "ffa", "*");
+    const ffa = new GameServer(wss, "ffa", "ffa");
+    const sbx = new GameServer(wss, "sandbox", "*");
 
-    games.push(jungle, sbx);
+    games.push(ffa, sbx);
 
     util.saveToLog("Servers up", "All servers booted up.", 0x37F554);
     util.log("Dumping endpoint -> gamemode routing table");
