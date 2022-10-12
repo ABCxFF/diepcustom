@@ -59,7 +59,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	public arenaState: number = ArenaState.OPEN;
 
 	/** The current boss spawned into the game */
-	protected boss: AbstractBoss | null = null;
+	public boss: AbstractBoss | null = null;
 
 	/** Controller of all shapes in the arena. */
 	protected shapes = new ShapeManager(this);
@@ -200,7 +200,6 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			[~~(Math.random() * 5)];
 		
 		this.boss = new TBoss(this.game);
-		if (~~(Math.random() * 100) === 0) this.boss.name.values.name = "FZ Broadcasts is OP"
 	}
 
 	public tick(tick: number) {
