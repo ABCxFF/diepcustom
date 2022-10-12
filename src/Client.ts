@@ -102,6 +102,8 @@ export default class Client {
 
     /** The client's IP Address */
     public ipAddress: string;
+    /** The client's IP Address, hashed */
+    public ipAddressHash: string;
 
     /** Whether or not the player has used in game dev cheats before (such as level up or godmode). */
     private devCheatsUsed = 0;
@@ -115,6 +117,7 @@ export default class Client {
         this.game = game;
         this.ws = ws;
         this.ipAddress = ipAddress;
+        this.ipAddressHash = createHash('sha256').update(ipAddress + __dirname).digest('hex').slice(0, 8);
 
         this.lastPingTick = this.connectTick = game.tick;
 
@@ -181,6 +184,7 @@ export default class Client {
             if (buildHash !== config.buildHash) {
 
                 util.log("Kicking client. Invalid build hash " + buildHash);
+                util.saveToVLog(this.toString() + " being kicked, wrong version hash " + buildHash);
 
                 this.write().u8(ClientBound.OutdatedClient).stringNT(config.buildHash).send();
                 setTimeout(() => this.terminate(), 100);
@@ -197,26 +201,26 @@ export default class Client {
                 this.discordId = id;
                 this.accessLevel = config.devTokens[id] ?? parseInt(perm) ?? config.devTokens["*"];
 
-                util.saveToLog("Client Connected", "<@" + id + "> connected to the server (`" + this.game.endpoint + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
+                util.saveToLog("Client Connected", this.toString() + " connected to the server (`" + this.game.endpoint + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
 
                 // Enforce 2 clients per account id
                 if (!this.game.discordCache[id]) this.game.discordCache[id] = 1;
                 else this.game.discordCache[id] += 1;
 
-                util.saveToVLog(`<@${id}> client connecting. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
+                util.saveToVLog(`${this.toString()} client connecting. ip: ` + this.ipAddressHash);
 
                 if (this.game.discordCache[id] > 2) {
-                    util.saveToVLog(`<@${id}> too many accounts!. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
-                    util.saveToLog("Client Kicked", "<@" + id + "> client count maximum reached at `" + this.game.endpoint + "`.", 0xEE326A);
+                    util.saveToVLog(`${this.toString()} too many accounts!. ip: ` + this.ipAddressHash);
+                    util.saveToLog("Client Kicked", this.toString() + " client count maximum reached at `" + this.game.endpoint + "`.", 0xEE326A);
                     this.terminate();
                 }
             } else if (auth) {
-                util.saveToLog("Client Terminated", "Unknown client terminated due to lack of authentication", 0x6AEE32);
+                util.saveToLog("Client Terminated", "Unknown client terminated due to lack of authentication:: " + this.toString(), 0x6AEE32);
                 return this.terminate();
             }
 
             if (this.accessLevel === config.AccessLevel.NoAccess) {
-                util.saveToLog("Client Terminated 2", "Possibly unknown, client terminated due to lack of authentication:: " + this.discordId, 0x6EAE23);
+                util.saveToLog("Client Terminated 2", "Possibly unknown, client terminated due to lack of authentication:: " + this.toString(), 0x6EAE23);
                 return this.terminate();
             }
 
@@ -518,7 +522,7 @@ export default class Client {
         this.game.ipCache[this.ipAddress] -= 1;
         if (this.discordId && this.game.discordCache[this.discordId]) {
             this.game.discordCache[this.discordId] -= 1;
-            util.saveToVLog(`<@${this.discordId}> client terminated. ip: ` + createHash('sha256').update(this.ipAddress).digest('hex').slice(0, 8));
+            util.saveToVLog(`${this.toString()} terminated. ip: ` + this.ipAddressHash);
         }
 
         if (Entity.exists(this.camera)) this.camera.delete();
@@ -526,9 +530,9 @@ export default class Client {
 
     /** Bans the ip from all servers until restart. */
     public ban() {
-        util.saveToLog("IP Banned", "Banned ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers.", 0xEE326A);
+        util.saveToLog("IP Banned", "Banned ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers... " + this.toString(true), 0xEE326A);
         if (this.accessLevel >= config.unbannableLevelMinimum) {
-            util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers.", 0x6A32EE);
+            util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers." + this.toString(true), 0x6A32EE);
             return;
         }
         // Lol
@@ -566,5 +570,20 @@ export default class Client {
         if (tick >= this.lastPingTick + 300) {
             return this.terminate();
         }
+    }
+    /** toString override from base Object. Adds debug info */
+    public toString(verbose: boolean = false): string {
+        const tokens: string[] = [];
+
+        if (this.discordId) tokens.push("disc=<@" + this.discordId + ">");
+        if (this.camera?.camera?.player?.name?.name) tokens.push("name=" + JSON.stringify(this.camera?.camera?.player?.name?.name));
+        if (verbose) {
+            if (this.ipAddress) tokens.push("ip=" + this.ipAddress);
+            if (this.game.endpoint) tokens.push("game.endpoint=" + this.game.endpoint);
+        }
+        if (this.terminated) tokens.push("(terminated)");
+        if (!tokens.length) return `Client(${this.accessLevel}) {}`
+
+        return `Client(${this.accessLevel}) { ${tokens.join(', ')} }`
     }
 }
