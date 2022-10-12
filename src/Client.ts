@@ -183,8 +183,8 @@ export default class Client {
 
             if (buildHash !== config.buildHash) {
 
-                util.log("Kicking client. Invalid build hash " + buildHash);
-                util.saveToVLog(this.toString() + " being kicked, wrong version hash " + buildHash);
+                util.log("Kicking client. Invalid build hash " + JSON.stringify(buildHash));
+                util.saveToVLog(this.toString() + " being kicked, wrong version hash " + JSON.stringify(buildHash));
 
                 this.write().u8(ClientBound.OutdatedClient).stringNT(config.buildHash).send();
                 setTimeout(() => this.terminate(), 100);
@@ -530,9 +530,9 @@ export default class Client {
 
     /** Bans the ip from all servers until restart. */
     public ban() {
-        util.saveToLog("IP Banned", "Banned ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers... " + this.toString(true), 0xEE326A);
+        util.saveToLog("IP Banned", "Banned ||`" + JSON.stringify(this.ipAddress) + "`|| (<@" + this.discordId + ">) across all servers... " + this.toString(true), 0xEE326A);
         if (this.accessLevel >= config.unbannableLevelMinimum) {
-            util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + this.ipAddress + "`|| (<@" + this.discordId + ">) across all servers." + this.toString(true), 0x6A32EE);
+            util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + JSON.stringify(this.ipAddress) + "`|| (<@" + this.discordId + ">) across all servers." + this.toString(true), 0x6A32EE);
             return;
         }
         // Lol

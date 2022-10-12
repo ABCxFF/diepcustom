@@ -141,7 +141,7 @@ export default class Camera extends CameraEntity {
     private addToView(entity: Entity) {
         let c = this.view.find(r => r.id === entity.id)
         if (c) {
-            console.log(c.toString(), entity.toString(), c=== entity)
+            console.log(c.toString(), entity.toString(), c === entity)
         }
         this.view.push(entity);
     }
