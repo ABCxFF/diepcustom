@@ -90,9 +90,9 @@ export default class LivingEntity extends ObjectEntity {
             entity2.style.styleFlags ^= StyleFlags.damage;
             entity2.lastDamageAnimationTick = game.tick;
         }
-        if (entity2.lastDamageAnimationTick !== game.tick && entity2 instanceof TankBody && entity2.definition.flags.invisibility && entity2.style.values.opacity < visibilityRateDamage) entity2.style.opacity += visibilityRateDamage;
         
         if (dF1 !== 0) {
+            if (entity2.lastDamageTick !== game.tick && entity2 instanceof TankBody && entity2.definition.flags.invisibility && entity2.style.values.opacity < visibilityRateDamage) entity2.style.opacity += visibilityRateDamage;
             entity2.lastDamageTick = game.tick;
             entity2.health.health -= dF1;
         }
@@ -102,9 +102,9 @@ export default class LivingEntity extends ObjectEntity {
             entity1.style.styleFlags ^= StyleFlags.damage;
             entity1.lastDamageAnimationTick = game.tick;
         }
-        if (entity1.lastDamageAnimationTick !== game.tick && entity1 instanceof TankBody && entity1.definition.flags.invisibility && entity1.style.values.opacity < visibilityRateDamage) entity1.style.opacity += visibilityRateDamage;
         
         if (dF2 !== 0) {
+            if (entity1.lastDamageTick !== game.tick && entity1 instanceof TankBody && entity1.definition.flags.invisibility && entity1.style.values.opacity < visibilityRateDamage) entity1.style.opacity += visibilityRateDamage;
             entity1.lastDamageTick = game.tick;
             entity1.health.health -= dF2;
         }
