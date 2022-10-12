@@ -22,6 +22,8 @@ export const buildHash: string = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 export const serverPort: number = parseInt(process.env.PORT || "8080");
 /** Milliseconds per tick in the game. */
 export const mspt: number = 40;
+/** Ticks per second in the game */
+export const tps: number = 1000 / mspt;
 /** Max connections per ip. -1 = no limit */
 export const connectionsPerIp: number = -1;
 
@@ -44,6 +46,9 @@ export const magicNum = (function magicNum(build: string) {
 
 /** Spatial Hashing CellSize for physics. Zero = quadtree. */
 export const spatialHashingCellSize: number = 7;
+
+/** Amount of TICKs before the next boss spawn attempt */
+export const bossSpawningInterval = 45 * 60 * tps;
 
 /** Hashed (sha256) dev password */
 export const devPasswordHash: string | undefined = process.env.DEV_PASSWORD_HASH;

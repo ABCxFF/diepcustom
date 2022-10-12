@@ -35,6 +35,7 @@ import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
 import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
+import { bossSpawningInterval } from "../config";
 
 export enum ArenaState {
 	OPEN = 0,
@@ -206,7 +207,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		this.shapes.tick();
 
 		if (this.arenaState === ArenaState.CLOSED) return;
-		if (this.game.tick >= 1 && (this.game.tick % (45 * 60 * 25)) === 0 && !this.boss) {
+		if (this.game.tick >= 1 && (this.game.tick % bossSpawningInterval) === 0 && !this.boss) {
 			this.spawnBoss();
 		}
 		const players: TankBody[] = [];
