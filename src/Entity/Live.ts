@@ -62,6 +62,7 @@ export default class LivingEntity extends ObjectEntity {
         if (entity1.health.values.health <= 0 || entity2.health.values.health <= 0) return;
         if (entity1.damagedEntities.includes(entity2) || entity2.damagedEntities.includes(entity1)) return;
         if ((entity1.style.values.styleFlags & StyleFlags.invincibility) && (entity2.style.values.styleFlags & StyleFlags.invincibility)) return;
+        if (entity1.damagePerTick == 0 || entity2.damagePerTick == 0) return;
 
         const game = entity1.game;
 
