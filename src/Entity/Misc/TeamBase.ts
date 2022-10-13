@@ -53,7 +53,7 @@ export default class TeamBase extends LivingEntity {
         this.style.values.opacity = 0.1;
         this.style.values.borderThickness = 0;
         this.style.values.color = team.team.teamColor;
-        this.style.values.styleFlags |= StyleFlags.minimap2;
+        this.style.values.styleFlags |= StyleFlags.minimap2 | StyleFlags.noDmgIndicator;
 
         this.health.healthbar |= HealthbarFlags.hidden
         this.health.health = this.health.values.maxHealth = 0xABCFF;
