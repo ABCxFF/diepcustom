@@ -65,7 +65,7 @@ export const magicNum = (function magicNum(build: string) {
 export const spatialHashingCellSize: number = 7;
 
 /** Hashed (sha256) dev password */
-export const devPasswordHash: string = process.env.DEV_PASSWORD_HASH || "338deafc53f70987e38f34472ca16ceb1656994558a9b20dfe1173f856783ca2";
+export const devPasswordHash: string | undefined = process.env.DEV_PASSWORD_HASH;
 
 /** Whether or not Verbose Logs should be logged */
 export const doVerboseLogs: boolean = false;
