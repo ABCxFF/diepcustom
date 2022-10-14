@@ -36,7 +36,7 @@ const games: GameServer[] = [];
 const server = http.createServer((req, res) => {
     util.log("Incoming request to " + req.url);
 
-    if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`) {
+    if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
 	    switch(req.url.slice(config.apiLocation.length + 1)) {
             case "/": // check for api enabled
                 res.writeHead(200);
