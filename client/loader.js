@@ -202,7 +202,7 @@ class ASMConsts {
         const socket = Module.cp5.sockets[socketId];
         if(!socket || socket.readyState !== 1) return 0;
         try {
-            socket.send(Module.HEAP8.slice(packetStart, packetStart + packetLength));
+            socket.send(Module.HEAP8.subarray(packetStart, packetStart + packetLength));
         } catch(e) {}
         return 1;
     }
@@ -283,7 +283,7 @@ class ASMConsts {
     // 1 (ads)
 
     static setLocalStorage(key, valueStart, valueLength) {
-        window.localStorage[Module.UTF8ToString(key)] = new TextDecoder().decode(Module.HEAPU8.slice(valueStart, valueLength));
+        window.localStorage[Module.UTF8ToString(key)] = new TextDecoder().decode(Module.HEAPU8.subarray(valueStart, valueStart + valueLength));
     }
 
     // 3 (ads)
@@ -321,7 +321,7 @@ class ASMConsts {
         return Module.allocateUTF8(Module.textInput.value);
     }
 
-    static enableTyping(left, top, width, height, lineHight, fontSize, enabled) {
+    static enableTyping(left, top, width, height, disabled) {
         window.setTyping(true);
         Module.textInputContainer.style.display = "block";
         Module.textInputContainer.style.position = "absolute";
@@ -329,11 +329,11 @@ class ASMConsts {
         Module.textInputContainer.style.top = window.unscale(top) + "px";
         Module.textInput.style.width = window.unscale(width * 0.96) + "px";
         Module.textInput.style.height = window.unscale(height) + "px";
-        Module.textInput.style.lineHeight = window.unscale(lineHight * 0.9) + "px";
-        Module.textInput.style.fontSize = window.unscale(fontSize * 0.9) + "px";
+        Module.textInput.style.lineHeight = window.unscale(height * 0.9) + "px";
+        Module.textInput.style.fontSize = window.unscale(height * 0.9) + "px";
         Module.textInput.style.paddingLeft = "5px";
         Module.textInput.style.paddingRight = "5px";
-        Module.textInput.disabled = !enabled;
+        Module.textInput.disabled = !disabled;
         Module.textInput.focus();
     }
 
