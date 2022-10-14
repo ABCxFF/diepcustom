@@ -50,7 +50,6 @@ const server = http.createServer((req, res) => {
     
     if(ENABLE_CLIENT) {
         const file = config.clientLocation + (req.url === "/" ? "/index.html" : req.url);
-        console.log(file);
         if(file && fs.existsSync(file)) {
             res.writeHead(200);
             return res.end(fs.readFileSync(file))
