@@ -23,84 +23,46 @@ import * as config from "./config"
 import * as util from "./util";
 import GameServer from "./Game";
 import auth from "./Auth";
-import { join } from "path";
-
 
 const PORT = config.serverPort;
+const ENABLE_API = config.enableApi && config.apiLocation;
+const ENABLE_CLIENT = config.enableClient && config.clientLocation && fs.existsSync(config.clientLocation);
 
-const staticFilePath = join(__dirname, "/../client/public");
-const isHostingClient = fs.existsSync(staticFilePath);
+if(ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
+if(ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
+
 const games: GameServer[] = [];
-if (isHostingClient) {
-    util.log("Client files exist and are now being hosted (" + staticFilePath + ")");
-}
+
 const server = http.createServer((req, res) => {
     util.log("Incoming request to " + req.url);
 
-    // For hosting the frontend
-    if (isHostingClient) {
-        let path = "";
-        if (req.url?.startsWith("/api/interactions") && auth) {
-            util.saveToVLog("someone attempting /claim");
-            return auth.handleInteraction(req, res);
+    if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`) {
+	    switch(req.url.slice(config.apiLocation.length + 1)) {
+            case "/": // check for api enabled
+                res.writeHead(200);
+                return res.end();
+            case "/interactions": // discord interaction
+                if(!auth) return;
+                util.saveToVLog("Authentication attempt");
+                return auth.handleInteraction(req, res);
         }
-        if (req.url?.startsWith("/claim/") && auth) {
-            path = "/claim.html";
-        } else {
-            switch (req.url) {
-                case "/":
-                    util.saveToVLog("someone opening up the page");
-                    path = "/index.html";
-                    break;
-                case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.wasm":
-	            res.setHeader ("Content-Type", "application/wasm");
-                case "/build_6f59094d60f98fafc14371671d3ff31ef4d75d9e.wasm.js":
-                case "/c.js":
-                    path = req.url;
-                    break;
-                case "/ext/token/":
-                case "/ext/token":
-                    path = "/ext/token.html";
-                    break;
-                case "/app_store.svg":
-	            res.setHeader ("Content-Type", "image/svg+xml");
-                case "/google_play.png":
-                   // return res.writeHead(200).end();
-                case "/facebook.png":
-                case "/reddit.png":
-                case "/title.png":
-                case "/wiki.png":
-                case "/youtube.png":
-                case "/favicon-32x32.ico":
-                case "/favicon-64x64.ico":
-                    path = "/img" + req.url;
-                    break;
-                default:
-                    util.saveToVLog("404. someone has just requested " + req.url)
-                    // Lol
-                    return res.end('<html><head><title>404 Not Found</title></head>\n<body bgcolor="white">\n<center><h1>404 Not Found</h1></center>\n<hr><center>nginx/1.8.0 (Ubuntu)</center>\n\n\n\n\n\n\n\n\n</body></html>');
-            }
-        }
-
-        fs.readFile(join(staticFilePath, path), function (err, data) {
-            if (err) {
-                res.writeHead(500);
-                res.end(JSON.stringify(err));
-                return;
-            }
+	}
+    
+    if(ENABLE_CLIENT) {
+        const file = config.clientLocation + (req.url === "/" ? "/index.html" : req.url);
+        console.log(file);
+        if(file && fs.existsSync(file)) {
             res.writeHead(200);
-
-            res.end(data);
-        });
-    } else {
-        res.writeHead(404)
-        res.end();
+            return res.end(fs.readFileSync(file))
+        }
+        res.writeHead(404);
+        return res.end(fs.readFileSync(config.clientLocation + "/404.html"))
     }
 });
 
 const wss = new WebSocket.Server({
     server,
-    maxPayload: 2000
+    maxPayload: config.wssMaxMessageSize,
 });
 
 const endpointMatch = /\/game\/diepio-.+/;
