@@ -23,7 +23,8 @@ import AutoTurret from "./AutoTurret";
 import { Colors, MotionFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
 import { BarrelBase } from "./TankBody";
 import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
-import { AI, AIState } from "../AI";
+import { AI, AIState, Inputs } from "../AI";
+import { Entity } from "../../Native/Entity";
 
 const AutoTurretMiniDefinition: BarrelDefinition = {
     angle: 0,
@@ -47,6 +48,63 @@ const AutoTurretMiniDefinition: BarrelDefinition = {
         absorbtionFactor: 1
     }
 };
+
+/**
+ * A smasher-like guard object.
+ * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
+ * for more details and examples.
+ */
+export class GuardAddon extends ObjectEntity implements BarrelBase {
+    /***** From BarrelBase *****/
+    public inputs: Inputs;
+    public cameraEntity: Entity;
+    public reloadTime: number;
+
+    /** Helps the class determine size ratio as well as who is the owner */
+    protected owner: BarrelBase;
+    /** To store the size ratio (in compared to the owner) */
+    public sizeRatio: number;
+    /** Radians per tick, how many radians the guard will rotate in a tick */
+    public radiansPerTick: number;
+
+    constructor(game: GameServer, owner: BarrelBase, sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
+        super(game);
+
+        this.owner = owner;
+        this.inputs = owner.inputs;
+        this.cameraEntity = owner.cameraEntity;
+        // It's weird, but it's how it works
+        sizeRatio *= Math.SQRT1_2
+        this.sizeRatio = sizeRatio;
+        this.radiansPerTick = radiansPerTick;
+
+        this.setParent(owner);
+        this.relations.values.owner = owner;
+        this.relations.values.team = owner.relations.values.team;
+
+        this.style.values.color = Colors.Border;
+        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.position.values.angle = offsetAngle;
+        this.physics.values.sides = sides;
+        this.reloadTime = owner.reloadTime;
+        this.physics.values.size = owner.physics.values.size * sizeRatio;
+    }
+
+    /**
+     * Size factor, used for calculation of the turret and base size.
+     */
+    get sizeFactor() {
+        return this.owner.sizeFactor;
+    }
+
+    public tick(tick: number): void {
+        this.reloadTime = this.owner.reloadTime;
+        this.physics.size = this.sizeRatio * this.owner.physics.values.size;
+        this.position.angle += this.radiansPerTick;
+        // It won't ever do any collisions, so no need to tick the object
+        // super.tick(tick);
+    }
+}
 
 /**
  * Abstract class to represent an addon in game.
@@ -75,41 +133,8 @@ export class Addon {
      * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
      * for more details and examples.
      */
-    protected createGuard(sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
-        const guard = new ObjectEntity(this.game) as BarrelBase;
-
-        guard.inputs = this.owner.inputs;
-
-        Object.defineProperty(guard, "sizeFactor", {
-            get: () => {
-                return this.owner.sizeFactor
-            }
-        });
-        guard.cameraEntity = this.owner.cameraEntity;
-
-        // Its weird, its how it works
-        sizeRatio *= Math.SQRT1_2;
-        
-        guard.style.values.color = Colors.Border;
-        guard.position.values.motion |= MotionFlags.absoluteRotation
-
-        guard.setParent(this.owner);
-        guard.relations.values.owner = this.owner;
-        guard.relations.values.team = this.owner.relations.values.team;
-
-        guard.position.values.angle = offsetAngle;
-        guard.physics.values.sides = sides;
-        guard.physics.values.size = sizeRatio * this.owner.physics.values.size;
-
-        guard.reloadTime = this.owner.reloadTime;
-        
-        guard.tick = () => {
-            guard.reloadTime = this.owner.reloadTime;
-            guard.physics.size = sizeRatio * this.owner.physics.values.size;
-            guard.position.angle += radiansPerTick;
-        }
-
-        return guard;
+    protected createGuard(sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number): GuardAddon {
+        return new GuardAddon(this.game, this.owner, sides, sizeRatio, offsetAngle, radiansPerTick);
     }
 
     /**

@@ -148,8 +148,14 @@ export default class AbstractBoss extends LivingEntity {
         this.movementControl.moveBoss();
     }
 
-    /** See LivingEntity.onDeath - This broadcasts when people kill it*/
+    /** See LivingEntity.onDeath
+     * This broadcasts when people kill it
+     * Will set game.arena.boss to null, so that the next boss can spawn
+     */
     public onDeath(killer: LivingEntity) {
+        // Reset arena.boss
+        if (this.game.arena.boss === this) this.game.arena.boss = null;
+
         const killerName = (killer instanceof TankBody && killer.name.values.name) || "an unnamed tank"
         this.game.broadcast()
             .u8(ClientBound.Notification)

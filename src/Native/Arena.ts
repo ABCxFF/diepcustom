@@ -35,6 +35,7 @@ import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
 import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
+import { bossSpawningInterval } from "../config";
 
 export enum ArenaState {
 	OPEN = 0,
@@ -59,7 +60,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	public arenaState: number = ArenaState.OPEN;
 
 	/** The current boss spawned into the game */
-	protected boss: AbstractBoss | null = null;
+	public boss: AbstractBoss | null = null;
 
 	/** Controller of all shapes in the arena. */
 	protected shapes = new ShapeManager(this);
@@ -200,14 +201,13 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			[~~(Math.random() * 5)];
 		
 		this.boss = new TBoss(this.game);
-		if (~~(Math.random() * 100) === 0) this.boss.name.values.name = "FZ Broadcasts is OP"
 	}
 
 	public tick(tick: number) {
 		this.shapes.tick();
 
 		if (this.arenaState === ArenaState.CLOSED) return;
-		if (this.game.tick >= 1 && (this.game.tick % (45 * 60 * 25)) === 0 && !this.boss) {
+		if (this.game.tick >= 1 && (this.game.tick % bossSpawningInterval) === 0 && !this.boss) {
 			this.spawnBoss();
 		}
 		const players: TankBody[] = [];
