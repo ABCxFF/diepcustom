@@ -161,7 +161,7 @@ export default class AbstractBoss extends LivingEntity {
         const killerName = (killer instanceof TankBody && killer.name.values.name) || "an unnamed tank"
         this.game.broadcast()
             .u8(ClientBound.Notification)
-            .stringNT(`The ${this.altName ? this.altName : this.name.values.name} has been defeated by ${killerName}!`)
+            .stringNT(`The ${this.altName || this.name.values.name} has been defeated by ${killerName}!`)
             .u32(0x000000)
             .float(10000)
             .stringNT("").send();
@@ -196,7 +196,7 @@ export default class AbstractBoss extends LivingEntity {
         if (!this.hasBeenWelcomed) {
             let message = "An unnamed boss has spawned!"
             if (this.name.values.name) {
-                message = `The ${this.altName ? this.altName : this.name.values.name} has spawned!`;
+                message = `The ${this.altName || this.name.values.name} has spawned!`;
             }
             this.game.broadcast().u8(ClientBound.Notification).stringNT(message).u32(0x000000).float(10000).stringNT("").send();
             this.hasBeenWelcomed = true;
