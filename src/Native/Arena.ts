@@ -206,10 +206,12 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	public tick(tick: number) {
 		this.shapes.tick();
 
-		if (this.arenaState === ArenaState.CLOSED) return;
 		if (this.game.tick >= 1 && (this.game.tick % bossSpawningInterval) === 0 && !this.boss) {
 			this.spawnBoss();
 		}
+
+        if (this.arenaState === ArenaState.CLOSED) return;
+
 		const players: TankBody[] = [];
 		
 		for (let id = 0; id <= this.game.entities.lastId; ++id) {
