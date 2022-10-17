@@ -31,6 +31,7 @@ export default class Guardian extends AbstractBoss {
         super(game);
 
         this.name.values.name = 'Guardian';
+        this.altName = 'Guardian of the Pentagons';
         this.style.values.color = Colors.EnemyCrasher;
         this.relations.values.team = this.game.arena;
         this.physics.values.sides = 3;
