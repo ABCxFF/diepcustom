@@ -82,25 +82,6 @@ const GamemodeToArenaClass: Record<DiepGamemodeID, (typeof ArenaEntity) | null> 
     "ball": BallArena
 }
 
-const GamemodeToGamemodeName: Record<DiepGamemodeID, string> & { "*": String } = {
-    "ffa": "FFA",
-    "teams": "2 Teams",
-    "4teams": "4 Teams",
-    "sandbox": "Sandbox",
-    "*": "Sandbox",
-    "dom": "Domination",
-    "survival": "Survival",
-    "tag": "Tag",
-    "maze": "Maze",
-    "mot": "MOT",
-    "testing": "Testing",
-    "spike": "Spikebox",
-    "domtest": "Dominator Test",
-    "jungle": "Jungle",
-    "factest": "Factory Test",
-    "ball": "Ball Test"
-}
-
 /**
  * Used for determining which endpoints go to the default.
  */
@@ -117,9 +98,8 @@ const HOSTED_ENDPOINTS: string[] = [];
     /** The gamemode the game is running. */
     public gamemode: DiepGamemodeID;
     /** The gamemode's name */
-    public gamemodeName: String;
-    /** The endpoint the game is listening to. */
-    public endpoint: DiepGamemodeID | "*";
+    public name: string;
+
     /** Whether or not to put players on the map. */
     public playersOnMap: boolean = false;
 
@@ -152,10 +132,9 @@ const HOSTED_ENDPOINTS: string[] = [];
     /** The interval timer of the tick loop. */
     private _tickInterval: NodeJS.Timeout;
 
-    public constructor(wss: Server, gamemode: DiepGamemodeID, endpoint: DiepGamemodeID | "*") {
+    public constructor(wss: Server, gamemode: DiepGamemodeID, name: string | "*") {
         this.gamemode = gamemode;
-        this.gamemodeName = GamemodeToGamemodeName[this.gamemode];
-        this.endpoint = endpoint;
+        this.name = name;
 
         this.wss = wss;
 
@@ -204,14 +183,14 @@ const HOSTED_ENDPOINTS: string[] = [];
 
     /** Sets up listeners */
     private listen() {
-        HOSTED_ENDPOINTS.push(this.endpoint);
+        HOSTED_ENDPOINTS.push(this.gamemode);
 
         this._listeners["connection"] = [];
         const onConnect = this._listeners.connection[0] = (ws: WebSocket, request: IncomingMessage) => {
             // shouldHandle takes care of this for us
             const endpoint: DiepGamemodeID = (request.url || "").slice((request.url || "").indexOf("-") + 1) as DiepGamemodeID;
         
-            if (!(this.endpoint === "*" && !HOSTED_ENDPOINTS.includes(endpoint)) && this.endpoint !== endpoint) return;
+            if (!(!HOSTED_ENDPOINTS.includes(endpoint)) && this.gamemode !== endpoint) return;
 
             util.log("Incoming client");
             if (this.arena.arenaState !== ArenaState.OPEN) return util.log("Arena is not open: Ignoring client");
@@ -240,7 +219,7 @@ const HOSTED_ENDPOINTS: string[] = [];
 
         this.wss.on("connection", onConnect);
 
-        util.saveToLog("Game Deploying", "Game now deploying gamemode `" + this.gamemode + "` at endpoint `" + this.endpoint + "`.", 0x1FE0C4);
+        util.saveToLog("Game Deploying", "Game now deploying gamemode `" + this.gamemode + "` at endpoint `" + this.gamemode + "`.", 0x1FE0C4);
     }
 
     /** Returns a WebSocketServer Writer Broadcast Stream. */
@@ -254,10 +233,10 @@ const HOSTED_ENDPOINTS: string[] = [];
 
     /** Ends the game instance. */
     public end() {
-        util.saveToLog("Game Instance Ending", "Game running " + this.gamemode + " at `" + this.endpoint + "` is now closing.", 0xEE4132);
+        util.saveToLog("Game Instance Ending", "Game running " + this.gamemode + " at `" + this.gamemode + "` is now closing.", 0xEE4132);
         util.log("Ending Game instance");
         
-        util.removeFast(HOSTED_ENDPOINTS, HOSTED_ENDPOINTS.indexOf(this.endpoint));
+        util.removeFast(HOSTED_ENDPOINTS, HOSTED_ENDPOINTS.indexOf(this.gamemode));
 
         clearInterval(this._tickInterval);
 
