@@ -154,6 +154,7 @@ const HOSTED_ENDPOINTS: string[] = [];
 
     public constructor(wss: Server, gamemode: DiepGamemodeID, endpoint: DiepGamemodeID | "*") {
         this.gamemode = gamemode;
+        this.gamemodeName = GamemodeToGamemodeName[this.gamemode];
         this.endpoint = endpoint;
 
         this.wss = wss;
