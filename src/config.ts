@@ -25,6 +25,9 @@ export const serverPort: number = parseInt(process.env.PORT || "8080");
 /** Milliseconds per tick in the game. */
 export const mspt: number = 40;
 
+/** Ticks per second in the game */
+export const tps: number = 1000 / mspt;
+
 /** Max connections per ip. -1 = no limit */
 export const connectionsPerIp: number = -1;
 
