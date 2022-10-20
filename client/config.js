@@ -171,7 +171,7 @@ const ASM_CONSTS = {
     33425: "empty", // fingerprinting
     33488: "empty", // fingerprinting
     33528: "empty", // fingerprinting
-}
+};
 
 const WASM_IMPORTS = {
     "i": "assertFail",
@@ -194,7 +194,7 @@ const WASM_IMPORTS = {
     "o": "timeString",
     "memory": "wasmMemory",
     "table": "wasmTable"
-}
+};
 
 const WASM_EXPORTS = {
     "s": "wasmCallCtors", // constructors
@@ -224,13 +224,26 @@ const WASM_EXPORTS = {
     "Q": "malloc", // allocates memory
     "R": "dynCallVI", // dynamic func call (v = void, i = integer as arg, d = double as arg, f = float as arg)
     "S": "dynCallV" // dynamic func call (v = void, i = integer as arg, d = double as arg, f = float as arg)
-}
+};
+
+const MOD_CONFIG = {
+    "wasmFunctions": {
+        "tankDefsCtor": 276,
+        "gamemodeButtonDefinitionCtor": 296,
+        "ctorDone": 22
+    },
+    "memory": {
+        "gamemodeButtonDefinitions": 113480,
+        "gamemodeButtonCtorDone": 113492
+    }
+};
+
 
 const WASM_TABLE = {
     "initial": 687,
     "maximum": 687,
     "element": "anyfunc"
-}
+};
 
 const INITIAL_MEMORY = 67108864;
 const WASM_PAGE_SIZE = 65536; // A WebAssembly page has a constant size of 65,536 bytes, i.e., 64KiB
@@ -241,4 +254,4 @@ const DYNAMIC_TOP_PTR = 183072; // start of dynamic memory
 const WASM_MEMORY = {
     "initial": INITIAL_MEMORY / WASM_PAGE_SIZE,
     "maximum": INITIAL_MEMORY / WASM_PAGE_SIZE
-}
+};
