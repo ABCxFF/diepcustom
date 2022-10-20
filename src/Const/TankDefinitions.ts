@@ -20,7 +20,7 @@ import DevTankDefinitions, { DevTank } from "./DevTankDefinitions";
 import { Tank } from "./Enums";
 
 /** The types of post addons that exist in the game, by their id. */
-export type postAddonId = "dompronounced" | "auto5" | "auto3" | "autosmasher" | "spike" | "pronounced" | "smasher" | "landmine" | "autoturret" | "weirdspike" | "auto2" | "auto7" | "autorocket" | "spiesk"
+export type postAddonId = "dompronounced" | "auto5" | "auto3" | "defender" | "autosmasher" | "spike" | "pronounced" | "smasher" | "megasmasher" | "landmine" | "autoturret" | "weirdspike" | "auto2" | "auto7" | "autorocket" | "spiesk"
 
 /** The types of post addons that exist in the game, by their id. */
 export type preAddonId = "dombase" | "launcher"
@@ -50,6 +50,10 @@ export interface BulletDefinition {
     lifeLength: number;
     /** Knockback factor field of the bullet */
     absorbtionFactor: number;
+    /** Projectile color. */
+    color?: number;
+    /** Projectile number of sides. */
+    sides?: number;
 }
 
 /**
@@ -80,6 +84,8 @@ export interface BarrelDefinition {
     droneCount?: number;
     /** Whether or not the drones are controllable - only present if `bullet.type` === 'drone'. */
     canControlDrones?: boolean;
+    /** Whether or not the barrel should always shoot (Trapper Dominator, Defender). */
+    forceFire?: boolean;
     /** The definition of the bullet that is shot from the barrel. */
     bullet: BulletDefinition;
 }
@@ -5866,6 +5872,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5888,6 +5895,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5910,6 +5918,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5932,6 +5941,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5954,6 +5964,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5976,6 +5987,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -5998,6 +6010,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
@@ -6020,6 +6033,7 @@ const TankDefinitions = JSON.parse(`[
                 "isTrapezoid": false,
                 "trapezoidDirection": 0,
                 "addon": "trapLauncher",
+                "forceFire": true,
                 "bullet": {
                     "type": "trap",
                     "sizeRatio": 0.8,
