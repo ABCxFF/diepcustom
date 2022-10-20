@@ -29,21 +29,21 @@ const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
 const ENABLE_CLIENT = config.enableClient && config.clientLocation && fs.existsSync(config.clientLocation);
 
-if(ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
-if(ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
+if (ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
+if (ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
 
 const games: GameServer[] = [];
 
 const server = http.createServer((req, res) => {
     util.saveToVLog("Incoming request to " + req.url);
 
-    if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
-        switch(req.url.slice(config.apiLocation.length + 1)) {
+    if (ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
+        switch (req.url.slice(config.apiLocation.length + 1)) {
             case "/":
                 res.writeHead(200);
                 return res.end();
             case "/interactions": // discord interaction
-                if(!auth) return;
+                if (!auth) return;
                 util.saveToVLog("Authentication attempt");
                 return auth.handleInteraction(req, res);
             case "/tankdefs":
@@ -56,9 +56,9 @@ const server = http.createServer((req, res) => {
     }
 
 
-    if(ENABLE_CLIENT) {
+    if (ENABLE_CLIENT) {
         let file: string | null = null;
-        switch(req.url) {
+        switch (req.url) {
             case "/":
                 file = config.clientLocation + "/index.html";
                 break;
@@ -76,7 +76,7 @@ const server = http.createServer((req, res) => {
                 break;
         }
 
-        if(file && fs.existsSync(file)) {
+        if (file && fs.existsSync(file)) {
             res.writeHead(200);
             return res.end(fs.readFileSync(file))
         }
@@ -108,7 +108,6 @@ server.listen(PORT, () => {
     // RULES(1): No two game servers should share the same endpoint;
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
-    // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
     const ffa = new GameServer(wss, "ffa", "FFA");
     const sbx = new GameServer(wss, "sandbox", "Sandbox");
 
