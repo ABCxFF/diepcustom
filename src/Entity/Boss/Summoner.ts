@@ -18,7 +18,6 @@
 
 import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
-//import TankDefinitions from "../../Const/TankDefinitions";
 import AbstractBoss from "./AbstractBoss";
 
 import { Colors, Tank } from "../../Const/Enums";
@@ -44,7 +43,7 @@ export default class Summoner extends AbstractBoss {
             size: 135 / (1.01 ** (75 - 1)),
             width: 75 / (1.01 ** (75 - 1)),
             delay: 0,
-            reload: 1,
+            reload: 0.5,
             recoil: 2,
             isTrapezoid: true,
             trapezoidDirection: 0,
@@ -71,7 +70,7 @@ export default class Summoner extends AbstractBoss {
             size: 135 / (1.01 ** (75 - 1)),
             width: 75 / (1.01 ** (75 - 1)),
             delay: 0,
-            reload: 0.25,
+            reload: 0.5,
             recoil: 2,
             isTrapezoid: true,
             trapezoidDirection: 0,
@@ -98,7 +97,7 @@ export default class Summoner extends AbstractBoss {
             size: 135 / (1.01 ** (75 - 1)),
             width: 75 / (1.01 ** (75 - 1)),
             delay: 0,
-            reload: 0.25,
+            reload: 0.5,
             recoil: 2,
             isTrapezoid: true,
             trapezoidDirection: 0,
@@ -125,7 +124,7 @@ export default class Summoner extends AbstractBoss {
             size: 135 / (1.01 ** (75 - 1)),
             width: 75 / (1.01 ** (75 - 1)),
             delay: 0,
-            reload: 0.25,
+            reload: 0.5,
             recoil: 2,
             isTrapezoid: true,
             trapezoidDirection: 0,
