@@ -23,6 +23,7 @@ import * as config from "./config"
 import * as util from "./util";
 import GameServer from "./Game";
 import auth from "./Auth";
+import TankDefinitions from "./Const/TankDefinitions";
 
 const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
@@ -37,26 +38,52 @@ const server = http.createServer((req, res) => {
     util.log("Incoming request to " + req.url);
 
     if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
-	    switch(req.url.slice(config.apiLocation.length + 1)) {
-            case "/": // check for api enabled
+        switch(req.url.slice(config.apiLocation.length + 1)) {
+            case "/":
                 res.writeHead(200);
                 return res.end();
             case "/interactions": // discord interaction
                 if(!auth) return;
                 util.saveToVLog("Authentication attempt");
                 return auth.handleInteraction(req, res);
+            case "/tankdefs":
+                res.writeHead(200);
+                return res.end(JSON.stringify(TankDefinitions));
+            case "/servers":
+                res.writeHead(200);
+                return res.end(JSON.stringify(games.map(({ gamemode, gamemodeName }) => ({ gamemode, gamemodeName }))));
         }
-	}
-    
+    }
+
+
     if(ENABLE_CLIENT) {
-        const file = config.clientLocation + (req.url === "/" ? "/index.html" : req.url);
+        let file: string | null = null;
+        switch(req.url) {
+            case "/":
+                file = config.clientLocation + "/index.html";
+                break;
+            case "/loader.js":
+                file = config.clientLocation + "/loader.js";
+                break;
+            case "/input.js":
+                file = config.clientLocation + "/input.js";
+                break;
+            case "/dma.js":
+                file = config.clientLocation + "/dma.js";
+                break;
+            case "/config.js":
+                file = config.clientLocation + "/config.js";
+                break;
+        }
+
         if(file && fs.existsSync(file)) {
             res.writeHead(200);
             return res.end(fs.readFileSync(file))
         }
+
         res.writeHead(404);
         return res.end(fs.readFileSync(config.clientLocation + "/404.html"))
-    }
+    } 
 });
 
 const wss = new WebSocket.Server({
@@ -82,10 +109,10 @@ server.listen(PORT, () => {
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
     // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
-    const jungle = new GameServer(wss, "jungle", "survival");
-    const sbx = new GameServer(wss, "ffa", "*");
+    const ffa = new GameServer(wss, "ffa", "ffa");
+    const sbx = new GameServer(wss, "sandbox", "*");
 
-    games.push(jungle, sbx);
+    games.push(ffa, sbx);
 
     util.saveToLog("Servers up", "All servers booted up.", 0x37F554);
     util.log("Dumping endpoint -> gamemode routing table");
