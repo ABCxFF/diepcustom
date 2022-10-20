@@ -49,6 +49,30 @@ const AutoTurretMiniDefinition: BarrelDefinition = {
     }
 };
 
+const MountedTurretDefinition: BarrelDefinition = {
+    angle: 0,
+    offset: 0,
+    size: 26.5,
+    width: 21 * 0.7,
+    delay: 0.01,
+    reload: 1,
+    recoil: 0.3,
+    isTrapezoid: false,
+    trapezoidDirection: 0,
+    addon: null,
+    bullet: {
+        type: "bullet",
+        health: 6.25,
+        damage: 0.7,
+        speed: 2.7,
+        scatterRate: 1,
+        lifeLength: 1,
+        sizeRatio: 1,
+        absorbtionFactor: 1,
+        color: 12
+    }
+};
+
 /**
  * A smasher-like guard object.
  * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
@@ -137,6 +161,25 @@ export class Addon {
         return new GuardAddon(this.game, this.owner, sides, sizeRatio, offsetAngle, radiansPerTick);
     }
 
+    protected createMountedTurrets(count: number) {
+
+        const ROT_OFFSET = 0.55;
+
+
+
+        const PI2 = Math.PI * 2;
+        for (let i = 0; i < count; ++i) {
+            const base = new AutoTurret(this.owner, MountedTurretDefinition);
+
+            const angle = base.ai.inputs.mouse.angle = PI2 * (i / count);
+
+            base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
+            base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+
+            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+        }
+    }
+
     /**
      * `createAutoTurrets` method builds `count` auto turrets around the current
      * tank's body. 
@@ -182,6 +225,7 @@ export class Addon {
         }
     }
 }
+
 
 /** Spikes addon. */
 class SpikeAddon extends Addon {
@@ -282,6 +326,14 @@ class Auto3Addon extends Addon {
         super(owner);
 
         this.createAutoTurrets(3);
+    }
+}
+/** 3 Auto Turrets */
+class DefenderAddon extends Addon {
+    public constructor(owner: BarrelBase) {
+        super(owner);
+
+        this.createMountedTurrets(3);
     }
 }
 /** The thing above ranger's barrel. */
@@ -420,6 +472,14 @@ class SpieskAddon extends Addon {
     }
 }
 
+class MegaSmasherAddon extends Addon {
+    public constructor(owner: BarrelBase) {
+        super(owner);
+
+        this.createGuard(6, 1.3, 0, .1);
+    }
+}
+
 
 /**
  * All addons in the game by their ID.
@@ -431,6 +491,7 @@ export const AddonById: Record<addonId, typeof Addon | null> = {
     dompronounced: PronouncedDomAddon,
     auto5: Auto5Addon,
     auto3: Auto3Addon,
+    defender: DefenderAddon,
     autosmasher: AutoSmasherAddon,
     pronounced: PronouncedAddon,
     smasher: SmasherAddon,
@@ -441,5 +502,6 @@ export const AddonById: Record<addonId, typeof Addon | null> = {
     auto7: Auto7Addon,
     auto2: Auto2Addon,
     autorocket: AutoRocketAddon,
-    spiesk: SpieskAddon
+    spiesk: SpieskAddon,
+    megasmasher: MegaSmasherAddon
 }
