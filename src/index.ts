@@ -37,6 +37,8 @@ const games: GameServer[] = [];
 const server = http.createServer((req, res) => {
     util.saveToVLog("Incoming request to " + req.url);
 
+    res.setHeader("Server", "github.com/ABCxFF/diepcustom");
+
     if (ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
         switch (req.url.slice(config.apiLocation.length + 1)) {
             case "/":
@@ -104,8 +106,7 @@ wss.shouldHandle = function(request: http.IncomingMessage) {
 server.listen(PORT, () => {
     util.log(`Listening on port ${PORT}`);
 
-    // RULES(0): Always put a endpoint=* gameserver at the end
-    // RULES(1): No two game servers should share the same endpoint;
+    // RULES(0): No two game servers should share the same endpoint
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
     const ffa = new GameServer(wss, "ffa", "FFA");
