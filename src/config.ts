@@ -67,6 +67,9 @@ export const magicNum = (function magicNum(build: string) {
 /** Spatial Hashing CellSize for physics. Zero = quadtree. */
 export const spatialHashingCellSize: number = 7;
 
+/** Amount of TICKs before the next boss spawn attempt */
+export const bossSpawningInterval = 45 * 60 * tps;
+
 /** Hashed (sha256) dev password */
 export const devPasswordHash: string | undefined = process.env.DEV_PASSWORD_HASH;
 
