@@ -128,17 +128,71 @@ Module.todo.push([() => {
 
 Module.todo.push([() => {
     Module.status = "FETCH";
-    return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer())];
+    return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch("/api/servers").then(res => res.json())];
 }, true]);
 
-Module.todo.push([dependency => {
+Module.todo.push([(dependency, tankDefs, servers) => {
     Module.status = "INSTANTIATE";
-    return [new Promise(resolve => WebAssembly.instantiate(dependency, Module.imports).then(res => resolve(res.instance), reason => Module.abort(reason)))];
+    const parser = new WailParser(new Uint8Array(dependency));
+    
+    // inject import hook
+    const loadGamemodeButtons = parser.addImportEntry({
+        moduleStr: "mods",
+        fieldStr: "loadGamemodeButtons",
+        kind: "func",
+        type: parser.addTypeEntry({
+            form: "func",
+            params: [],
+            returnType: null
+        })
+    });
+
+    // add import hook
+    Module.imports.mods = {
+        loadGamemodeButtons: () => {
+            const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtonDefinitions, 'struct', 28);
+            if(vec.start) vec.delete();
+            vec.push(...servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.gamemodeName }, { offset: 24, type: 'i32', value: 0 }])));
+            Module.rawExports.ctorDone(MOD_CONFIG.memory.gamemodeButtonCtorDone);
+        }
+    }
+
+    const gamemodeButtonDefinitionCtor = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.gamemodeButtonDefinitionCtor);
+    const ctorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.ctorDone);
+
+    parser.addExportEntry(ctorDone, {
+        fieldStr: "ctorDone",
+        kind: "func"
+    });
+
+    /**
+     * New wasm instructions look like this:
+     * [...]
+     * if(ctorDone) return;
+     * loadGamemodeButtons();
+     * return;
+     * [...]
+     */
+    parser.addCodeElementParser(null, function({ index, bytes }) {
+        if(index === gamemodeButtonDefinitionCtor.i32()) {
+          return new Uint8Array([
+            ...bytes.subarray(0, 33),
+            OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
+            OP_RETURN,
+            ...bytes.subarray(33, bytes.length)
+          ]);
+        }
+        return false;
+    });
+
+    parser.parse();
+    return [new Promise(resolve => WebAssembly.instantiate(parser.write(), Module.imports).then(res => resolve(res.instance), reason => Module.abort(reason)))];
 }, true]);
 
 Module.todo.push([instance => {
     Module.status = "INITIALIZE";
     Module.exports = Object.fromEntries(Object.entries(instance.exports).map(([key, func]) => [WASM_EXPORTS[key], func]));    
+    Module.rawExports = instance.exports;
     Module.memBuf = wasmImports.wasmMemory.buffer,
     Module.HEAPU8 = new Uint8Array(Module.memBuf);
     Module.HEAP8 = new Int8Array(Module.memBuf);
@@ -157,6 +211,7 @@ Module.todo.push([instance => {
         patterns: []
     };
     window.setupInput();
+    window.setupDMA();
     return [];
 }, false]);
 
@@ -321,7 +376,7 @@ class ASMConsts {
         return Module.allocateUTF8(Module.textInput.value);
     }
 
-    static enableTyping(left, top, width, height, disabled) {
+    static enableTyping(left, top, width, height, enabled) {
         window.setTyping(true);
         Module.textInputContainer.style.display = "block";
         Module.textInputContainer.style.position = "absolute";
@@ -333,7 +388,7 @@ class ASMConsts {
         Module.textInput.style.fontSize = window.unscale(height * 0.9) + "px";
         Module.textInput.style.paddingLeft = "5px";
         Module.textInput.style.paddingRight = "5px";
-        Module.textInput.disabled = !disabled;
+        Module.textInput.disabled = !enabled;
         Module.textInput.focus();
     }
 
