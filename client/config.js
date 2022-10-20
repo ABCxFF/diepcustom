@@ -259,8 +259,8 @@ const WASM_TABLE = {
 const INITIAL_MEMORY = 67108864;
 const WASM_PAGE_SIZE = 65536; // A WebAssembly page has a constant size of 65,536 bytes, i.e., 64KiB
 
-const DYNAMIC_BASE = 5426112; // end of dynmic memory
-const DYNAMIC_TOP_PTR = 183072; // start of dynamic memory
+const DYNAMIC_BASE = 5426112; // start of dynmic memory
+const DYNAMIC_TOP_PTR = 183072; // points to start of dynamic memory
 
 const WASM_MEMORY = {
     "initial": INITIAL_MEMORY / WASM_PAGE_SIZE,
