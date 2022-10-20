@@ -19,6 +19,13 @@
 const BUILD = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 const CDN = "https://static.diep.io/";
 
+const CHANGELOG = [
+    "Updated not so long time ago",
+    "",
+    "Check out the github repo github.com/ABCxFF/diepcustom",
+    "Join out discord: https://discord.com/invite/SyxWdxgHnT :)"
+];
+
 const ASM_CONSTS = {
     1024: "createCanvasCtxWithAlpha",
     3781: "createImage",
@@ -229,15 +236,19 @@ const WASM_EXPORTS = {
 const MOD_CONFIG = {
     "wasmFunctions": {
         "tankDefsCtor": 276,
-        "gamemodeButtonDefinitionCtor": 296,
-        "ctorDone": 22
+        "loadGamemodeButtons": 296,
+        "vectorCtorDone": 22,
+        "loadChangelog": 447
     },
     "memory": {
-        "gamemodeButtonDefinitions": 113480,
-        "gamemodeButtonCtorDone": 113492
+        "gamemodeButtons": 113480,
+        "changelog": 167328
+    },
+    "wasmFunctionHookOffset": {
+        "gamemodeButtons": 33,
+        "changelog": 28
     }
 };
-
 
 const WASM_TABLE = {
     "initial": 687,
