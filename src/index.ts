@@ -29,21 +29,21 @@ const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
 const ENABLE_CLIENT = config.enableClient && config.clientLocation && fs.existsSync(config.clientLocation);
 
-if (ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
-if (ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
+if(ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
+if(ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
 
 const games: GameServer[] = [];
 
 const server = http.createServer((req, res) => {
-    util.log("Incoming request to " + req.url);
+    util.saveToVLog("Incoming request to " + req.url);
 
-    if (ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
-        switch (req.url.slice(config.apiLocation.length + 1)) {
+    if(ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
+        switch(req.url.slice(config.apiLocation.length + 1)) {
             case "/":
                 res.writeHead(200);
                 return res.end();
             case "/interactions": // discord interaction
-                if (!auth) return;
+                if(!auth) return;
                 util.saveToVLog("Authentication attempt");
                 return auth.handleInteraction(req, res);
             case "/tankdefs":
@@ -51,14 +51,14 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify(TankDefinitions));
             case "/servers":
                 res.writeHead(200);
-                return res.end(JSON.stringify(games.map(({ gamemode, gamemodeName }) => ({ gamemode, gamemodeName }))));
+                return res.end(JSON.stringify(games.map(({ gamemode, name }) => ({ gamemode, name }))));
         }
     }
 
 
-    if (ENABLE_CLIENT) {
+    if(ENABLE_CLIENT) {
         let file: string | null = null;
-        switch (req.url) {
+        switch(req.url) {
             case "/":
                 file = config.clientLocation + "/index.html";
                 break;
@@ -76,13 +76,13 @@ const server = http.createServer((req, res) => {
                 break;
         }
 
-        if (file && fs.existsSync(file)) {
+        if(file && fs.existsSync(file)) {
             res.writeHead(200);
-            return res.end(fs.readFileSync(file));
+            return res.end(fs.readFileSync(file))
         }
 
         res.writeHead(404);
-        return res.end(fs.readFileSync(config.clientLocation + "/404.html"));
+        return res.end(fs.readFileSync(config.clientLocation + "/404.html"))
     } 
 });
 
@@ -108,17 +108,15 @@ server.listen(PORT, () => {
     // RULES(1): No two game servers should share the same endpoint;
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
-    const ffa = new GameServer(wss, "ffa", "ffa");
-    const sbx = new GameServer(wss, "sandbox", "*");
+    // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
+    const ffa = new GameServer(wss, "ffa", "FFA");
+    const sbx = new GameServer(wss, "sandbox", "Sandbox");
 
     games.push(ffa, sbx);
 
     util.saveToLog("Servers up", "All servers booted up.", 0x37F554);
     util.log("Dumping endpoint -> gamemode routing table");
-    for (const game of games) {
-        const url = game.endpoint !== "*" ? "localhost:" + config.serverPort + "/game/diepio-" + game.endpoint : "the rest" ;
-        console.log("> " + url.padEnd(40, " ") + " -> " + game.gamemode);
-    }
+    for (const game of games) console.log("> " + `localhost:${config.serverPort}/game/diepio-${game.gamemode}`.padEnd(40, " ") + " -> " + game.name);
 });
 
 process.on("uncaughtException", (error) => {
