@@ -22,7 +22,7 @@ const CDN = "https://static.diep.io/";
 const CHANGELOG = [
     "Updated not so long time ago",
     "",
-    "Check out the github repo github.com/ABCxFF/diepcustom",
+    "Check out the github repo: github.com/ABCxFF/diepcustom",
     "Join out discord: https://discord.com/invite/SyxWdxgHnT :)"
 ];
 
