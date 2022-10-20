@@ -60,7 +60,7 @@ export class ShootCycle {
         }
 
         /** @ts-ignore */
-        const dontAlwaysShoot = this.barrelEntity.definition.disableFire;
+        const dontAlwaysShoot = this.barrelEntity.tank.definition?.id === Tank.Battleship || this.barrelEntity.tank.definition?.id === DevTank.Squirrel;
         /** @ts-ignore */
         const alwaysShoot = this.barrelEntity.definition.forceFire;
 
