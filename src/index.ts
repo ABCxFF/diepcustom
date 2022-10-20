@@ -78,11 +78,11 @@ const server = http.createServer((req, res) => {
 
         if (file && fs.existsSync(file)) {
             res.writeHead(200);
-            return res.end(fs.readFileSync(file))
+            return res.end(fs.readFileSync(file));
         }
 
         res.writeHead(404);
-        return res.end(fs.readFileSync(config.clientLocation + "/404.html"))
+        return res.end(fs.readFileSync(config.clientLocation + "/404.html"));
     } 
 });
 
@@ -102,7 +102,7 @@ wss.shouldHandle = function(request: http.IncomingMessage) {
 }
 
 server.listen(PORT, () => {
-    util.log("Listening on port " + PORT + "");
+    util.log(`Listening on port ${PORT}`);
 
     // RULES(0): Always put a endpoint=* gameserver at the end
     // RULES(1): No two game servers should share the same endpoint;
@@ -119,7 +119,7 @@ server.listen(PORT, () => {
 });
 
 process.on("uncaughtException", (error) => {
-    util.saveToLog("Uncaught Exception", '```\n' + error.stack + '\n```', 0xFF0000)
+    util.saveToLog("Uncaught Exception", '```\n' + error.stack + '\n```', 0xFF0000);
 
     throw error;
 });
