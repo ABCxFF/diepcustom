@@ -131,7 +131,7 @@ Module.todo.push([() => {
     return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch("/api/servers").then(res => res.json())];
 }, true]);
 
-Module.todo.push([(dependency, tankDefs, servers) => {
+Module.todo.push([(dependency, servers) => {
     Module.status = "INSTANTIATE";
     const parser = new WailParser(new Uint8Array(dependency));
     
