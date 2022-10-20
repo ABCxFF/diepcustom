@@ -21,7 +21,7 @@
 <html>
     <head>
         <link rel="icon" href="https://raw.githubusercontent.com/ABCxFF/diepcustom/main/icon.png"/>
-        <title>Diep Custom</title>
+        <title>diep.io custom-server</title>
         
         <style>
           body {
@@ -80,8 +80,13 @@
         <canvas id="canvas" width="800" height="800"></canvas>
         <div style="font-family:'Ubuntu'">&nbsp;</div>
         <div id="textInputContainer"><input id="textInput"></div>
+        
+        <!-- Third party library for dynmically modifying wasm files on the fly-->
+        <script src ="https://rawcdn.githack.com/Qwokka/wail.min.js/5e32d36bd7a5e0830d1ff4b64d3587aea13f77da/wail.min.js" crossorigin="anonymous"></script>
+
         <script src="./config.js"></script>
         <script src="./input.js"></script>
+        <script src="./dma.js"></script>
         <script src="./loader.js"></script>
     </body>
 </html>
