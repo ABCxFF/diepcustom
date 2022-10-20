@@ -152,7 +152,7 @@ Module.todo.push([(dependency, servers) => {
         loadGamemodeButtons: () => {
             const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtonDefinitions, 'struct', 28);
             if(vec.start) vec.delete();
-            vec.push(...servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.gamemodeName }, { offset: 24, type: 'i32', value: 0 }])));
+            vec.push(...servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
             Module.rawExports.ctorDone(MOD_CONFIG.memory.gamemodeButtonCtorDone);
         }
     }
