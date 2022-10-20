@@ -31,10 +31,12 @@ import { TeamGroupEntity } from "../Entity/Misc/TeamEntity";
 import Client from "../Client";
 import AbstractBoss from "../Entity/Boss/AbstractBoss";
 import Guardian from "../Entity/Boss/Guardian";
+import Summoner from "../Entity/Boss/Summoner";
 import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
-import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
-import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
+import Defender from "../Entity/Boss/Defender";
+//import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
+//import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
 import { bossSpawningInterval } from "../config";
 
 export enum ArenaState {
@@ -197,7 +199,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 	/** Spawns the boss into the arena */
 	protected spawnBoss() {
-		const TBoss = [Guardian, FallenOverlord, FallenBooster, FallenSpike, FallenMegaTrapper]
+		const TBoss = [Guardian, Summoner, FallenOverlord, FallenBooster, Defender]
 			[~~(Math.random() * 5)];
 		
 		this.boss = new TBoss(this.game);
