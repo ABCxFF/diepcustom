@@ -108,7 +108,6 @@ server.listen(PORT, () => {
     // RULES(1): No two game servers should share the same endpoint;
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
-    // NOTES(1): This does not update the index.html - server list was always static, so you need to modify html first (see "Survival" in html)
     const ffa = new GameServer(wss, "ffa", "ffa");
     const sbx = new GameServer(wss, "sandbox", "*");
 
