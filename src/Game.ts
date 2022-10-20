@@ -61,7 +61,7 @@ class WSSWriterStream extends Writer {
     }
 }
 
-type DiepGamemodeID = "ffa" | "sandbox" | "teams" | "4teams" | "mot" | "dom" | "tag" | "survival" | "testing" | "spike" | "domtest" | "jungle" | "factest" | "ball";
+type DiepGamemodeID = "ffa" | "sandbox" | "teams" | "4teams" | "mot" | "dom" | "maze" | "tag" | "survival" | "testing" | "spike" | "domtest" | "jungle" | "factest" | "ball";
 
 const GamemodeToArenaClass: Record<DiepGamemodeID, (typeof ArenaEntity) | null> & { "*": typeof ArenaEntity }= {
     "ffa": FFAArena,
@@ -73,12 +73,32 @@ const GamemodeToArenaClass: Record<DiepGamemodeID, (typeof ArenaEntity) | null> 
     "survival": null,
     "tag": null,
     "mot": null,
+    "maze": null,
     "testing": TestingArena,
     "spike": SpikeboxArena,
     "domtest": DominationTestingArena,
     "jungle": JungleArena,
     "factest": FactoryTestArena,
     "ball": BallArena
+}
+
+const GamemodeToGamemodeName: Record<DiepGamemodeID, string> & { "*": String } = {
+    "ffa": "FFA",
+    "teams": "2 Teams",
+    "4teams": "4 Teams",
+    "sandbox": "Sandbox",
+    "*": "Sandbox",
+    "dom": "Domination",
+    "survival": "Survival",
+    "tag": "Tag",
+    "maze": "Maze",
+    "mot": "MOT",
+    "testing": "Testing",
+    "spike": "Spikebox",
+    "domtest": "Dominator Test",
+    "jungle": "Jungle",
+    "factest": "Factory Test",
+    "ball": "Ball Test"
 }
 
 /**
@@ -96,6 +116,8 @@ const HOSTED_ENDPOINTS: string[] = [];
     public running = true;
     /** The gamemode the game is running. */
     public gamemode: DiepGamemodeID;
+    /** The gamemode's name */
+    public gamemodeName: String;
     /** The endpoint the game is listening to. */
     public endpoint: DiepGamemodeID | "*";
     /** Whether or not to put players on the map. */
