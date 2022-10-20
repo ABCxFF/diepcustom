@@ -27,6 +27,7 @@ Module.exception = null;
 Module.mainFunc = null;
 Module.cp5 = null;
 window.input = null;
+Module.servers = null;
 Module.textInput = document.getElementById("textInput");
 Module.textInputContainer = document.getElementById("textInputContainer");
 
@@ -97,6 +98,20 @@ Module.allocateUTF8 = str => {
     return ptr;
 };
 
+Module.loadGamemodeButtons = () => {
+    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, 'struct', 28);
+    if(vec.start) vec.delete();
+    vec.push(...Module.servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
+    Module.rawExports.vectorCtorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
+};
+
+Module.loadChangelog = () => {
+    const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
+    if(vec.start) vec.delete();
+    vec.push(...CHANGELOG);
+    $(168632).i8 = 1;
+};
+
 const wasmImports = {
     assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + UTF8ToString(condition) + ", at: " + [filename ? UTF8ToString(filename) : "unknown filename", line, func ? UTF8ToString(func) : "unknown function"]),
     mapFile: () => -1, // unused
@@ -133,7 +148,13 @@ Module.todo.push([() => {
 
 Module.todo.push([(dependency, servers) => {
     Module.status = "INSTANTIATE";
+    Module.servers = servers;
+    
     const parser = new WailParser(new Uint8Array(dependency));
+    
+    const vectorCtorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.vectorCtorDone);
+    const loadGamemodeButtonsOriginal = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadGamemodeButtons);
+    const loadChangelogOriginal = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadChangelog);
     
     // inject import hook
     const loadGamemodeButtons = parser.addImportEntry({
@@ -147,24 +168,28 @@ Module.todo.push([(dependency, servers) => {
         })
     });
 
-    // add import hook
-    Module.imports.mods = {
-        loadGamemodeButtons: () => {
-            const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtonDefinitions, 'struct', 28);
-            if(vec.start) vec.delete();
-            vec.push(...servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
-            Module.rawExports.ctorDone(MOD_CONFIG.memory.gamemodeButtonCtorDone);
-        }
-    }
-
-    const gamemodeButtonDefinitionCtor = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.gamemodeButtonDefinitionCtor);
-    const ctorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.ctorDone);
-
-    parser.addExportEntry(ctorDone, {
-        fieldStr: "ctorDone",
-        kind: "func"
+    const loadChangelog = parser.addImportEntry({
+        moduleStr: "mods",
+        fieldStr: "loadChangelog",
+        kind: "func",
+        type: parser.addTypeEntry({
+            form: "func",
+            params: [],
+            returnType: null
+        })
     });
 
+    // add import hook
+    Module.imports.mods = {
+        loadGamemodeButtons: Module.loadGamemodeButtons,
+        loadChangelog: Module.loadChangelog
+    }
+
+    parser.addExportEntry(vectorCtorDone, {
+        fieldStr: "vectorCtorDone",
+        kind: "func"
+    });
+    
     /**
      * New wasm instructions look like this:
      * [...]
@@ -174,15 +199,24 @@ Module.todo.push([(dependency, servers) => {
      * [...]
      */
     parser.addCodeElementParser(null, function({ index, bytes }) {
-        if(index === gamemodeButtonDefinitionCtor.i32()) {
-          return new Uint8Array([
-            ...bytes.subarray(0, 33),
-            OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
-            OP_RETURN,
-            ...bytes.subarray(33, bytes.length)
-          ]);
+        switch(index) {
+            case loadChangelogOriginal.i32():
+                return new Uint8Array([
+                    ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.changelog),
+                    OP_CALL, ...VarUint32ToArray(loadChangelog.i32()),
+                    OP_RETURN,
+                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.changelog, bytes.length)
+                  ]);
+            case loadGamemodeButtonsOriginal.i32():
+                return new Uint8Array([
+                    ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons),
+                    OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
+                    OP_RETURN,
+                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons, bytes.length)
+                ]);
+            default:
+                return false;
         }
-        return false;
     });
 
     parser.parse();
