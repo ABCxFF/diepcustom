@@ -97,7 +97,7 @@ const HOSTED_ENDPOINTS: string[] = [];
     public running = true;
     /** The gamemode the game is running. */
     public gamemode: DiepGamemodeID;
-    /** The arena's name */
+    /** The arena's display name */
     public name: string;
 
     /** Whether or not to put players on the map. */
