@@ -18,19 +18,39 @@
 
 /** The build supported by the server. */
 export const buildHash: string = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
+
 /** The port the server is hosting its game server on. */
 export const serverPort: number = parseInt(process.env.PORT || "8080");
+
 /** Milliseconds per tick in the game. */
 export const mspt: number = 40;
+
 /** Ticks per second in the game */
 export const tps: number = 1000 / mspt;
+
 /** Max connections per ip. -1 = no limit */
 export const connectionsPerIp: number = -1;
 
+/** Max packet size (HARD LIMIT), not the max read / write size */
+export const wssMaxMessageSize: number = 4096; // 4 kb
+
 /** Host id to be sent to client. */
 export const host: string = process.env.SERVER_INFO || (process.env.NODE_ENV === "development" ? "localhost" : "");
+
 /** Runtime mode. */
 export const mode: string = process.env.NODE_ENV || "development";
+
+/** Is hosting a rest api */
+export const enableApi: boolean = true;
+
+/** Rest API location (root of all other endpoints), ignored if enableApi is false */
+export const apiLocation: string = "api"
+
+/** Is hosting a client */
+export const enableClient: boolean = true;
+
+/** Client files location, ignored if enableClient is false, path from the root dir of the project */
+export const clientLocation: string = "./client";
 
 /** Magic number used for tank xor and stat xor. */
 export const magicNum = (function magicNum(build: string) {

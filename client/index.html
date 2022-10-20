@@ -1,0 +1,92 @@
+<!--
+    DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
+    Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>
+-->
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <link rel="icon" href="https://raw.githubusercontent.com/ABCxFF/diepcustom/main/icon.png"/>
+        <title>diep.io custom-server</title>
+        
+        <style>
+          body {
+            background-color: #000000;
+          }
+
+          #canvas {
+            border: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+          }
+    
+          #loading {
+            color: #FFFFFF;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48pt;
+            font-family: sans-serif;
+            font-weight: bold;
+            cursor: default;
+          }
+    
+          #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            cursor: default;
+          }
+    
+          #textInputContainer {
+            display: none;
+            position: absolute;
+          }
+    
+          #textInput {
+            background-color: transparent;
+            font-family: "Ubuntu";
+            padding: 0;
+            border: 0;
+            outline: none;
+          }
+        </style>
+
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <span id="loading">Loading...</span>
+        <canvas id="canvas" width="800" height="800"></canvas>
+        <div style="font-family:'Ubuntu'">&nbsp;</div>
+        <div id="textInputContainer"><input id="textInput"></div>
+        
+        <!-- Third party library for dynmically modifying wasm files on the fly-->
+        <script src ="https://rawcdn.githack.com/Qwokka/wail.min.js/5e32d36bd7a5e0830d1ff4b64d3587aea13f77da/wail.min.js" crossorigin="anonymous"></script>
+
+        <script src="./config.js"></script>
+        <script src="./input.js"></script>
+        <script src="./dma.js"></script>
+        <script src="./loader.js"></script>
+    </body>
+</html>

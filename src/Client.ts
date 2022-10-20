@@ -193,7 +193,7 @@ export default class Client {
             // Hardcoded dev password
             if (!config.devPasswordHash || createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
                 this.accessLevel = config.AccessLevel.FullAccess;
-                util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.endpoint + "`) with `full` access.", 0x5A65EA);
+                util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.gamemode + "`) with `full` access.", 0x5A65EA);
             } else if (auth && pw) {
                 if (!auth.verifyCode(pw)) return this.terminate();
 
@@ -201,7 +201,7 @@ export default class Client {
                 this.discordId = id;
                 this.accessLevel = config.devTokens[id] ?? parseInt(perm) ?? config.devTokens["*"];
 
-                util.saveToLog("Client Connected", this.toString() + " connected to the server (`" + this.game.endpoint + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
+                util.saveToLog("Client Connected", this.toString() + " connected to the server (`" + this.game.gamemode + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
 
                 // Enforce 2 clients per account id
                 if (!this.game.discordCache[id]) this.game.discordCache[id] = 1;
@@ -211,7 +211,7 @@ export default class Client {
 
                 if (this.game.discordCache[id] > 2) {
                     util.saveToVLog(`${this.toString()} too many accounts!. ip: ` + this.ipAddressHash);
-                    util.saveToLog("Client Kicked", this.toString() + " client count maximum reached at `" + this.game.endpoint + "`.", 0xEE326A);
+                    util.saveToLog("Client Kicked", this.toString() + " client count maximum reached at `" + this.game.gamemode + "`.", 0xEE326A);
                     this.terminate();
                 }
             } else if (auth) {
@@ -579,7 +579,7 @@ export default class Client {
         if (this.camera?.camera?.player?.name?.name) tokens.push("name=" + JSON.stringify(this.camera?.camera?.player?.name?.name));
         if (verbose) {
             if (this.ipAddress) tokens.push("ip=" + this.ipAddress);
-            if (this.game.endpoint) tokens.push("game.endpoint=" + this.game.endpoint);
+            if (this.game.gamemode) tokens.push("game.gamemode=" + this.game.gamemode);
         }
         if (this.terminated) tokens.push("(terminated)");
         if (!tokens.length) return `Client(${this.accessLevel}) {}`
