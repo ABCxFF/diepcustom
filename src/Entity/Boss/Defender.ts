@@ -28,7 +28,11 @@ import { AddonById } from "../Tank/Addons";
 /**
  * Class which represents the boss "Defender"
  */
+
 export default class Defender extends AbstractBoss {
+    public movementSpeed = 0.35;
+    public turretScale = 0.5;
+
     public constructor(game: GameServer) {
         super(game);
 
@@ -38,7 +42,7 @@ export default class Defender extends AbstractBoss {
         this.physics.values.size = 150 * Math.SQRT1_2;
         this.physics.values.sides = 3;
 
-if (AddonById.defender) new AddonById['defender'](this);
+        if (AddonById.defender) new AddonById['defender'](this);
 
         this.barrels.push(new Barrel(this, {
             angle: Math.PI * 2 / 6 * 1,
