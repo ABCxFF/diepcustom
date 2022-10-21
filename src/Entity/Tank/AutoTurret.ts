@@ -114,7 +114,7 @@ export default class AutoTurret extends ObjectEntity {
     }
 
     public tick(tick: number) {
-        this.physics.size = this.owner instanceof AbstractBoss && this.owner.name.values.name === 'Defender'? 25 * this.owner.sizeFactor / 2 : baseRatio * this.sizeFactor; // lazy bad workaround, change soon hopefully
+        this.physics.size = this.owner instanceof AbstractBoss && this.owner.turretScale ? 25 * this.owner.sizeFactor * this.owner.turretScale : baseRatio * this.sizeFactor; // bad workaround, change soon hopefully
 
         this.ai.aimSpeed = this.turret.bulletAccel;
         // Top Speed
