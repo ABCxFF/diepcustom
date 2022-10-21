@@ -166,7 +166,6 @@ export class Addon {
         const ROT_OFFSET = 0.55;
 
 
-
         const PI2 = Math.PI * 2;
         for (let i = 0; i < count; ++i) {
             const base = new AutoTurret(this.owner, MountedTurretDefinition);
@@ -176,7 +175,17 @@ export class Addon {
             base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
             base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
 
+
             base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+
+            const tickBase = base.tick;
+            base.tick = (tick: number) => {
+                base.position.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
+                base.position.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+
+                tickBase.call(base, tick);
+
+            }
         }
     }
 
