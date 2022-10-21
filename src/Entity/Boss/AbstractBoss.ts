@@ -95,6 +95,8 @@ export default class AbstractBoss extends LivingEntity {
     public sizeFactor = 1;
     /** The reload time calculation property. Used for calculating reload of barrels. */
     public reloadTime = 15;
+    /** Alternate name, eg Guardian and Guardian of the Pentagons to appear in notifications" */
+    public turretScale = 0;
 
     /** The AI that controls how this boss moves. */
     public ai: AI;
