@@ -25,6 +25,7 @@ import { BarrelBase } from "./TankBody";
 import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
+import LivingEntity from "../Live";
 
 const AutoTurretMiniDefinition: BarrelDefinition = {
     angle: 0,
@@ -95,6 +96,17 @@ export class GuardAddon extends ObjectEntity implements BarrelBase {
      */
     get sizeFactor() {
         return this.owner.sizeFactor;
+    }
+
+    /**
+     * Called (if ever) similarly to LivingEntity.onKill
+     * Spreads onKill to owner
+     */
+    public onKill(killedEntity: LivingEntity) {
+        // TODO(ABC):
+        // Make this, work differently (Maybe KillerEntity interface)
+        /** @ts-ignore */
+        if (typeof this.owner.onKill === 'function') this.owner.onKill(killedEntity);
     }
 
     public tick(tick: number): void {
