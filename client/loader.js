@@ -123,6 +123,7 @@ Module.getTankDefinition = tankId => {
 
 Module.loadTankDefinitions = () => {
     const writeTankDef = (ptr, tank) => {
+        // Please note that this is not the full tank/barrel struct but just the portion needed for the client to function properly
         const barrels = tank.barrels ? tank.barrels.map(barrel => {
             return [
                 { offset: 0, type: "f32", value: barrel.angle },
