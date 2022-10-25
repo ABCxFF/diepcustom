@@ -254,6 +254,25 @@ const MOD_CONFIG = {
     }
 };
 
+const ADDON_MAP = {
+    "barrelAddons": {
+        "trapLauncher": 147
+    },
+    "tankAddons": {
+        "auto3": 148,
+        "smasher": 149,
+        "pronounced": 150,
+        "landmine": 151,
+        "auto5": 153,
+        "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
+        "autosmasher": 155,
+        "spike": 156,
+        "launcher": 157, // Skimmer (157) & Rocketeer (158)
+        "dombase": 159,
+        "dompronounced": 160, // Dom1 (160) & Dom2 (161) 
+    }
+};
+
 const WASM_TABLE = {
     "initial": 687,
     "maximum": 687,
