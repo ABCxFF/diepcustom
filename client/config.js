@@ -237,7 +237,7 @@ const WASM_EXPORTS = {
 const MOD_CONFIG = {
     "wasmFunctions": {
         "loadGamemodeButtons": 296,
-        "vectorCtorDone": 22,
+        "loadVectorDone": 22,
         "loadChangelog": 447,
         "loadTankDefinitions": 277,
         "getTankDefinition": 101
