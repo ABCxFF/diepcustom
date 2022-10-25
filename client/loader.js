@@ -135,7 +135,7 @@ Module.loadTankDefinitions = () => {
                 { offset: 56, type: "f32", value: barrel.bullet.sizeRatio },
                 { offset: 60, type: "f32", value: barrel.trapezoidDirection },
                 { offset: 64, type: "f32", value: barrel.reload },
-                { offset: 96, type: "u32", value: ADDONMAP.barrelAddons[barrel.addon] || 0 }
+                { offset: 96, type: "u32", value: ADDON_MAP.barrelAddons[barrel.addon] || 0 }
             ];
         }) : [];
 
@@ -150,8 +150,8 @@ Module.loadTankDefinitions = () => {
             { offset: 64, type: "u32", value: tank.levelRequirement || 0 },
             { offset: 76, type: "u8", value: Number(tank.sides === 4) },
             { offset: 93, type: "u8", value: Number(tank.sides === 16) },
-            { offset: 96, type: "u32", value: ADDONMAP.addons[tank.preAddon] || 0 },
-            { offset: 100, type: "u32", value: ADDONMAP.addons[tank.postAddon] || 0 },
+            { offset: 96, type: "u32", value: ADDON_MAP.tankAddons[tank.preAddon] || 0 },
+            { offset: 100, type: "u32", value: ADDON_MAP.tankAddons[tank.postAddon] || 0 },
         ];
 
         $.writeStruct(ptr, fields);
@@ -265,17 +265,17 @@ Module.todo.push([(dependency, servers, tanks) => {
     
     parser.addCodeElementParser(null, function({ index, bytes }) {
         switch(index) {
-            case loadChangelogOriginal.i32(): // we only need the part where it checks if the changelog is already loaded to avoid too many import calls
+            case originalLoadChangelog.i32(): // we only need the part where it checks if the changelog is already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.changelog),
                     OP_CALL, ...VarUint32ToArray(loadChangelog.i32()),
-                    OP_END,
+                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.changelog)
                   ]);
-            case loadGamemodeButtonsOriginal.i32(): // we only need the part where it checks if the buttons are already loaded to avoid too many import calls
+            case originalLoadGamemodeButtons.i32(): // we only need the part where it checks if the buttons are already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons),
                     OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
-                    OP_END
+                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons)
                 ]);
             case originalGetTankDef.i32(): // we modify this to call a js function which then returns the tank def ptr from a table
                 return new Uint8Array([
