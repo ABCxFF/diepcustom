@@ -28,6 +28,8 @@ Module.mainFunc = null;
 Module.cp5 = null;
 window.input = null;
 Module.servers = null;
+Module.tankDefinitions = null;
+Module.tankDefinitionsTable = null;
 Module.textInput = document.getElementById("textInput");
 Module.textInputContainer = document.getElementById("textInputContainer");
 
@@ -102,7 +104,7 @@ Module.loadGamemodeButtons = () => {
     const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, 'struct', 28);
     if(vec.start) vec.delete();
     vec.push(...Module.servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
-    Module.rawExports.vectorCtorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
+    Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
 };
 
 Module.loadChangelog = () => {
@@ -110,6 +112,63 @@ Module.loadChangelog = () => {
     if(vec.start) vec.delete();
     vec.push(...CHANGELOG);
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1;
+};
+
+Module.getTankDefinition = tankId => {
+    if(!Module.tankDefinitions) return 0;
+    if(!Module.tankDefinitionsTable) Module.loadTankDefinitions();
+    if(!Module.tankDefinitionsTable[tankId]) return 0;
+    return Module.tankDefinitionsTable[tankId] + 12;
+};
+
+Module.loadTankDefinitions = () => {
+    const writeTankDef = (ptr, tank) => {
+        const barrels = tank.barrels ? tank.barrels.map(barrel => {
+            return [
+                { offset: 0, type: "f32", value: barrel.angle },
+                { offset: 4, type: "f32", value: barrel.delay },
+                { offset: 8, type: "f32", value: barrel.size },
+                { offset: 12, type: "f32", value: barrel.offset },
+                { offset: 16, type: "u8", value: Number(barrel.isTrapezoid) },
+                { offset: 24, type: "f32", value: barrel.width / 42 },
+                { offset: 56, type: "f32", value: barrel.bullet.sizeRatio },
+                { offset: 60, type: "f32", value: barrel.trapezoidDirection },
+                { offset: 64, type: "f32", value: barrel.reload },
+                { offset: 96, type: "u32", value: ADDONMAP.barrelAddons[barrel.addon] || 0 }
+            ];
+        }) : [];
+
+        const fields = [
+            { offset: 4, type: "u32", value: tank.id },
+            { offset: 8, type: "u32", value: tank.id },
+            { offset: 12, type: "u32", value: tank.id },
+            { offset: 16, type: "cstr", value: tank.name.toString() || "" },
+            { offset: 28, type: "cstr", value: tank.upgradeMessage.toString() || "" },
+            { offset: 40, type: "vector", value: { type: "u32", typeSize: 4, entries: tank.upgrades || [] } },
+            { offset: 52, type: "vector", value: { type: "struct", typeSize: 100, entries: barrels } },
+            { offset: 64, type: "u32", value: tank.levelRequirement || 0 },
+            { offset: 76, type: "u8", value: Number(tank.sides === 4) },
+            { offset: 93, type: "u8", value: Number(tank.sides === 16) },
+            { offset: 96, type: "u32", value: ADDONMAP.addons[tank.preAddon] || 0 },
+            { offset: 100, type: "u32", value: ADDONMAP.addons[tank.postAddon] || 0 },
+        ];
+
+        $.writeStruct(ptr, fields);
+    };
+
+    Module.tankDefinitionsTable = new Array(Module.tankDefinitions.length).fill(0);
+    let lastPtr = MOD_CONFIG.memory.tankDefinitions;
+    for(const tank of Module.tankDefinitions) {
+        if(!tank) continue;
+        const ptr = Module.exports.malloc(244);
+        Module.HEAPU8.subarray(ptr, ptr + 244).fill(0);
+        $(lastPtr).i32 = ptr;
+        writeTankDef(ptr, tank);
+        Module.tankDefinitionsTable[tank.id] = ptr;
+        lastPtr = ptr;
+    }
+
+    $(MOD_CONFIG.memory.tankDefinitionsCount).i32 = Module.tankDefinitions.filter(e => Boolean(e)).length;
 };
 
 const wasmImports = {
@@ -143,20 +202,22 @@ Module.todo.push([() => {
 
 Module.todo.push([() => {
     Module.status = "FETCH";
-    return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch("/api/servers").then(res => res.json())];
+    return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch(`${API_URL}servers`).then(res => res.json()), fetch(${API_URL}tanks).then(res => res.json())];
 }, true]);
 
-Module.todo.push([(dependency, servers) => {
+Module.todo.push([(dependency, servers, tanks) => {
     Module.status = "INSTANTIATE";
     Module.servers = servers;
+    Module.tankDefinitions = tanks;
     
     const parser = new WailParser(new Uint8Array(dependency));
     
-    const vectorCtorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.vectorCtorDone);
-    const loadGamemodeButtonsOriginal = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadGamemodeButtons);
-    const loadChangelogOriginal = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadChangelog);
+    const originalVectorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadVectorDone);
+    const originalLoadChangelog = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadChangelog);
+    const originalLoadGamemodeButtons = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadGamemodeButtons);
+    const originalLoadTankDefs = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadTankDefinitions);
+    const originalGetTankDef = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.getTankDefinition);
     
-    // inject import hook
     const loadGamemodeButtons = parser.addImportEntry({
         moduleStr: "mods",
         fieldStr: "loadGamemodeButtons",
@@ -179,40 +240,52 @@ Module.todo.push([(dependency, servers) => {
         })
     });
 
-    // add import hook
+    const getTankDefinition = parser.addImportEntry({
+        moduleStr: "mods",
+        fieldStr: "getTankDefinition",
+        kind: "func",
+        type: parser.addTypeEntry({
+            form: "func",
+            params: ["i32"],
+            returnType: "i32"
+        })
+    });
+
     Module.imports.mods = {
         loadGamemodeButtons: Module.loadGamemodeButtons,
-        loadChangelog: Module.loadChangelog
-    }
+        loadChangelog: Module.loadChangelog,
+        getTankDefinition: Module.getTankDefinition
+    };
 
-    parser.addExportEntry(vectorCtorDone, {
-        fieldStr: "vectorCtorDone",
+    parser.addExportEntry(originalVectorDone, {
+        fieldStr: "loadVectorDone",
         kind: "func"
     });
     
-    /**
-     * New wasm instructions look like this:
-     * [...]
-     * if(ctorDone) return;
-     * loadGamemodeButtons();
-     * return;
-     * [...]
-     */
     parser.addCodeElementParser(null, function({ index, bytes }) {
         switch(index) {
-            case loadChangelogOriginal.i32():
+            case loadChangelogOriginal.i32(): // we only need the part where it checks if the changelog is already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.changelog),
                     OP_CALL, ...VarUint32ToArray(loadChangelog.i32()),
-                    OP_RETURN,
-                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.changelog, bytes.length)
+                    OP_END,
                   ]);
-            case loadGamemodeButtonsOriginal.i32():
+            case loadGamemodeButtonsOriginal.i32(): // we only need the part where it checks if the buttons are already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons),
                     OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
+                    OP_END
+                ]);
+            case originalGetTankDef.i32(): // we modify this to call a js function which then returns the tank def ptr from a table
+                return new Uint8Array([
+                    OP_GET_LOCAL, 0,
+                    OP_CALL, ...VarUint32ToArray(getTankDefinition.i32()),
                     OP_RETURN,
-                    ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons, bytes.length)
+                    OP_END
+                ]);
+            case originalLoadTankDefs.i32(): // we dont want this to run anymore because it will call the original tank wrapper function
+                return new Uint8Array([
+                    OP_END
                 ]);
             default:
                 return false;
