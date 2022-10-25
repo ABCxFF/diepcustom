@@ -48,7 +48,7 @@ const server = http.createServer((req, res) => {
                 if (!auth) return;
                 util.saveToVLog("Authentication attempt");
                 return auth.handleInteraction(req, res);
-            case "/tankdefs":
+            case "/tanks":
                 res.writeHead(200);
                 return res.end(JSON.stringify(TankDefinitions));
             case "/servers":
