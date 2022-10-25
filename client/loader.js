@@ -109,7 +109,7 @@ Module.loadChangelog = () => {
     const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
     if(vec.start) vec.delete();
     vec.push(...CHANGELOG);
-    $(168632).i8 = 1;
+    $(MOD_CONFIG.memory.changelogLoaded).i8 = 1;
 };
 
 const wasmImports = {
