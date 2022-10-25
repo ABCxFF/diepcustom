@@ -269,12 +269,14 @@ Module.todo.push([(dependency, servers, tanks) => {
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.changelog),
                     OP_CALL, ...VarUint32ToArray(loadChangelog.i32()),
+                    OP_RETURN,
                     ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.changelog)
                   ]);
             case originalLoadGamemodeButtons.i32(): // we only need the part where it checks if the buttons are already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons),
                     OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
+                    OP_RETURN,
                     ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons)
                 ]);
             case originalGetTankDef.i32(): // we modify this to call a js function which then returns the tank def ptr from a table
