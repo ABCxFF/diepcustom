@@ -24,7 +24,7 @@ const CHANGELOG = [
     "Updated recently",
     "",
     "Check out the github repo: github.com/ABCxFF/diepcustom",
-    "Join out discord: https://discord.com/invite/SyxWdxgHnT :)"
+    "Join out discord: discord.gg/SyxWdxgHnT :)"
 ];
 
 const ASM_CONSTS = {
