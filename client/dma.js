@@ -20,7 +20,7 @@ const setupDMAHelpers = () => {
     $.write = (ptr, type, value) => {
         switch(type) {
             case "struct": return $.writeStruct(ptr, value);
-            case "vector": return new $.Vector(ptr, value.type, value.typeSize).push(value.entries);
+            case "vector": return new $.Vector(ptr, value.type, value.typeSize).push(...value.entries);
             default: return $(ptr)[type] = value;
         }
     }
@@ -82,6 +82,7 @@ const setupDMAHelpers = () => {
         }
     
         _malloc() {
+            this.maxEntries = (this.maxCapacity - this.start) / this.typeSize;
             this.totalSize = this.entries.length * this.typeSize;
             this.start = Module.exports.malloc(this.totalSize);
             this.end = this.start;

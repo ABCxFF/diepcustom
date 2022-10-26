@@ -18,9 +18,10 @@
 
 const BUILD = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 const CDN = "https://static.diep.io/";
+const API_URL = "http://localhost:8080/api/";
 
 const CHANGELOG = [
-    "Updated not so long time ago",
+    "Updated recently",
     "",
     "Check out the github repo: github.com/ABCxFF/diepcustom",
     "Join out discord: https://discord.com/invite/SyxWdxgHnT :)"
@@ -235,18 +236,41 @@ const WASM_EXPORTS = {
 
 const MOD_CONFIG = {
     "wasmFunctions": {
-        "tankDefsCtor": 276,
         "loadGamemodeButtons": 296,
-        "vectorCtorDone": 22,
-        "loadChangelog": 447
+        "loadVectorDone": 22,
+        "loadChangelog": 447,
+        "loadTankDefinitions": 277,
+        "getTankDefinition": 101
     },
     "memory": {
         "gamemodeButtons": 113480,
-        "changelog": 167328
+        "changelog": 167328,
+        "changelogLoaded": 168632,
+        "tankDefinitions": 166572,
+        "tankDefinitionsCount": 166576
     },
     "wasmFunctionHookOffset": {
         "gamemodeButtons": 33,
         "changelog": 28
+    }
+};
+
+const ADDON_MAP = {
+    "barrelAddons": {
+        "trapLauncher": 147
+    },
+    "tankAddons": {
+        "auto3": 148,
+        "smasher": 149,
+        "pronounced": 150,
+        "landmine": 151,
+        "auto5": 153,
+        "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
+        "autosmasher": 155,
+        "spike": 156,
+        "launcher": 157, // Skimmer (157) & Rocketeer (158)
+        "dombase": 159,
+        "dompronounced": 160, // Dom1 (160) & Dom2 (161) 
     }
 };
 
