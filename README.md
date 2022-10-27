@@ -8,18 +8,13 @@
 
 ## Running backend
 
-First, download the client with
-```bash
-$ node client/pull.js
-```
-
-Then run the server with:
+Run the server with:
 ```bash
 $ npm run server
 ```
 This builds and runs the server.
 
-After downloading the client and running the server, content will be served at `localhost:8080` on your computer. The port will default to 8080, and you may override it with `process.env.PORT`.
+After running the server, content will be served at `localhost:8080` on your computer. The port will default to 8080, and you may override it with `process.env.PORT`.
 
 Consult `src/config.ts` for configuration, and `package.json` for environ variable setup.
 
