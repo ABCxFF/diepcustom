@@ -18,7 +18,7 @@
 
 const BUILD = "6f59094d60f98fafc14371671d3ff31ef4d75d9e";
 const CDN = "https://static.diep.io/";
-const API_URL = window.location.href + "/api/";
+const API_URL = `${window.location.href}api/`;
 
 const CHANGELOG = [
     "Updated recently",
