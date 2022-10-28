@@ -96,6 +96,7 @@ export class AI {
     public targetFilter: (possibleTarget: ObjectEntity) => boolean;
 
     public constructor(owner: ObjectEntity) {
+
         this.owner = owner;
         this.game = owner.game;
 
@@ -109,30 +110,42 @@ export class AI {
         this.game.entities.AIs.push(this);
     }
 
-    /** Finds the closest entity in a different team */
+    /* Finds the closest entity in a different team */
     public findTarget() {
+
         const rootPos = this.owner.rootParent.position.values;
         const team = this.owner.relations.values.team;
+
+        if (Entity.exists(this.target)) {
+
+            // If the AI already has a valid target within view distance, it's not necessary to find a new one
+
+            const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
+
+            if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
+
+        }
         
-        if (Entity.exists(this.target) 
-                && team !== this.target.relations.values.team
-                && this.targetFilter(this.target)
-                // this range is inaccurate i think
-                && (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2 < (this.viewRange ** 2) * 2) return this.target;
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
+
         const root = this.owner.rootParent === this.owner && this.owner.relations.values.owner instanceof ObjectEntity ? this.owner.relations.values.owner : this.owner.rootParent;
         const entities = this.viewRange === Infinity ? this.game.entities.inner.slice(0, this.game.entities.lastId) : this.game.entities.collisionManager.retrieve(root.position.values.x, root.position.values.y, this.viewRange, this.viewRange);
 
         let closestEntity = null;
         let closestDistSq =  this.viewRange ** 2;
+
         for (let i = 0; i < entities.length; ++i) {
+
             const entity = entities[i];
 
-            if (!(entity instanceof LivingEntity) || // Do not target non living entities
-                (entity.physics.values.objectFlags & ObjectFlags.base) || // Do not target bases.
-                !(entity.relations.values.owner === null || !(entity.relations.values.owner instanceof ObjectEntity)) || // Do not target entities who have an object owner
-                !this.targetFilter(entity)) continue; // Custom check
+            if (! (entity instanceof LivingEntity) ) continue; // Check if the target is living
+
+            if (entity.physics.values.objectFlags & ObjectFlags.base) continue; // Check if the target is a base
+
+            if (!(entity.relations.values.owner === null || !(entity.relations.values.owner instanceof ObjectEntity))) continue; // Don't target entities who have an object owner
+
+            if (!this.targetFilter(entity)) continue; // Custom check
             
             if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
 
@@ -141,7 +154,6 @@ export class AI {
             if (distSq < closestDistSq) {
                 closestEntity = entity;
                 closestDistSq = distSq;
-                continue;
             }
         }
 
@@ -150,18 +162,22 @@ export class AI {
 
     /** Aims and predicts at the target. */
     public aimAt(target: ObjectEntity) {
+
         const movementSpeed = this.aimSpeed * 1.6;
         const ownerPos = this.owner.getWorldPosition();
 
+        const pos = {
+            x: target.position.values.x,
+            y: target.position.values.y,
+        }
+
         if (movementSpeed <= 0.001) { // Pls no weirdness
-            const pos = {
-                x: target.position.values.x,
-                y: target.position.values.y
-            }
+
             this.inputs.movement.set({
                 x: pos.x - ownerPos.x,
                 y: pos.y - ownerPos.y
             });
+
             this.inputs.mouse.set(pos);
 
             // this.inputs.movement.angle = Math.atan2(delta.y, delta.x);
@@ -170,8 +186,8 @@ export class AI {
         }
 
         const delta = {
-            x: target.position.values.x - ownerPos.x,
-            y: target.position.values.y - ownerPos.y
+            x: pos.x - ownerPos.x,
+            y: pos.y - ownerPos.y
         }
 
         let dist = Math.sqrt(delta.x ** 2 + delta.y ** 2);
@@ -185,27 +201,31 @@ export class AI {
         let entPerpComponent = unitDistancePerp.x * target.velocity.x + unitDistancePerp.y * target.velocity.y;
 
         if (entPerpComponent > movementSpeed * 0.9) entPerpComponent = movementSpeed * 0.9;
-        else if (entPerpComponent < movementSpeed * -0.9) entPerpComponent = movementSpeed * -0.9;
+
+        if (entPerpComponent < movementSpeed * -0.9) entPerpComponent = movementSpeed * -0.9;
 
         const directComponent = Math.sqrt(movementSpeed ** 2 - entPerpComponent ** 2);
         const offset = entPerpComponent / directComponent * dist;
 
         this.inputs.mouse.set({
-            x: target.position.values.x + offset * unitDistancePerp.x,
-            y: target.position.values.y + offset * unitDistancePerp.y
+            x: pos.x + offset * unitDistancePerp.x,
+            y: pos.y + offset * unitDistancePerp.y
         });
+
         this.inputs.movement.magnitude = 1;
         this.inputs.movement.angle = Math.atan2(this.inputs.mouse.y - ownerPos.y, this.inputs.mouse.x - ownerPos.x);
     }
 
     public tick(tick: number) {
         // If its being posessed, but its possessor is deleted... then just restart;
+
         if (this.state === AIState.possessed) {
             if (!this.inputs.deleted) return;
             
             this.inputs = new Inputs();
             this.isTaken = false; // Only possessed when not taken
         }
+        
         const target = this.findTarget();
 
         if (!target) {
