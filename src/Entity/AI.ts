@@ -119,10 +119,14 @@ export class AI {
         if (Entity.exists(this.target)) {
 
             // If the AI already has a valid target within view distance, it's not necessary to find a new one
+            
+            if (team !== this.target.relations.values.team) { // Check if the target is on the same team. If it is, need to find a new one
+            
+                const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
 
-            const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
-
-            if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
+                if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
+                
+            }
 
         }
         
