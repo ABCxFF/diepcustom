@@ -90,6 +90,12 @@ Module.exit = status => {
 
 Module.UTF8ToString = ptr => ptr ? new TextDecoder().decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr))) : "";
 
+Module.fdWrite = (stream, ptr, count, res) => {
+    let out = 0;
+    for(let i = 0; i < count; i++) out += Module.HEAP32[(ptr + (i * 8 + 4)) >> 2];
+    Module.HEAP32[res >> 2] = out;
+};
+
 Module.allocateUTF8 = str => {
     if(!str) return 0;
     const encoded = new TextEncoder().encode(str);
@@ -188,7 +194,7 @@ const wasmImports = {
     setMainLoop: Module.setLoop,
     envGet: () => 0, // unused
     envSize: () => 0, // unused
-    fdWrite: () => 0, // unused
+    fdWrite: Module.fdWrite, // used for diep client console
     roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5),
     timeString: () => 0, // unused
     wasmMemory: new WebAssembly.Memory(WASM_MEMORY),
