@@ -894,6 +894,7 @@ class ASMConsts {
         else return prompt("Error loading into game. Take a picture of this then send to our support server (github.com/ABCxFF/diepcustom)", url);
     
         const ws = new WebSocket(url);
+        window.ws = ws;
         ws.binaryType = "arraybuffer";
         ws.events = [];
         ws.onopen = function() {
