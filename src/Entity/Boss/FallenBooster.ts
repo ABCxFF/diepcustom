@@ -29,15 +29,17 @@ import { AIState } from "../AI";
  */
 export default class FallenBooster extends AbstractBoss {
     /** The speed to maintain during movement. */
-    public movementSpeed = 0.5;
+    public movementSpeed = 1;
 
     public constructor(game: GameServer) {
         super(game);
 
         this.name.values.name = 'Fallen Booster';
-
         for (const barrelDefinition of TankDefinitions[Tank.Booster].barrels) {
-            this.barrels.push(new Barrel(this, barrelDefinition));
+
+            const def = Object.assign({}, barrelDefinition, {});
+            def.bullet = Object.assign({}, def.bullet, { speed: 1.7, health: 6.25 });
+            this.barrels.push(new Barrel(this, def));
         }
     }
 
