@@ -125,6 +125,8 @@ export default class AutoTurret extends ObjectEntity {
     }
 
     public tick(tick: number) {
+        if (this.inputs !== this.ai.inputs) this.inputs = this.ai.inputs;
+
         this.physics.size = baseRatio * this.sizeFactor;
 
         this.ai.aimSpeed = this.turret.bulletAccel;
