@@ -462,6 +462,7 @@ export default class Client {
                             for (let i = 0; i < StatCount; ++i) camera.camera.statNames[i as Stat] = "";
 
 
+                            camera.camera.killedBy = "";
                             camera.camera.player = ai.owner;
                             camera.camera.movementSpeed = ai.movementSpeed;
 
