@@ -1595,6 +1595,175 @@ const DevTankDefinitions: TankDefinition[] = [
                 max: 7
             }
         ]
+    },
+    {
+        id: DevTank.Railgun,
+        name: "Railgun",
+        upgradeMessage: "",
+        levelRequirement: 45,
+        upgrades: [],
+        flags: {
+            invisibility: false,
+            zoomAbility: false,
+            devOnly: false
+        },
+        visibilityRateShooting: 0.23,
+        visibilityRateMoving: 0.08,
+        invisibilityRate: 0.03,
+        fieldFactor: 0.8,
+        absorbtionFactor: 1,
+        speed: 1,
+        maxHealth: 50,
+        preAddon: null,
+        postAddon: "pronounced",
+        sides: 1,
+        borderWidth: 15,
+        barrels: [
+            {
+                angle: 0,
+                offset: 0,
+                size: 130,
+                width: 42,
+                delay: Infinity,
+                reload: 1.75,
+                recoil: 5,
+                isTrapezoid: false,
+                trapezoidDirection: 0,
+                addon: null,
+                bullet: {
+                    type: "bullet",
+                    sizeRatio: 1.25,
+                    health: 1.5,
+                    damage: 1.8,
+                    speed: 3,
+                    scatterRate: 1,
+                    lifeLength: 1.5,
+                    absorbtionFactor: 0.7
+                }
+            },
+            {
+                angle: 0,
+                offset: 0,
+                size: 110,
+                width: 42,
+                delay: Infinity,
+                reload: 1.75,
+                recoil: 5,
+                isTrapezoid: false,
+                trapezoidDirection: 0,
+                addon: null,
+                bullet: {
+                    type: "bullet",
+                    sizeRatio: 1.25,
+                    health: 1.5,
+                    damage: 1.8,
+                    speed: 3,
+                    scatterRate: 1,
+                    lifeLength: 1.5,
+                    absorbtionFactor: 0.7
+                }
+            },
+            {
+                angle: 0,
+                offset: 0,
+                size: 90,
+                width: 42,
+                delay: 0,
+                reload: 1.75,
+                recoil: 5,
+                isTrapezoid: false,
+                trapezoidDirection: 0,
+                addon: null,
+                bullet: {
+                    type: "bullet",
+                    sizeRatio: 1.25,
+                    health: 1.5,
+                    damage: 1.8,
+                    speed: 3,
+                    scatterRate: 1,
+                    lifeLength: 1.5,
+                    absorbtionFactor: 0.7
+                }
+            },
+            {
+                angle: Math.PI * (-1 / 36),
+                offset: -20,
+                size: 150,
+                width: 21,
+                delay: Infinity,
+                reload: 1,
+                recoil: 0.75,
+                isTrapezoid: true,
+                trapezoidDirection: Math.PI,
+                addon: null,
+                bullet: {
+                    type: "bullet",
+                    sizeRatio: 1,
+                    health: 0.9,
+                    damage: 0.65,
+                    speed: 1,
+                    scatterRate: 1,
+                    lifeLength: 1,
+                    absorbtionFactor: 1
+                }
+	},
+            {
+                angle: Math.PI * (1 / 36),
+                offset: 20,
+                size: 150,
+                width: 21,
+                delay: Infinity,
+                reload: 1,
+                recoil: 0.75,
+                isTrapezoid: true,
+                trapezoidDirection: Math.PI,
+                addon: null,
+                bullet: {
+                    type: "bullet",
+                    sizeRatio: 1,
+                    health: 0.9,
+                    damage: 0.65,
+                    speed: 1,
+                    lifeLength: 1,
+                    scatterRate: 1,
+                    absorbtionFactor: 1
+                }
+            }
+        ],
+       stats: [
+            {
+                name: "Movement Speed",
+                "max": 7
+            },
+            {
+                name: "Reload",
+                "max": 7
+            },
+            {
+                name: "Bullet Damage",
+                "max": 7
+            },
+            {
+                name: "Bullet Penetration",
+                "max": 7
+            },
+            {
+                name: "Bullet Speed",
+                "max": 7
+            },
+            {
+                name: "Body Damage",
+                "max": 7
+            },
+            {
+                name: "Max Health",
+                "max": 7
+            },
+            {
+                name: "Health Regen",
+                "max": 7
+            }
+        ]
     }
 ]
 
