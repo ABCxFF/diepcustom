@@ -35,7 +35,8 @@ export enum DevTank {
     Builder = -10,
     Goodbye = -11,
     Spectator = -12,
-    TheCroc = -13
+    TheCroc = -13,
+    Railgun = -14
 };
 
 /**
