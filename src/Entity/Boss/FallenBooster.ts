@@ -44,14 +44,13 @@ export default class FallenBooster extends AbstractBoss {
     }
 
     protected moveAroundMap() {
+      const x = this.position.values.x,
+      y = this.position.values.y
         if (this.ai.state === AIState.idle) {
-            this.position.angle += this.ai.passiveRotation;
-            this.accel.set({x: 0, y: 0});
+            super.moveAroundMap();
+            this.position.angle = Math.atan2(this.inputs.movement.y, this.inputs.movement.x)
         } else {
-            const x = this.position.values.x,
-                  y = this.position.values.y;
-
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x)
         }
     }
 
