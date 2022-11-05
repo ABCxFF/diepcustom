@@ -184,10 +184,10 @@ export default class Camera extends CameraEntity {
             const width = entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size;
             const size = entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size;
                      
-            if (entity.position.values.x + width < r &&
-                entity.position.values.y - size > t &&
-                entity.position.values.x - width > l &&
-                entity.position.values.y + size < b) {
+            if (entity.position.values.x - width < r &&
+                entity.position.values.y + size > t &&
+                entity.position.values.x + width > l &&
+                entity.position.values.y - size < b) {
                     if (entity !== this.camera.values.player &&!(entity.style.values.opacity === 0 && !entity.deletionAnimation)) {
                         entitiesInRange.push(entity);
                     }
