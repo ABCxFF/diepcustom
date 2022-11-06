@@ -202,7 +202,7 @@ export class AI {
             y: -delta.x / dist
         }
 
-        let entPerpComponent = unitDistancePerp.x * target.velocity.x+ unitDistancePerp.y * target.velocity.y;
+        let entPerpComponent = unitDistancePerp.x * target.velocity.x + unitDistancePerp.y * target.velocity.y;
 
         if (entPerpComponent > movementSpeed * 0.9) entPerpComponent = movementSpeed * 0.9;
 
