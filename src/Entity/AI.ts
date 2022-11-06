@@ -20,6 +20,7 @@ import GameServer from "../Game";
 import Vector from "../Physics/Vector";
 import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
+import TankBody from "./Tank/TankBody";
 
 import { InputFlags, ObjectFlags } from "../Const/Enums";
 import { Entity } from "../Native/Entity";
@@ -112,7 +113,6 @@ export class AI {
 
     /* Finds the closest entity in a different team */
     public findTarget() {
-
         const rootPos = this.owner.rootParent.position.values;
         const team = this.owner.relations.values.team;
 
@@ -152,6 +152,8 @@ export class AI {
             if (!this.targetFilter(entity)) continue; // Custom check
             
             if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
+
+            if (entity instanceof TankBody) return this.target = entity;
 
             const distSq = (entity.position.values.x - rootPos.x) ** 2 + (entity.position.values.y - rootPos.y) ** 2;
 
