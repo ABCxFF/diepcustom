@@ -202,14 +202,14 @@ export class AI {
             y: -delta.x / dist
         }
 
-        let entPerpComponent = unitDistancePerp.x * target.velocity.x + unitDistancePerp.y * target.velocity.y;
+        let entPerpComponent = unitDistancePerp.x * target.velocity.x+ unitDistancePerp.y * target.velocity.y;
 
         if (entPerpComponent > movementSpeed * 0.9) entPerpComponent = movementSpeed * 0.9;
 
         if (entPerpComponent < movementSpeed * -0.9) entPerpComponent = movementSpeed * -0.9;
 
         const directComponent = Math.sqrt(movementSpeed ** 2 - entPerpComponent ** 2);
-        const offset = entPerpComponent / directComponent * dist;
+        const offset = (entPerpComponent / directComponent * dist) / 32;
 
         this.inputs.mouse.set({
             x: pos.x + offset * unitDistancePerp.x,
