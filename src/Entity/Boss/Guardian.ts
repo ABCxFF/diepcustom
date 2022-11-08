@@ -55,7 +55,7 @@ export default class Guardian extends AbstractBoss {
                 type: "drone",
                 sizeRatio: 0.6,
                 health: 12.5,
-                damage: 0.75,
+                damage: 0.5,
                 speed: 1.7,
                 scatterRate: 1,
                 lifeLength: 1.5,
