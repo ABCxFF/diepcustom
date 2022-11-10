@@ -62,7 +62,7 @@ export class ShootCycle {
         /** @ts-ignore */
         const dontAlwaysShoot = this.barrelEntity.tank.definition?.id === Tank.Battleship || this.barrelEntity.tank.definition?.id === DevTank.Squirrel;
         /** @ts-ignore */
-        const alwaysShoot = this.barrelEntity.tank.definition?.id === Tank.DominatorT;
+        const alwaysShoot = this.barrelEntity.definition.forceFire;
 
         if (this.pos >= reloadTime) {
             // When its not shooting dont shoot, unless its a drone tank besides battleship or dom
