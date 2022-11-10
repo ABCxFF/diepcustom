@@ -93,6 +93,8 @@ export default class AbstractBoss extends LivingEntity {
 
     /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
     public sizeFactor = 1;
+    /** Addon size multiplier. */
+    public scaleFactor = 1;
     /** The reload time calculation property. Used for calculating reload of barrels. */
     public reloadTime = 15;
 
