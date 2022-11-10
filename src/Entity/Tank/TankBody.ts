@@ -67,6 +67,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     /** Size of the tank at level 1. Defined by tank loader.  */
     public baseSize = 50;
+    /** Addon size multiplier  */
+    public scaleFactor = 1;
     /** The definition of the currentTank */
     public definition: TankDefinition = getTankById(Tank.Basic) as TankDefinition;
     /** Reload time base, used for barrel's reloads. */
@@ -101,7 +103,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
     public get sizeFactor() {
-        return this.physics.values.size / this.baseSize;
+        return this.physics.values.size / this.baseSize * this.scaleFactor;
     }
 
     /** The current tank type / tank id. */
@@ -200,7 +202,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     }
 
     /** See LivingEntity.onDeath */
-    public onDeath(killer: LivingEntity) {
+   public onDeath(killer: LivingEntity) {
         if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
 
         this.cameraEntity.spectatee = killer;
