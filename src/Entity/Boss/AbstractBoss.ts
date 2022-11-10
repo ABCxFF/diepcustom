@@ -173,7 +173,7 @@ export default class AbstractBoss extends LivingEntity {
         // Force
         if (this.inputs !== this.ai.inputs) this.inputs = this.ai.inputs;
         
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physics.values.size / 50 * this.scaleFactor;
         this.ai.movementSpeed = this.movementSpeed;
         
         if (this.ai.state !== AIState.possessed) this.moveAroundMap();
