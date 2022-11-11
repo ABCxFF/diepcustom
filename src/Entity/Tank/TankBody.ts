@@ -200,7 +200,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     }
 
     /** See LivingEntity.onDeath */
-    public onDeath(killer: LivingEntity) {
+   public onDeath(killer: LivingEntity) {
         if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
 
         this.cameraEntity.spectatee = killer;

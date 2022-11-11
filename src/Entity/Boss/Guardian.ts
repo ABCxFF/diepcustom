@@ -22,6 +22,32 @@ import AbstractBoss from "./AbstractBoss";
 
 import { Colors, Tank } from "../../Const/Enums";
 import { AIState } from "../AI";
+import { BarrelDefinition } from "../../Const/TankDefinitions";
+
+const GuardianSpawnerDefinition: BarrelDefinition = {
+    angle: Math.PI,
+    offset: 0,
+    size: 100 / (1.01 ** (75 - 1)),
+    width: 71.4 / (1.01 ** (75 - 1)),
+    delay: 0,
+    reload: 0.25,
+    recoil: 1,
+    isTrapezoid: true,
+    trapezoidDirection: 0,
+    addon: null,
+    droneCount: 24,
+    canControlDrones: true,
+    bullet: {
+        type: "drone",
+        sizeRatio: 0.6,
+        health: 12.5,
+        damage: 0.5,
+        speed: 1.7,
+        scatterRate: 1,
+        lifeLength: 1.5,
+        absorbtionFactor: 1
+    }
+};
 
 /**
  * Class which represents the boss "Guardian"
@@ -37,31 +63,7 @@ export default class Guardian extends AbstractBoss {
         this.physics.values.size = 135 * Math.SQRT1_2;
         this.physics.values.sides = 3;
 
-        this.barrels.push(new Barrel(this, {
-            angle: Math.PI,
-            offset: 0,
-            // Scale cuz direct
-            size: 100 / (1.01 ** (75 - 1)),
-            width: 71.4 / (1.01 ** (75 - 1)),
-            delay: 0,
-            reload: 0.25,
-            recoil: 1,
-            isTrapezoid: true,
-            trapezoidDirection: 0,
-            addon: null,
-            droneCount: 24,
-            canControlDrones: true,
-            bullet: {
-                type: "drone",
-                sizeRatio: 0.6,
-                health: 12.5,
-                damage: 0.5,
-                speed: 1.7,
-                scatterRate: 1,
-                lifeLength: 1.5,
-                absorbtionFactor: 1
-            }
-        }));
+        this.barrels.push(new Barrel(this, GuardianSpawnerDefinition));
     }
 
     protected moveAroundMap() {
@@ -71,7 +73,7 @@ export default class Guardian extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
-
+        this.sizeFactor = this.physics.values.size / 50;
         if (this.ai.state !== AIState.possessed) {
             this.inputs.flags = 0;
         }

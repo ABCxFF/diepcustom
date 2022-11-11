@@ -56,5 +56,6 @@ export default class FallenBooster extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
+        this.sizeFactor = this.physics.values.size / 50;
     }
 }
