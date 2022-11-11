@@ -27,8 +27,8 @@ import { BarrelDefinition } from "../../Const/TankDefinitions";
 const GuardianSpawnerDefinition: BarrelDefinition = {
     angle: Math.PI,
     offset: 0,
-    size: 100,
-    width: 71.4,
+    size: 100 / (1.01 ** (75 - 1)),
+    width: 71.4 / (1.01 ** (75 - 1)),
     delay: 0,
     reload: 0.25,
     recoil: 1,
@@ -61,7 +61,6 @@ export default class Guardian extends AbstractBoss {
         this.style.values.color = Colors.EnemyCrasher;
         this.relations.values.team = this.game.arena;
         this.physics.values.size = 135 * Math.SQRT1_2;
-        this.sizeFactor = 1.0;
         this.physics.values.sides = 3;
 
         this.barrels.push(new Barrel(this, GuardianSpawnerDefinition));
@@ -74,7 +73,7 @@ export default class Guardian extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
-
+        this.sizeFactor = this.physics.values.size / 50;
         if (this.ai.state !== AIState.possessed) {
             this.inputs.flags = 0;
         }
