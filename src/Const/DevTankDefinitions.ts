@@ -36,7 +36,8 @@ export enum DevTank {
     Goodbye = -11,
     Spectator = -12,
     TheCroc = -13,
-    Railgun = -14
+    Railgun = -14,
+    Nightmare = -15
 };
 
 /**
@@ -1730,6 +1731,209 @@ const DevTankDefinitions: TankDefinition[] = [
                     absorbtionFactor: 1
                 }
             }
+        ],
+       stats: [
+            {
+                name: "Movement Speed",
+                "max": 7
+            },
+            {
+                name: "Reload",
+                "max": 7
+            },
+            {
+                name: "Bullet Damage",
+                "max": 7
+            },
+            {
+                name: "Bullet Penetration",
+                "max": 7
+            },
+            {
+                name: "Bullet Speed",
+                "max": 7
+            },
+            {
+                name: "Body Damage",
+                "max": 7
+            },
+            {
+                name: "Max Health",
+                "max": 7
+            },
+            {
+                name: "Health Regen",
+                "max": 7
+            }
+        ]
+    },
+    {
+        id: DevTank.Nightmare,
+        name: "Nightmare",
+        upgradeMessage: "",
+        levelRequirement: 45,
+        upgrades: [],
+        flags: {
+            invisibility: false,
+            zoomAbility: false,
+            devOnly: false
+        },
+        visibilityRateShooting: 0.23,
+        visibilityRateMoving: 0.08,
+        invisibilityRate: 0.03,
+        fieldFactor: 0.9,
+        absorbtionFactor: 1,
+        speed: 1,
+        maxHealth: 50,
+        preAddon: null,
+        postAddon: null,
+        sides: 1,
+        borderWidth: 15,
+        barrels: [
+            {
+                angle: (Math.PI * 2) / 6 * 1,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
+            {
+                angle: (Math.PI * 2) / 6 * 3,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
+            {
+                angle: (Math.PI * 2) / 6 * 5,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
+            {
+                angle: (Math.PI * 2) / 6 * 2,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
+            {
+                angle: (Math.PI * 2) / 6 * 4,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
+            {
+                angle: (Math.PI * 2) / 6 * 6,
+                offset: 0,
+                size: 70,
+                width: 42,
+                delay: 0,
+                reload: 6,
+                recoil: 1,
+                isTrapezoid: true,
+                trapezoidDirection: 0,
+                addon: null,
+                droneCount: 2,
+                canControlDrones: true,
+                bullet: {
+                    type: "drone",
+                    sizeRatio: 1,
+                    health: 2,
+                    damage: 0.7,
+                    speed: 0.8,
+                    scatterRate: 1,
+                    lifeLength: -1,
+                    absorbtionFactor: 1
+                }
+            },
         ],
        stats: [
             {
