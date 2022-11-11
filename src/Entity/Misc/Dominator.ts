@@ -86,7 +86,7 @@ export default class Dominator extends TankBody {
     public onDeath(killer: LivingEntity) {
         if (this.relations.values.team === this.game.arena) {
             this.relations.team = killer.relations.values.team || this.game.arena;
-            this.style.color = killer.relations.values.team?.team?.teamColor || killer.style.values.color;
+            this.style.color = this.relations.team.team?.teamColor || killer.style.values.color;
         } else {
             this.relations.team = this.game.arena
             this.style.color = this.game.arena.team.teamColor;
