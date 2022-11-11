@@ -120,10 +120,10 @@ export class AI {
 
             // If the AI already has a valid target within view distance, it's not necessary to find a new one
             
-            if (team !== this.target.relations.values.team) { // Check if the target is on the same team. If it is, need to find a new one
-            
+            // Make sure the target hasn't changed teams, and is existant (sides != 0)
+            if (team !== this.target.relations.values.team && this.target.physics.values.sides !== 0) {
+                // confirm its within range
                 const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
-
                 if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
                 
             }
@@ -132,7 +132,6 @@ export class AI {
         
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
-
         const root = this.owner.rootParent === this.owner && this.owner.relations.values.owner instanceof ObjectEntity ? this.owner.relations.values.owner : this.owner.rootParent;
         const entities = this.viewRange === Infinity ? this.game.entities.inner.slice(0, this.game.entities.lastId) : this.game.entities.collisionManager.retrieve(root.position.values.x, root.position.values.y, this.viewRange, this.viewRange);
 
@@ -143,15 +142,15 @@ export class AI {
 
             const entity = entities[i];
 
-            if (! (entity instanceof LivingEntity) ) continue; // Check if the target is living
+            if (!(entity instanceof LivingEntity) ) continue; // Check if the target is living
 
             if (entity.physics.values.objectFlags & ObjectFlags.base) continue; // Check if the target is a base
 
             if (!(entity.relations.values.owner === null || !(entity.relations.values.owner instanceof ObjectEntity))) continue; // Don't target entities who have an object owner
-
-            if (!this.targetFilter(entity)) continue; // Custom check
             
             if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
+
+            if (!this.targetFilter(entity)) continue; // Custom check
 
             if (entity instanceof TankBody) return this.target = entity;
 
