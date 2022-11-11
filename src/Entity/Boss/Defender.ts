@@ -77,7 +77,7 @@ export default class Defender extends AbstractBoss {
         this.style.values.color = Colors.EnemyTriangle;
         this.relations.values.team = this.game.arena;
         this.physics.values.size = 150 * Math.SQRT1_2;
-        this.sizeFactor = 1.0;
+        this.sizeFactor =  this.physics.values.size / 50 / (1.5 * Math.sqrt (2));
         this.physics.values.sides = 3;
 
         for (let i = 0; i < 3; ++i) {
@@ -111,6 +111,7 @@ export default class Defender extends AbstractBoss {
     public tick(tick: number) {
        super.tick(tick);
 
+        this.sizeFactor = this.physics.values.size / 50 / (1.5 * Math.sqrt (2));
         if (this.ai.state !== AIState.possessed) {
             this.inputs.flags = 0;
             this.position.angle += this.ai.passiveRotation;
