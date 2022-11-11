@@ -27,7 +27,7 @@ import { Entity } from "../../Native/Entity";
 import { NameGroup } from "../../Native/FieldGroups";
 import LivingEntity from "../Live";
 
-const AutoTurretDefinition: BarrelDefinition = {
+export const AutoTurretDefinition: BarrelDefinition = {
     angle: 0,
     offset: 0,
     size: 55,

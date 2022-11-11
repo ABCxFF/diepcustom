@@ -18,7 +18,7 @@
 
 import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
-import AutoTurret from "../Tank/AutoTurret";
+import AutoTurret, { AutoTurretDefinition } from "../Tank/AutoTurret";
 import AbstractBoss from "./AbstractBoss";
 
 import { Colors, Tank, MotionFlags } from "../../Const/Enums";
@@ -27,60 +27,48 @@ import { AIState } from "../AI";
 import { BarrelDefinition } from "../../Const/TankDefinitions";
 
 /**
- * Class which represents the boss "Defender"
+ * Definitions (stats and data) of the mounted turret on Defender
+ *
+ * Same as 
  */
-        const MountedTurretDefinition: BarrelDefinition = {
-            angle: 0,
-            offset: 0,
-            size: 55,
-            width: 42 * 0.7,
-            delay: 0.01,
-            reload: 1,
-            recoil: 0.3,
-            isTrapezoid: false,
-            trapezoidDirection: 0,
-            addon: null,
-        bullet: {
-            type: "bullet",
-            health: 1,
-            damage: 0.4,
-            speed: 1.2,
-            scatterRate: 1,
-            lifeLength: 1,
-            sizeRatio: 1,
-            absorbtionFactor: 1,
-            color: 12
-        }
+const MountedTurretDefinition: BarrelDefinition = {
+    ...AutoTurretDefinition,
+    bullet: {
+        ...AutoTurretDefinition.bullet,
+        color: Colors.Neutral
+    }
 };
+
 const DefenderDefinition: BarrelDefinition = {
-            angle: Math.PI,
-            offset: 0,
-            size: 120 * 2 / (1.01 ** (75 - 1)),
-            width: 71.4 * 2 / (1.01 ** (75 - 1)),
-            delay: 0,
-            reload: 4.5,
-            recoil: 2,
-            isTrapezoid: false,
-            trapezoidDirection: 0,
-            addon: "trapLauncher",
-            forceFire: true,
-            bullet: {
-                type: "trap",
-                sizeRatio: 0.8,
-                health: 12.5,
-                damage: 4,
-                speed: 2.5,
-                scatterRate: 1,
-                lifeLength: 3.2,
-                absorbtionFactor: 1,
-                color: 12
-            }
+    angle: Math.PI,
+    offset: 0,
+    size: 120,
+    width: 71.4,
+    delay: 0,
+    reload: 4.5,
+    recoil: 2,
+    isTrapezoid: false,
+    trapezoidDirection: 0,
+    addon: "trapLauncher",
+    forceFire: true,
+    bullet: {
+        type: "trap",
+        sizeRatio: 0.8,
+        health: 12.5,
+        damage: 4,
+        speed: 2.5,
+        scatterRate: 1,
+        lifeLength: 3.2,
+        absorbtionFactor: 1,
+        color: Colors.Neutral
+    }
 }
 
 export default class Defender extends AbstractBoss {
 
-    private DefenderTrapper: Barrel[];
-
+    /** Defender's trap launchers */
+    private defenderTrapLaunchers: Barrel[] = [];
+    /** See AbstractBoss.movementSpeed */
     public movementSpeed = 0.35;
 
     public constructor(game: GameServer) {
@@ -89,23 +77,18 @@ export default class Defender extends AbstractBoss {
         this.style.values.color = Colors.EnemyTriangle;
         this.relations.values.team = this.game.arena;
         this.physics.values.size = 150 * Math.SQRT1_2;
+        this.sizeFactor = 1.0;
         this.physics.values.sides = 3;
 
-        this.scaleFactor = 0.5;
-   
-        const DefenderTrapper: Barrel[] = this.DefenderTrapper =[];
-
-        const x1 = new Barrel(this, {...DefenderDefinition});
-        const x2Definition = {...DefenderDefinition};
-        x2Definition.angle = Math.PI * 2 * (1 / 6)
-        const x2 = new Barrel(this, x2Definition);
-        const x3Definition = {...DefenderDefinition};
-        x3Definition.angle = Math.PI * 2 * (5 / 6)
-        const x3 = new Barrel(this, x3Definition);
-
-        DefenderTrapper.push(x1, x2);
-
         for (let i = 0; i < 3; ++i) {
+            // Add trap launcher
+            this.defenderTrapLaunchers.push(new Barrel(this, {
+                ...DefenderDefinition,
+                angle: Math.PI * 2 * ((i / 3) + 1 / 6)
+            }));
+
+            // TODO:
+            // Maybe make this into a class of itself - DefenderAutoTurret
             const base = new AutoTurret(this, MountedTurretDefinition);
 
             const angle = base.ai.inputs.mouse.angle = Math.PI * 2 * (i / 3);

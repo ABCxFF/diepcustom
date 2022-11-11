@@ -17,7 +17,7 @@
 */
 
 import DevTankDefinitions, { DevTank } from "./DevTankDefinitions";
-import { Tank } from "./Enums";
+import { Tank, Colors } from "./Enums";
 
 /** The types of post addons that exist in the game, by their id. */
 export type postAddonId = "dompronounced" | "auto5" | "auto3" | "autosmasher" | "spike" | "pronounced" | "smasher" | "landmine" | "autoturret" | "weirdspike" | "auto2" | "auto7" | "autorocket" | "spiesk"
@@ -51,7 +51,7 @@ export interface BulletDefinition {
     /** Knockback factor field of the bullet */
     absorbtionFactor: number;
     /** Projectile color - by default this is set to parent's body color. */
-    color?: number;
+    color?: Colors;
 }
 
 /**

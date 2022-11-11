@@ -24,6 +24,8 @@ import * as util from "./util";
 import GameServer from "./Game";
 import auth from "./Auth";
 import TankDefinitions from "./Const/TankDefinitions";
+import Defender from "./Entity/Boss/Defender";
+import Guardian from "./Entity/Boss/Guardian";
 
 const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
