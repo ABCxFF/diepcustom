@@ -50,7 +50,7 @@ export interface BulletDefinition {
     lifeLength: number;
     /** Knockback factor field of the bullet */
     absorbtionFactor: number;
-    /** Projectile color. */
+    /** Projectile color - by default this is set to parent's body color. */
     color?: number;
 }
 
