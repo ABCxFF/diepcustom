@@ -22,7 +22,10 @@
 // TODO(ABC):
 // Code a compressor (The previous was not OOP and used lz4js code)
 // If this code gets out of bounds (only happens if you play around with dev too much), the server crashes [better than out of bounds r/w].
-const OUTPUT_BUFFER = new Uint8Array(65536);
+// 
+// TEMP FIX - 2022/11/11:
+//   OUTPUT_BUFFER now gets resized if running out of space for the packet
+let OUTPUT_BUFFER = new Uint8Array(65536);
 
 const convo = new ArrayBuffer(4);
 const u8 = new Uint8Array(convo);
@@ -40,7 +43,22 @@ const endianSwap = (num: number) =>
     ((num >> 24) & 0xff);
 
 export default class Writer {
-    private at: number = 0;
+    private _at: number = 0;
+
+    private get at() {
+        return this._at;
+    }
+
+    private set at(v) {
+        this._at = v;
+
+        if (OUTPUT_BUFFER.byteLength <= this._at + 5) {
+            const newBuffer = new Uint8Array(OUTPUT_BUFFER.byteLength + (OUTPUT_BUFFER.byteLength >> 1));
+            newBuffer.set(OUTPUT_BUFFER, 0);
+
+            OUTPUT_BUFFER = newBuffer;
+        }
+    }
 
     public u8(val: number) {
         OUTPUT_BUFFER[this.at++] = val;

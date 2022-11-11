@@ -156,8 +156,6 @@ export default class Camera extends CameraEntity {
 
     /** Updates the camera's current view. */
     private updateView(tick: number) {
-        const w = this.client.write().u8(ClientBound.Update).vu(tick);
-
         const deletes: { id: number, hash: number, noDelete?: boolean }[] = [];
         const updates: Entity[] = [];
         const creations: Entity[] = [];
@@ -222,13 +220,8 @@ export default class Camera extends CameraEntity {
             }
         }
 
-        // Now compile
-        w.vu(deletes.length);
-        for (let i = 0; i < deletes.length; ++i) {
-            w.entid(deletes[i]);
-            if (!deletes[i].noDelete) this.removeFromView(deletes[i].id);
-        }
 
+        // Next pick updates
         const entities = this.game.entities;
         for (const id of this.game.entities.otherEntities) {
             if (this.view.findIndex(r => r.id === id) === -1) {
@@ -269,16 +262,38 @@ export default class Camera extends CameraEntity {
             }
         }
 
-        // Arrays of entities
-        w.vu(creations.length + updates.length);
-        for (let i = 0; i < updates.length; ++i) {
-            this.compileUpdate(w, updates[i]);
-        }
-        for (let i = 0; i < creations.length; ++i) {
-            this.compileCreation(w, creations[i]);
-        }
+        // UPDATE 2022/11/11 - Send out only chunks of 64 updates per packet to prevent intense packet size
+        // - WHEN COMPRESSION IS ADDED, UNDO
+        const CHUNK_SIZE = 64;
+        let entitiesSent = 0;
+        while (entitiesSent < creations.length + updates.length) {
+            // Prep for compilation
+            const w = this.client.write().u8(ClientBound.Update).vu(tick);
+            // If the first packet of tick, compile deletions
+            if (entitiesSent === 0) {
+                w.vu(deletes.length);
+                for (let i = 0; i < deletes.length; ++i) {
+                    w.entid(deletes[i]);
+                    if (!deletes[i].noDelete) this.removeFromView(deletes[i].id);
+                }
+            } else w.vu(0); // or assume they've already been completed
 
-        w.send();
+            const lastChunk = entitiesSent;
+            const sizeOfChunk = creations.length + updates.length - lastChunk < CHUNK_SIZE ? creations.length + updates.length - lastChunk : CHUNK_SIZE;
+
+            // Chunk out the arrays of entities
+            w.vu(sizeOfChunk);
+            while (entitiesSent < updates.length && entitiesSent - lastChunk < sizeOfChunk) {
+                this.compileUpdate(w, updates[entitiesSent]);
+                entitiesSent += 1;
+            }
+            while (entitiesSent - updates.length < creations.length && entitiesSent - lastChunk < sizeOfChunk) {
+                this.compileCreation(w, creations[entitiesSent - updates.length]);
+                entitiesSent += 1;
+            }
+
+            w.send();
+        }
     }
 
     /** Entity creation compiler function... Run! */
