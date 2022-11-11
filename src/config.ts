@@ -31,8 +31,11 @@ export const tps: number = 1000 / mspt;
 /** Max connections per ip. -1 = no limit */
 export const connectionsPerIp: number = -1;
 
-/** Max packet size (HARD LIMIT), not the max read / write size */
+/** Max incoming packet size (HARD LIMIT), not the max read / write size */
 export const wssMaxMessageSize: number = 4096; // 4 kb
+
+/** Output Chunk Size for the Writer (during resize) */
+export const writtenBufferChunkSize = Buffer.poolSize || 2048;
 
 /** Host id to be sent to client. */
 export const host: string = process.env.SERVER_INFO || (process.env.NODE_ENV === "development" ? "localhost" : "");

@@ -16,6 +16,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+import { writtenBufferChunkSize } from "../config";
+
 /**
  * UNDOCUMENTED FILE
  **/
@@ -25,13 +27,10 @@
 // 
 // TEMP FIX - 2022/11/11:
 //   OUTPUT_BUFFER now gets resized if running out of space for the packet
-let OUTPUT_BUFFER = new Uint8Array(65536);
+let OUTPUT_BUFFER = Buffer.alloc(writtenBufferChunkSize);
 
 const convo = new ArrayBuffer(4);
-const u8 = new Uint8Array(convo);
-const u16 = new Uint16Array(convo);
 const i32 = new Int32Array(convo);
-const u32 = new Uint32Array(convo);
 const f32 = new Float32Array(convo);
 
 const Encoder: TextEncoder = new TextEncoder();
@@ -52,8 +51,8 @@ export default class Writer {
     private set at(v) {
         this._at = v;
 
-        if (OUTPUT_BUFFER.byteLength <= this._at + 5) {
-            const newBuffer = new Uint8Array(OUTPUT_BUFFER.byteLength + (OUTPUT_BUFFER.byteLength >> 1));
+        if (OUTPUT_BUFFER.length <= this._at + 5) {
+            const newBuffer = Buffer.alloc(OUTPUT_BUFFER.length + writtenBufferChunkSize);
             newBuffer.set(OUTPUT_BUFFER, 0);
 
             OUTPUT_BUFFER = newBuffer;
@@ -61,22 +60,19 @@ export default class Writer {
     }
 
     public u8(val: number) {
-        OUTPUT_BUFFER[this.at++] = val;
+        OUTPUT_BUFFER.writeUInt8(val >>> 0 & 0xFF, this.at++);
         return this;
     }
     public u16(val: number) {
-        u16[0] = val;
-        OUTPUT_BUFFER.set(u8.subarray(0, 2), (this.at += 2) - 2);
+        OUTPUT_BUFFER.writeUint16LE(val >>> 0 & 0xFFFF, (this.at += 2) - 2);
         return this;
     }
     public u32(val: number) {
-        u32[0] = val;
-        OUTPUT_BUFFER.set(u8, (this.at += 4) - 4);
+        OUTPUT_BUFFER.writeUint32LE(val >>> 0, (this.at += 4) - 4);
         return this;
     }
     public float(val: number) {
-        f32[0] = val;
-        OUTPUT_BUFFER.set(u8, (this.at += 4) - 4);
+        OUTPUT_BUFFER.writeFloatLE(val, (this.at += 4) - 4);
         return this;
     }
     public vf(val: number) {
@@ -91,7 +87,7 @@ export default class Writer {
             let part = val;
             val >>>= 7;
             if (val) part |= 0x80;
-            OUTPUT_BUFFER[this.at++] = part;
+            OUTPUT_BUFFER.writeUint8(part >>> 0 & 0xFF, this.at++);
         } while (val);
 
         // OUTPUT_BUFFER.set(buf.subarray(0, at), (this.at += at) - at);
@@ -102,11 +98,11 @@ export default class Writer {
         return this.vu((0 - (val < 0 ? 1 : 0)) ^ (val << 1)); // varsint trick
     }
     public bytes(buffer: Uint8Array) {
-        OUTPUT_BUFFER.set(buffer, (this.at += buffer.byteLength) - buffer.byteLength);
+        OUTPUT_BUFFER.set(buffer, (this.at += buffer.byteLength) - buffer.byteLength)
         return this;
     }
     public raw(...data: number[]) {
-        OUTPUT_BUFFER.set(data, (this.at += data.length) - data.length);
+        OUTPUT_BUFFER.set(data, (this.at += data.length) - data.length)
         return this;
     }
     public radians(radians: number) {
