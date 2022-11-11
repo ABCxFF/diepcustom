@@ -29,7 +29,7 @@ import { BarrelDefinition } from "../../Const/TankDefinitions";
 /**
  * Definitions (stats and data) of the mounted turret on Defender
  *
- * Same as 
+ * Same as mounted turret, just different color
  */
 const MountedTurretDefinition: BarrelDefinition = {
     ...AutoTurretDefinition,
@@ -39,6 +39,9 @@ const MountedTurretDefinition: BarrelDefinition = {
     }
 };
 
+/**
+ * Definitions (stats and data) of the trap launcher on Defender
+ */
 const DefenderDefinition: BarrelDefinition = {
     angle: Math.PI,
     offset: 0,
@@ -64,6 +67,12 @@ const DefenderDefinition: BarrelDefinition = {
     }
 }
 
+// The size of a Defender by default
+const DEFENDER_SIZE = 150;
+
+/**
+ * Class which represents the boss "Defender"
+ */
 export default class Defender extends AbstractBoss {
 
     /** Defender's trap launchers */
@@ -76,8 +85,8 @@ export default class Defender extends AbstractBoss {
         this.name.values.name = 'Defender';
         this.style.values.color = Colors.EnemyTriangle;
         this.relations.values.team = this.game.arena;
-        this.physics.values.size = 150 * Math.SQRT1_2;
-        this.sizeFactor =  this.physics.values.size / 50 / (1.5 * Math.sqrt (2));
+        this.physics.values.size = DEFENDER_SIZE * Math.SQRT1_2;
+        this.sizeFactor = 1;
         this.physics.values.sides = 3;
 
         for (let i = 0; i < 3; ++i) {
@@ -111,7 +120,7 @@ export default class Defender extends AbstractBoss {
     public tick(tick: number) {
        super.tick(tick);
 
-        this.sizeFactor = this.physics.values.size / 50 / (1.5 * Math.sqrt (2));
+       this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
             this.inputs.flags = 0;
             this.position.angle += this.ai.passiveRotation;
