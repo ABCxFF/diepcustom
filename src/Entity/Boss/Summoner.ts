@@ -31,7 +31,7 @@ const SummonerSpawnerDefinition: BarrelDefinition = {
     size: 135,
     width: 71.4,
     delay: 0,
-    reload: 0.25,
+    reload: 0.5,
     recoil: 1,
     isTrapezoid: true,
     trapezoidDirection: 0,
