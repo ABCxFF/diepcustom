@@ -31,6 +31,7 @@ import { TeamGroupEntity } from "../Entity/Misc/TeamEntity";
 import Client from "../Client";
 import AbstractBoss from "../Entity/Boss/AbstractBoss";
 import Guardian from "../Entity/Boss/Guardian";
+import Summoner from "../Entity/Boss/Summoner";
 import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import Defender from "../Entity/Boss/Defender";
@@ -198,8 +199,8 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 	/** Spawns the boss into the arena */
 	protected spawnBoss() {
-		const TBoss = [Guardian, FallenOverlord, FallenBooster, Defender]
-			[~~(Math.random() * 4)];
+		const TBoss = [Guardian, Summoner, FallenOverlord, FallenBooster, Defender]
+			[~~(Math.random() * 5)];
 		
 		this.boss = new TBoss(this.game);
 	}
