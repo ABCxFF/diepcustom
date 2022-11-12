@@ -52,6 +52,8 @@ export interface BulletDefinition {
     absorbtionFactor: number;
     /** Projectile color - by default this is set to parent's body color. */
     color?: Colors;
+    /** Overrides number of sides for projectile. */
+    sides?: number;
 }
 
 /**
