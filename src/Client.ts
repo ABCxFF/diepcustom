@@ -59,8 +59,21 @@ class WSWriterStream extends Writer {
         this.ws = ws;
     }
 
+    protected _at: number = 0;
+
+    protected get at() {
+        return this._at;
+    }
+
+    protected set at(v) {
+        if (v + 5 >= Writer.OUTPUT_BUFFER.length) {
+            this.ws.send(Writer.OUTPUT_BUFFER.subarray(0, v), {fin: false});
+            this._at = 0;
+        } else this._at = v;
+    }
+
     public send() {
-        return this.ws.send(this.write());
+        this.ws.send(this.write());
     }
 }
 
