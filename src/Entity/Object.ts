@@ -291,11 +291,8 @@ export default class ObjectEntity extends Entity {
 
             if (entity.physics.values.sides === 0) continue;
             if (entity.physics.values.sides === 2 && this.physics.values.sides === 2) {
-                // TODO(Crabby): Untested
-                if (!(entity.position.values.x > this.position.values.x - this.physics.values.width / 2 ||
-                    entity.position.values.x + entity.physics.values.width / 2 < this.position.values.x ||
-                    entity.position.values.y > this.position.values.y + this.physics.values.size / 2 ||
-                    entity.position.values.y + entity.physics.values.size / 2)) this.cachedCollisions.push(entity);
+                // in Diep.io source code, rectangles do not support collisions
+                // hence, they are not supported here
             } else if (this.physics.values.sides !== 2 && entity.physics.values.sides === 2) {
                 const dX = util.constrain(this.position.values.x, entity.position.values.x - entity.physics.values.size / 2, entity.position.values.x + entity.physics.values.size / 2) - this.position.values.x;
                 const dY = util.constrain(this.position.values.y, entity.position.values.y - entity.physics.values.width / 2, entity.position.values.y + entity.physics.values.width / 2) - this.position.values.y;
