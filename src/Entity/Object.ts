@@ -327,24 +327,19 @@ export default class ObjectEntity extends Entity {
     }
 
     /** Returns the true world position (even for objects who have parents). */
-    public getWorldPosition(): VectorAbstract {
-        let x = this.position.values.x;
-        let y = this.position.values.y;
+    public getWorldPosition(): Vector {
+        let pos = new Vector(this.position.values.x, this.position.values.y);
 
         let entity: ObjectEntity = this;
-        let absolute = false;
         while (entity.relations.values.parent instanceof ObjectEntity) {
-            // if (!absolute) {
-                x *= Math.cos(entity.position.values.angle);
-                y *= Math.sin(entity.position.values.angle);
-            // } 
+            
+            if (!(entity.relations.values.parent.position.values.motion & MotionFlags.absoluteRotation)) pos.angle += entity.position.values.angle;
             entity = entity.relations.values.parent;
-            x += entity.position.values.x;
-            y += entity.position.values.y;
-            // if (entity.position.values.motion & MotionFlags.absoluteRotation) absolute = true;
+            pos.x += entity.position.values.x;
+            pos.y += entity.position.values.y;
         }
 
-        return { x, y };
+        return pos;
     }
 
     public tick(tick: number) {
