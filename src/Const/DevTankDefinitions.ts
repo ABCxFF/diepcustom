@@ -1466,13 +1466,13 @@ const DevTankDefinitions: TankDefinition[] = [
         levelRequirement: 0,
         upgrades: [],
         flags: {
-            invisibility: false,
+            invisibility: true,
             zoomAbility: false,
             devOnly: true
         },
         visibilityRateShooting: 0.0,
         visibilityRateMoving: 0.0,
-        invisibilityRate: 1,
+        invisibilityRate: 1.0,
         fieldFactor: 0.3,
         absorbtionFactor: 0,
         speed: 3,

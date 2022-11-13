@@ -16,19 +16,14 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+import { writtenBufferChunkSize } from "../config";
+
 /**
  * UNDOCUMENTED FILE
  **/
-// TODO(ABC):
-// Code a compressor (The previous was not OOP and used lz4js code)
-// If this code gets out of bounds (only happens if you play around with dev too much), the server crashes [better than out of bounds r/w].
-const OUTPUT_BUFFER = new Uint8Array(65536);
 
 const convo = new ArrayBuffer(4);
-const u8 = new Uint8Array(convo);
-const u16 = new Uint16Array(convo);
 const i32 = new Int32Array(convo);
-const u32 = new Uint32Array(convo);
 const f32 = new Float32Array(convo);
 
 const Encoder: TextEncoder = new TextEncoder();
@@ -40,25 +35,51 @@ const endianSwap = (num: number) =>
     ((num >> 24) & 0xff);
 
 export default class Writer {
-    private at: number = 0;
+    // TODO(ABC):
+    // Code a compressor (The previous was not OOP and used lz4js code)
+    // If this code gets out of bounds (only happens if you play around with dev too much), the server crashes [better than out of bounds r/w].
+    // 
+    // TEMP FIX - 2022/11/11:
+    //   OUTPUT_BUFFER now gets resized if running out of space for the packet
+    //
+    // TEMP FIX 2 - 2022/11/13:
+    //   OUTPUT_BUFFER gets sent out in chunks (see Client.ts for more info)
+    protected static OUTPUT_BUFFER = Buffer.alloc(50);
+    protected _at: number = 0;
+
+    protected get at() {
+        return this._at;
+    }
+
+    protected set at(v) {
+        this._at = v;
+
+        if (Writer.OUTPUT_BUFFER.length <= this._at + 5) {
+            const newBuffer = Buffer.alloc(Writer.OUTPUT_BUFFER.length + writtenBufferChunkSize);
+            newBuffer.set(Writer.OUTPUT_BUFFER, 0);
+
+            Writer.OUTPUT_BUFFER = newBuffer;
+        }
+    }
 
     public u8(val: number) {
-        OUTPUT_BUFFER[this.at++] = val;
+        Writer.OUTPUT_BUFFER.writeUInt8(val >>> 0 & 0xFF, this.at);
+        this.at += 1;
         return this;
     }
     public u16(val: number) {
-        u16[0] = val;
-        OUTPUT_BUFFER.set(u8.subarray(0, 2), (this.at += 2) - 2);
+        Writer.OUTPUT_BUFFER.writeUint16LE(val >>> 0 & 0xFFFF, this.at);
+        this.at += 2;
         return this;
     }
     public u32(val: number) {
-        u32[0] = val;
-        OUTPUT_BUFFER.set(u8, (this.at += 4) - 4);
+        Writer.OUTPUT_BUFFER.writeUint32LE(val >>> 0, this.at);
+        this.at += 4;
         return this;
     }
     public float(val: number) {
-        f32[0] = val;
-        OUTPUT_BUFFER.set(u8, (this.at += 4) - 4);
+        Writer.OUTPUT_BUFFER.writeFloatLE(val, this.at);
+        this.at += 4;
         return this;
     }
     public vf(val: number) {
@@ -73,7 +94,8 @@ export default class Writer {
             let part = val;
             val >>>= 7;
             if (val) part |= 0x80;
-            OUTPUT_BUFFER[this.at++] = part;
+            Writer.OUTPUT_BUFFER.writeUint8(part >>> 0 & 0xFF, this.at);
+            this.at += 1;
         } while (val);
 
         // OUTPUT_BUFFER.set(buf.subarray(0, at), (this.at += at) - at);
@@ -84,11 +106,13 @@ export default class Writer {
         return this.vu((0 - (val < 0 ? 1 : 0)) ^ (val << 1)); // varsint trick
     }
     public bytes(buffer: Uint8Array) {
-        OUTPUT_BUFFER.set(buffer, (this.at += buffer.byteLength) - buffer.byteLength);
+        Writer.OUTPUT_BUFFER.set(buffer, this.at);
+        this.at += buffer.byteLength;
         return this;
     }
     public raw(...data: number[]) {
-        OUTPUT_BUFFER.set(data, (this.at += data.length) - data.length);
+        Writer.OUTPUT_BUFFER.set(data, this.at)
+        this.at += data.length;
         return this;
     }
     public radians(radians: number) {
@@ -99,7 +123,13 @@ export default class Writer {
         return this.vi(degrees * 64)
     }
     public stringNT(str: string) {
-        this.at += Encoder.encodeInto(str + "\x00", OUTPUT_BUFFER.subarray(this.at)).written || 0;
+        const bytes = Encoder.encode(str + "\x00");
+        // TODO(ABC): See line 69 Client.ts
+        // rn it sends string out in bytes, send it all at once without messing up the chunking
+        for (let i = 0; i < bytes.byteLength; ++i) {
+            Writer.OUTPUT_BUFFER[this.at] = bytes[i];
+            this.at += 1;
+        }
 
         return this;
     }
@@ -108,8 +138,8 @@ export default class Writer {
         return this.vu(entity.hash).vu(entity.id);
     }
     public write(slice: boolean=false) {
-        if (slice) return OUTPUT_BUFFER.slice(0, this.at);
+        if (slice) return Writer.OUTPUT_BUFFER.slice(0, this.at);
         
-        return OUTPUT_BUFFER.subarray(0, this.at);
+        return Writer.OUTPUT_BUFFER.subarray(0, this.at);
     }
 }

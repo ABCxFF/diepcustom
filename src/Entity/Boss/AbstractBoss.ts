@@ -122,7 +122,7 @@ export default class AbstractBoss extends LivingEntity {
         this.position.values.x = x;
         this.position.values.y = y;
         
-        this.relations.values.team = this.cameraEntity;
+        this.relations.values.team = null;
 
         this.physics.values.absorbtionFactor = 0.05;
         this.position.values.motion |= MotionFlags.absoluteRotation;
