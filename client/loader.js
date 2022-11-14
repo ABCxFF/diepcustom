@@ -113,10 +113,10 @@ Module.loadGamemodeButtons = () => {
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
 };
 
-Module.loadChangelog = (changelog) => {
+Module.loadChangelog = (changelog=CHANGELOG) => {
     const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
     if(vec.start) vec.delete();
-    vec.push(...(changelog || CHANGELOG));
+    vec.push(...changelog);
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1;
 };
 
