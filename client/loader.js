@@ -113,10 +113,10 @@ Module.loadGamemodeButtons = () => {
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
 };
 
-Module.loadChangelog = () => {
+Module.loadChangelog = (changelog) => {
     const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
     if(vec.start) vec.delete();
-    vec.push(...CHANGELOG);
+    vec.push(...(changelog || CHANGELOG));
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1;
 };
 
@@ -332,6 +332,22 @@ Module.todo.push([instance => {
 }, false]);
 
 Module.todo.push([() => {
+    window.Game = {
+        reloadServers: async () => {
+            Module.servers = await fetch(`${API_URL}servers`).then(res => res.json());
+            Module.loadGamemodeButtons();
+        },
+        reloadTanks: async () => {
+            Module.tankDefinitions = await fetch(`${API_URL}tanks`).then(res => res.json());
+            for(const tankDef of Module.tankDefinitionsTable) Module.exports.free(tankDef);
+            Module.loadTankDefinitions();
+        },
+        changeChangelog: (lines) => Module.loadChangelog(lines),
+        socket: null,
+        spawn: name => window.input.execute(`game_spawn ${name}`),
+        reconnect: () => window.input.execute(`lb_reconnect`)
+    };
+    
     Module.status = "START";
     Module.HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     Module.isRunning = true;
@@ -894,7 +910,6 @@ class ASMConsts {
         else return prompt("Error loading into game. Take a picture of this then send to our support server (github.com/ABCxFF/diepcustom)", url);
     
         const ws = new WebSocket(url);
-        window.ws = ws;
         ws.binaryType = "arraybuffer";
         ws.events = [];
         ws.onopen = function() {
@@ -923,6 +938,7 @@ class ASMConsts {
             return i;
         }
         Module.cp5.sockets.push(ws);
+        window.Game.socket = ws;
         return Module.cp5.sockets.length - 1;
     }
 
