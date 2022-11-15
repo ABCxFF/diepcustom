@@ -28,7 +28,7 @@ import ArenaEntity from "../Native/Arena";
 
 const arenaSize = 11150;
 /**
- * Domination Gamemode Arena
+ * Mothership Gamemode Arena
  */
 export default class MothershipArena extends ArenaEntity {
     /** Blue Team entity */
