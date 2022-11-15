@@ -204,7 +204,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
 
         this.cameraEntity.spectatee = killer;
-        this.cameraEntity.camera.FOV = 0.4;
+        this.cameraEntity.camera.FOV = killer.camera?.FOV || 0.4;
         this.cameraEntity.camera.killedBy = (killer.name && killer.name.values.name) || "";
     }
 
