@@ -49,8 +49,6 @@ export default class MothershipArena extends ArenaEntity {
        this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
 
        this.updateBounds(arenaSize * 2, arenaSize * 2);
-
-       const { x, y } = this.findSpawnLocation();
         
        this.mothershipBlue.relations.values.team = this.blueTeam;
        this.mothershipBlue.style.values.color = this.blueTeam.team.values.teamColor;
