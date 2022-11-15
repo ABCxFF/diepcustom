@@ -56,15 +56,20 @@ export default class Mothership extends TankBody {
         this.ai = new AI(this);
         this.ai.inputs = inputs;
         this.ai.viewRange = 2000;
+        
         this.position.values.x = 0;
         this.position.values.y = 0;
+        
         this.setTank(Tank.Mothership);
+        
         this.name.values.name = "Mothership"
+        
         this.scoreReward = 0;
+        
         camera.camera.values.player = this;
 
         for (let i = Stat.MovementSpeed; i < Stat.HealthRegen; ++i) camera.camera.values.statLevels.values[i] = 7;
-      // camera.camera.values.statLevels.values[Stat.HealthRegen] = 1;
+        camera.camera.values.statLevels.values[Stat.HealthRegen] = 1;
 
         const def = (this.definition = Object.assign({}, this.definition));
         def.maxHealth = 7000 - 418;
