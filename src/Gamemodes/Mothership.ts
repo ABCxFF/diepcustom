@@ -40,35 +40,28 @@ export default class MothershipArena extends ArenaEntity {
 
     public mothershipRed: Mothership = new Mothership(this);
 
-
-
-
-
     public constructor(game: GameServer) {
         super(game);
 
        this.arena.GUI |= GUIFlags.hideScorebar;
-        this.blueTeam.team.values.mothership |= MothershipFlags.showArrow;
-        this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
 
-        this.updateBounds(arenaSize * 2, arenaSize * 2);
+       this.blueTeam.team.values.mothership |= MothershipFlags.showArrow;
+       this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
+
+       this.updateBounds(arenaSize * 2, arenaSize * 2);
 
        const { x, y } = this.findSpawnLocation();
         
-      //  const m0 = new Mothership(this);
-        this.mothershipBlue.relations.values.team = this.blueTeam;
-        this.mothershipBlue.style.values.color = this.blueTeam.team.values.teamColor;
-        this.mothershipBlue.position.values.x = 10000;
-        this.mothershipBlue.position.values.y = 0;
+       this.mothershipBlue.relations.values.team = this.blueTeam;
+       this.mothershipBlue.style.values.color = this.blueTeam.team.values.teamColor;
+       this.mothershipBlue.position.values.x = 10000;
+       this.mothershipBlue.position.values.y = 0;
 
-//        const m1 = new Mothership(this);
        this.mothershipRed.relations.values.team = this.redTeam;
-      this.mothershipRed.style.values.color = this.redTeam.team.values.teamColor;
+       this.mothershipRed.style.values.color = this.redTeam.team.values.teamColor;
        this.mothershipRed.position.values.x = -10000;
-        this.mothershipRed.position.values.y = 0;
+       this.mothershipRed.position.values.y = 0;
 
-//        this.blueTeam.team.values.mothershipX = m0.position.values.x;
-   //     this.redTeam.team.values.mothershipX = m1.position.values.x;
     }
     public spawnPlayer(tank: TankBody, client: Client) {
 
@@ -88,7 +81,8 @@ export default class MothershipArena extends ArenaEntity {
         if (client.camera) client.camera.relations.team = tank.relations.values.team;
     }
 	public updateScoreboard(scoreboardPlayers: Mothership[]) {
-this.arena.scoreboardAmount = 2;
+                        this.arena.scoreboardAmount = 2;
+		
 			const ms0 = this.mothershipBlue;
 			this.blueTeam.team.mothershipX = ms0.position.values.x;
 			this.blueTeam.team.mothershipY = ms0.position.values.y;
@@ -97,8 +91,8 @@ this.arena.scoreboardAmount = 2;
 			this.redTeam.team.mothershipX = ms1.position.values.x;
 			this.redTeam.team.mothershipY = ms1.position.values.y;
 
-const player = this.mothershipBlue
-const player2 = this.mothershipRed
+                        const player = this.mothershipBlue
+                        const player2 = this.mothershipRed
 			/** @ts-ignore */
 			if (player.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[0] = Colors.ScoreboardBar;
 			/** @ts-ignore */
@@ -127,8 +121,8 @@ const player2 = this.mothershipRed
 
 	}   
 public tick (tick: number) {
-super.tick(tick)
-if (this.mothershipBlue.health.values.health <= 0 && !this.hasFinished) {
+   super.tick(tick)
+   if (this.mothershipBlue.health.values.health <= 0 && !this.hasFinished) {
         this.game.broadcast()
             .u8(ClientBound.Notification)
             .stringNT("RED HAS WON THE GAME!")
@@ -151,7 +145,7 @@ if (this.mothershipBlue.health.values.health <= 0 && !this.hasFinished) {
 				this.close();
 			}, 10000);
             this.hasFinished = true;
-}
+            }
 }
 
 }
