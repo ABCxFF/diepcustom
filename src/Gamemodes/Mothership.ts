@@ -123,7 +123,7 @@ public tick (tick: number) {
    if (this.mothershipBlue.health.values.health <= 0 && !this.hasFinished) {
         this.game.broadcast()
             .u8(ClientBound.Notification)
-            .stringNT("RED HAS WON THE GAME!")
+            .stringNT("RED HAS DESTROYED BLUE'S MOTHERSHIP!")
             .u32(0xF14E54)
             .float(-1)
             .stringNT("").send();
@@ -134,7 +134,7 @@ public tick (tick: number) {
 } else if (this.mothershipRed.health.values.health <= 0 && !this.hasFinished) {
         this.game.broadcast()
             .u8(ClientBound.Notification)
-            .stringNT("BLUE HAS WON THE GAME!")
+            .stringNT("BLUE HAS DESTROYED RED'S MOTHERSHIP!")
             .u32(0x00B1DE)
             .float(-1)
             .stringNT("").send();
