@@ -29,12 +29,15 @@ import { BarrelDefinition } from "../../Const/TankDefinitions";
 /**
  * Definitions (stats and data) of the mounted turret on Defender
  *
- * Same as mounted turret, just different color
+ * Same as mounted turret, just different color and stronger bullet
  */
 const MountedTurretDefinition: BarrelDefinition = {
     ...AutoTurretDefinition,
     bullet: {
         ...AutoTurretDefinition.bullet,
+        speed: 2,
+        damage: 0.75,
+        health: 12.5,
         color: Colors.Neutral
     }
 };
@@ -48,7 +51,7 @@ const DefenderDefinition: BarrelDefinition = {
     size: 120,
     width: 71.4,
     delay: 0,
-    reload: 4.5,
+    reload: 4,
     recoil: 2,
     isTrapezoid: false,
     trapezoidDirection: 0,
@@ -59,9 +62,9 @@ const DefenderDefinition: BarrelDefinition = {
         sizeRatio: 0.8,
         health: 12.5,
         damage: 4,
-        speed: 2.5,
+        speed: 3,
         scatterRate: 1,
-        lifeLength: 3.2,
+        lifeLength: 5,
         absorbtionFactor: 1,
         color: Colors.Neutral
     }
@@ -123,7 +126,7 @@ export default class Defender extends AbstractBoss {
        this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
             this.inputs.flags = 0;
-            this.position.angle += this.ai.passiveRotation;
+            this.position.angle += this.ai.passiveRotation * 1.5;
         }
     }
 }
