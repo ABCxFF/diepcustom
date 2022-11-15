@@ -1,17 +1,14 @@
 /*
     DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
@@ -49,22 +46,25 @@ export default class MothershipArena extends ArenaEntity {
        this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
 
        this.updateBounds(arenaSize * 2, arenaSize * 2);
-        
-       this.mothershipBlue.relations.values.team = this.blueTeam;
-       this.mothershipBlue.style.values.color = this.blueTeam.team.values.teamColor;
-       this.mothershipBlue.position.values.x = 10000;
-       this.mothershipBlue.position.values.y = 0;
 
-       this.mothershipRed.relations.values.team = this.redTeam;
-       this.mothershipRed.style.values.color = this.redTeam.team.values.teamColor;
-       this.mothershipRed.position.values.x = -10000;
-       this.mothershipRed.position.values.y = 0;
+       const ms0 = this.mothershipBlue;
+       const ms1 = this.mothershipRed;
+
+       ms0.relations.values.team = this.blueTeam;
+       ms0.style.values.color = this.blueTeam.team.values.teamColor;
+       ms0.position.values.x = 5000;
+       ms0.position.values.y = 0;
+
+       ms1.relations.values.team = this.redTeam;
+       ms1.style.values.color = this.redTeam.team.values.teamColor;
+       ms1.position.values.x = -5000;
+       ms1.position.values.y = 0;
 
     }
     public spawnPlayer(tank: TankBody, client: Client) {
 
          const { x, y } = this.findSpawnLocation();
-        
+
         if (Math.random() < 0.5) {
             tank.relations.values.team = this.blueTeam;
             tank.style.values.color = this.blueTeam.team.values.teamColor;
@@ -80,7 +80,7 @@ export default class MothershipArena extends ArenaEntity {
     }
 	public updateScoreboard(scoreboardPlayers: Mothership[]) {
                         this.arena.scoreboardAmount = 2;
-		
+
 			const ms0 = this.mothershipBlue;
 			this.blueTeam.team.mothershipX = ms0.position.values.x;
 			this.blueTeam.team.mothershipY = ms0.position.values.y;
@@ -97,7 +97,7 @@ export default class MothershipArena extends ArenaEntity {
 			else this.arena.values.scoreboardColors[0] = player.style.values.color;
 			/** @ts-ignore */
 			this.arena.values.scoreboardNames[0] = "BLUE";
-			
+
 			/** @ts-ignore */
 			this.arena.values.scoreboardScores[0] = player.health.values.health;
 			/** @ts-ignore */
@@ -110,7 +110,7 @@ export default class MothershipArena extends ArenaEntity {
 			else this.arena.values.scoreboardColors[1] = player2.style.values.color;
 			/** @ts-ignore */
 			this.arena.values.scoreboardNames[1] = "RED";
-			
+
 			/** @ts-ignore */
 			this.arena.values.scoreboardScores[1] = player2.health.values.health;
 			/** @ts-ignore */
