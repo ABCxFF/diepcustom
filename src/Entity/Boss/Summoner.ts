@@ -40,7 +40,7 @@ const SummonerSpawnerDefinition: BarrelDefinition = {
     canControlDrones: true,
     bullet: {
         type: "drone",
-        sizeRatio: 1,
+        sizeRatio: 55 * Math.SQRT1_2 /(71.4 / 2),
         health: 12.5,
         damage: 0.5,
         speed: 1.7,
