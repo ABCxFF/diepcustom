@@ -127,23 +127,26 @@ public tick (tick: number) {
             .u32(0xF14E54)
             .float(-1)
             .stringNT("").send();
- setTimeout(() => {
-				this.close();
-			}, 10000); 
+	   
+             setTimeout(() => {
+		this.close();
+	    }, 10000); 
+
             this.hasFinished = true;
-} else if (this.mothershipRed.health.values.health <= 0 && !this.hasFinished) {
+   }       
+ else if (this.mothershipRed.health.values.health <= 0 && !this.hasFinished) {
         this.game.broadcast()
             .u8(ClientBound.Notification)
             .stringNT("BLUE has destroyed RED's Mothership!")
             .u32(0x00B1DE)
             .float(-1)
             .stringNT("").send();
-
-                    			setTimeout(() => {
-				this.close();
-			}, 10000);
+	
+             setTimeout(() => {
+		this.close();
+	    }, 10000); 
+	
             this.hasFinished = true;
             }
-}
-
+      }
 }
