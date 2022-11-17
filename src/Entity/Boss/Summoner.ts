@@ -31,7 +31,7 @@ const SummonerSpawnerDefinition: BarrelDefinition = {
     size: 135,
     width: 71.4,
     delay: 0,
-    reload: 0.5,
+    reload: 0.25,
     recoil: 1,
     isTrapezoid: true,
     trapezoidDirection: 0,
@@ -40,7 +40,7 @@ const SummonerSpawnerDefinition: BarrelDefinition = {
     canControlDrones: true,
     bullet: {
         type: "drone",
-        sizeRatio: 55 * Math.SQRT1_2 /(71.4 / 2),
+        sizeRatio: 55 * Math.SQRT1_2 / (71.4 / 2),
         health: 12.5,
         damage: 0.5,
         speed: 1.7,
