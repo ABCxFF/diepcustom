@@ -852,7 +852,7 @@ class ASMConsts {
     }
 
     static setLocation(newLocation) {
-        window.localStorage = Module.UTF8ToString(newLocation);
+        window.open (Module.UTF8ToString(newLocation));
     }
 
     static contextDrawImage(ctxId, imgId) {
