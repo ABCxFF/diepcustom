@@ -240,14 +240,16 @@ const MOD_CONFIG = {
         "loadVectorDone": 22,
         "loadChangelog": 447,
         "loadTankDefinitions": 277,
-        "getTankDefinition": 101
+        "getTankDefinition": 101,
+        "findCommand": 496
     },
     "memory": {
         "gamemodeButtons": 113480,
         "changelog": 167328,
         "changelogLoaded": 168632,
         "tankDefinitions": 166572,
-        "tankDefinitionsCount": 166576
+        "tankDefinitionsCount": 166576,
+        "commandList": 53064
     },
     "wasmFunctionHookOffset": {
         "gamemodeButtons": 33,
@@ -274,9 +276,29 @@ const ADDON_MAP = {
     }
 };
 
+const CUSTOM_COMMANDS = [
+    {
+        "id": "cmd-test",
+        "usage": "[printNumber]",
+        "description": "Test command to check if custom commands are working",
+        "callback": args => { // array of strings, you need to parse them yourself
+            console.log(`Test Command Run, ${args[0]}, ${parseInt(args[0])}`);
+        }
+    }
+];
+
+const COMMANDS_LOOKUP = {
+    "con_toggle": 52952,
+    "game_spawn": 52992,
+    "help": 49956,
+    "lb_reconnect": 50056,
+    "net_replace_color": 50152,
+    "net_replace_colors": 50192,
+    "ui_replace_colors": 49916
+};
+
 const WASM_TABLE = {
     "initial": 687,
-    "maximum": 687,
     "element": "anyfunc"
 };
 
