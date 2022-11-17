@@ -278,7 +278,7 @@ const ADDON_MAP = {
 
 const CUSTOM_COMMANDS = [
     {
-        "id": "cmd-test",
+        "id": "cmd_test",
         "usage": "[printNumber]",
         "description": "Test command to check if custom commands are working",
         "callback": args => { // array of strings, you need to parse them yourself
