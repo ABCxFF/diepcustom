@@ -23,7 +23,6 @@ import { AI, AIState, Inputs } from "../AI";
 import LivingEntity from "../Live";
 import Bullet from "../Tank/Projectile/Bullet";
 import TankBody from "../Tank/TankBody";
-import TeamBase from "./TeamBase";
 
 /**
  * Mothership Tank
