@@ -68,13 +68,13 @@ export default class MothershipArena extends ArenaEntity {
     public spawnPlayer(tank: TankBody, client: Client) {
 
         if (Math.random() < 0.5) {
-           const { x, y } = this.mothershipBlue.position.values;
+            const { x, y } = this.mothershipBlue.position.values;
             tank.relations.values.team = this.blueTeam;
             tank.style.values.color = this.blueTeam.team.values.teamColor;
             tank.position.values.x = x;
             tank.position.values.y = y;
         } else {
-           const { x, y } = this.mothershipRed.position.values;
+            const { x, y } = this.mothershipRed.position.values;
             tank.relations.values.team = this.redTeam;
             tank.style.values.color = this.redTeam.team.values.teamColor;
             tank.position.values.x = x;
