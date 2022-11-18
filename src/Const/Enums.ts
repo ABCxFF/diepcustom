@@ -43,6 +43,31 @@ export enum Colors {
 }
 
 /**
+ * The hex color codes of each color (by ID), expressed as an int (0x00RRGGBB)
+ */
+export const ColorsHexCode: Record<Colors, number> = {
+    [Colors.Border]: 0x555555,
+    [Colors.Barrel]: 0x999999,
+    [Colors.Tank]: 0x00B2E1,
+    [Colors.TeamBlue]: 0x00B2E1,
+    [Colors.TeamRed]: 0xF14E54,
+    [Colors.TeamPurple]: 0xBF7FF5,
+    [Colors.TeamGreen]: 0x00E16E,
+    [Colors.Shiny]: 0x8AFF69,
+    [Colors.EnemySquare]: 0xFFE869,
+    [Colors.EnemyTriangle]: 0xFC7677,
+    [Colors.EnemyPentagon]: 0x768DFC,
+    [Colors.EnemyCrasher]: 0xF177DD,
+    [Colors.Neutral]: 0xFFE869,
+    [Colors.ScoreboardBar]: 0x43FF91,
+    [Colors.Box]: 0xBBBBBB,
+    [Colors.EnemyTank]: 0xF14E54,
+    [Colors.NecromancerSquare]: 0xFCC376,
+    [Colors.Fallen]: 0xC0C0C0,
+    [Colors.kMaxColors]: 0x000000
+}
+
+/**
  * The IDs for all the tanks, by name.
  */
 export enum Tank {
