@@ -83,11 +83,39 @@ export default class MothershipArena extends ArenaEntity {
 
         const blueMothership = this.mothershipBlue;
         const redMothership = this.mothershipRed;
-        let amount = 0;
+
+        const bhp = blueMothership.health.values.health;
+        const rhp = redMothership.health.values.health;
+
+        let idx = rhp > bhp ? 1 : 0;
+        let idy = idx == 1 ? 0 : 1;
+
+        let amount = 2;
+        if (Entity.exists(redMothership)) {
+            this.redTeam.team.mothershipX = redMothership.position.values.x;
+            this.redTeam.team.mothershipY = redMothership.position.values.y;
+            /** @ts-ignore */
+            if (redMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idy] = Colors.ScoreboardBar;
+            /** @ts-ignore */
+            else this.arena.values.scoreboardColors[idy] = redMothership.style.values.color;
+            /** @ts-ignore */
+            this.arena.values.scoreboardNames[idy] = "RED";
+            /** @ts-ignore */
+            this.arena.values.scoreboardScores[idy] = redMothership.health.values.health;
+            /** @ts-ignore */
+            this.arena.values.scoreboardTanks[idy] = -1;
+            /** @ts-ignore */
+            this.arena.values.scoreboardSuffixes[idy] = " HP";
+        } else {
+            amount--;
+            this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
+        }
         if (Entity.exists(blueMothership)) {
+           let bhp = blueMothership.health.values.health;
             this.blueTeam.team.mothershipX = blueMothership.position.values.x;
             this.blueTeam.team.mothershipY = blueMothership.position.values.y;
-            let idx = amount++;
+            idx = rhp > bhp ? 1 : 0;
+            idy = idx == 1 ? 0 : 1;
             /** @ts-ignore */
             if (blueMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
             /** @ts-ignore */
@@ -101,26 +129,8 @@ export default class MothershipArena extends ArenaEntity {
             /** @ts-ignore */
             this.arena.values.scoreboardSuffixes[idx] = " HP";
         } else {
+            amount--;
             this.blueTeam.team.mothership &= ~MothershipFlags.showArrow;
-        }
-        if (Entity.exists(redMothership)) {
-            this.redTeam.team.mothershipX = redMothership.position.values.x;
-            this.redTeam.team.mothershipY = redMothership.position.values.y;
-            let idx = amount++;
-            /** @ts-ignore */
-            if (redMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
-            /** @ts-ignore */
-            else this.arena.values.scoreboardColors[idx] = redMothership.style.values.color;
-            /** @ts-ignore */
-            this.arena.values.scoreboardNames[idx] = "RED";
-            /** @ts-ignore */
-            this.arena.values.scoreboardScores[idx] = redMothership.health.values.health;
-            /** @ts-ignore */
-            this.arena.values.scoreboardTanks[idx] = -1;
-            /** @ts-ignore */
-            this.arena.values.scoreboardSuffixes[idx] = " HP";
-        } else {
-            this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
         }
 
         this.arena.scoreboardAmount = amount;
