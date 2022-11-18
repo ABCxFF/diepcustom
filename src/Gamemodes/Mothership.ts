@@ -51,31 +51,37 @@ export default class MothershipArena extends ArenaEntity {
         const ms0 = this.mothershipBlue;
         const ms1 = this.mothershipRed;
 
+
+        const { x, y } = this.findSpawnLocation();
+
         ms0.relations.values.team = this.blueTeam;
         ms0.style.values.color = this.blueTeam.team.values.teamColor;
-        ms0.position.values.x = 5000;
-        ms0.position.values.y = 0;
+        ms0.position.values.x = y;
+        ms0.position.values.y = x;
 
         ms1.relations.values.team = this.redTeam;
         ms1.style.values.color = this.redTeam.team.values.teamColor;
-        ms1.position.values.x = -5000;
-        ms1.position.values.y = 0;
+        ms1.position.values.x = x;
+        ms1.position.values.y = y;
 
     }
     public spawnPlayer(tank: TankBody, client: Client) {
 
-        const { x, y } = this.findSpawnLocation();
-
         if (Math.random() < 0.5) {
+           const { x, y } = this.mothershipBlue.position.values;
             tank.relations.values.team = this.blueTeam;
             tank.style.values.color = this.blueTeam.team.values.teamColor;
+            tank.position.values.x = x;
+            tank.position.values.y = y;
         } else {
+           const { x, y } = this.mothershipRed.position.values;
             tank.relations.values.team = this.redTeam;
             tank.style.values.color = this.redTeam.team.values.teamColor;
+            tank.position.values.x = x;
+            tank.position.values.y = y;
         }
 
-        tank.position.values.x = x;
-        tank.position.values.y = y;
+
 
         if (client.camera) client.camera.relations.team = tank.relations.values.team;
     }
