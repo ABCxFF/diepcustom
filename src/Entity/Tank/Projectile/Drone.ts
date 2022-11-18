@@ -91,7 +91,7 @@ export default class Drone extends Bullet {
     }
 
     public tick(tick: number) {
-        const usingAI = !this.canControlDrones || (!this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel());
+        const usingAI = !this.canControlDrones || this.tank.inputs.deleted || (!this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel());
         const inputs = !usingAI ? this.tank.inputs : this.ai.inputs;
 
         if (usingAI && this.ai.state === AIState.idle) {
