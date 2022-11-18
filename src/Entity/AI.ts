@@ -222,8 +222,8 @@ export class AI {
     }
 
     public tick(tick: number) {
-        // If its being posessed, but its possessor is deleted... then just restart;
 
+        // If its being posessed, but its possessor is deleted... then just restart;
         if (this.state === AIState.possessed) {
             if (!this.inputs.deleted) return;
             
