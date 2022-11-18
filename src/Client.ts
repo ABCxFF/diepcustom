@@ -86,6 +86,14 @@ export class ClientInputs extends Inputs {
 
     /** Just a place to store whether or not the client is possessing an AI. */
     public isPossessing = false;
+
+    /** The Client owner */
+    public client: Client;
+
+    constructor(client: Client) {
+        super();
+        this.client = client;
+    }
 }
 
 export default class Client {
@@ -101,7 +109,7 @@ export default class Client {
     /** Cache of all incoming packets of the current tick. */
     private incomingCache: Uint8Array[][] = Array(ServerBound.TakeTank + 1).fill(null).map(() => []);
     /** The parsed input data from the socket. */
-    public inputs: ClientInputs = new ClientInputs()
+    public inputs: ClientInputs = new ClientInputs(this);
 
     /** Current game server. */
     private game: GameServer;
@@ -349,7 +357,7 @@ export default class Client {
             case ServerBound.Spawn: {
                 util.log("Client wants to spawn");
 
-                if (Entity.exists(camera.camera.values.player) || this.game.arena.arenaState !== ArenaState.OPEN) return;
+                if (Entity.exists(camera.camera.values.player) || (this.game.arena.arenaState >= ArenaState.CLOSING)) return;
 
                 camera.camera.values.statsAvailable = 0;
                 camera.camera.values.level = 1;
@@ -457,7 +465,7 @@ export default class Client {
                             const ai = AIs[i];
 
                             this.inputs.deleted = true;
-                            ai.inputs = this.inputs = new ClientInputs();
+                            ai.inputs = this.inputs = new ClientInputs(this);
                             this.inputs.isPossessing = true;
                             ai.isTaken = true;
                             ai.state = AIState.possessed;
@@ -577,7 +585,7 @@ export default class Client {
                 return this.terminate();
             }
         } else if (this.inputs.deleted) {
-            this.inputs = new ClientInputs();
+            this.inputs = new ClientInputs(this);
             this.camera.camera.player = null;
             this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
         }

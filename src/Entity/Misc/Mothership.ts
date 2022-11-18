@@ -16,13 +16,15 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, NametagFlags, Tank, Stat } from "../../Const/Enums";
+import { ClientInputs } from "../../Client";
+import { tps } from "../../config";
+import { Colors, NametagFlags, Tank, Stat, ColorsHexCode } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
-import LivingEntity from "../Live";
-import Bullet from "../Tank/Projectile/Bullet";
 import TankBody from "../Tank/TankBody";
+
+const POSSESSION_TIMER = tps * 60 * 10;
 
 /**
  * Mothership Tank
@@ -33,6 +35,9 @@ export default class Mothership extends TankBody {
 
     /** The AI that controls how the Mothership aims. */
     public ai: AI;
+
+    /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
+    public possessionStartTick: number = -1;
 
 
     public constructor(arena: ArenaEntity) {
@@ -71,12 +76,14 @@ export default class Mothership extends TankBody {
         camera.camera.values.statLevels.values[Stat.HealthRegen] = 1;
 
         const def = (this.definition = Object.assign({}, this.definition));
-        def.maxHealth = 7000 - 418;
+        // 418 is what the normal health increase for stat/level would be, so we just subtract it and force it 7k
+        def.maxHealth = 7008 - 418;
     }
 
 
     public tick(tick: number) {
         if (!this.barrels.length) return super.tick(tick)
+
         this.inputs = this.ai.inputs;
 
         if (this.ai.state === AIState.idle) {
@@ -86,6 +93,24 @@ export default class Mothership extends TankBody {
                 x: this.position.values.x + Math.cos(angle) * mag,
                 y: this.position.values.y + Math.sin(angle) * mag
             });
+        } else if (this.ai.state === AIState.possessed && this.possessionStartTick === -1) {
+            this.possessionStartTick = tick;
+        }
+        if (this.possessionStartTick !== -1 && this.ai.state !== AIState.possessed) {
+            this.possessionStartTick = -1;
+        }
+
+        // after 10 minutes, kick out the person possessing
+        if (this.possessionStartTick !== -1) {
+            if (this.possessionStartTick !== -1 && this.ai.state !== AIState.possessed) {
+                this.possessionStartTick = -1;
+            } else if (this.inputs instanceof ClientInputs) {
+                if (tick - this.possessionStartTick >= POSSESSION_TIMER) {
+                    this.inputs.deleted = true;
+                } else if (tick - this.possessionStartTick === Math.floor(POSSESSION_TIMER - 10 * tps)) {
+                    this.inputs.client.notify("You only have 10 seconds left in control of the Mothership", ColorsHexCode[this.style.values.color], 5_000, "");
+                }
+            }
         }
 
         super.tick(tick);

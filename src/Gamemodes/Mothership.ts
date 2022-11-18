@@ -14,13 +14,14 @@
 */
 
 import Client from "../Client";
-import { ClientBound, Colors, GUIFlags, MothershipFlags } from "../Const/Enums";
+import { ClientBound, Colors, ColorsHexCode, GUIFlags, MothershipFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import TeamBase from "../Entity/Misc/TeamBase";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
 import GameServer from "../Game";
-import ArenaEntity from "../Native/Arena";
+import ArenaEntity, { ArenaState } from "../Native/Arena";
+import { Entity } from "../Native/Entity";
 
 
 const arenaSize = 11150;
@@ -40,30 +41,30 @@ export default class MothershipArena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
 
-       this.arena.GUI |= GUIFlags.hideScorebar;
+        this.arena.GUI |= GUIFlags.hideScorebar;
 
-       this.blueTeam.team.values.mothership |= MothershipFlags.showArrow;
-       this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
+        this.blueTeam.team.values.mothership |= MothershipFlags.showArrow;
+        this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
 
-       this.updateBounds(arenaSize * 2, arenaSize * 2);
+        this.updateBounds(arenaSize * 2, arenaSize * 2);
 
-       const ms0 = this.mothershipBlue;
-       const ms1 = this.mothershipRed;
+        const ms0 = this.mothershipBlue;
+        const ms1 = this.mothershipRed;
 
-       ms0.relations.values.team = this.blueTeam;
-       ms0.style.values.color = this.blueTeam.team.values.teamColor;
-       ms0.position.values.x = 5000;
-       ms0.position.values.y = 0;
+        ms0.relations.values.team = this.blueTeam;
+        ms0.style.values.color = this.blueTeam.team.values.teamColor;
+        ms0.position.values.x = 5000;
+        ms0.position.values.y = 0;
 
-       ms1.relations.values.team = this.redTeam;
-       ms1.style.values.color = this.redTeam.team.values.teamColor;
-       ms1.position.values.x = -5000;
-       ms1.position.values.y = 0;
+        ms1.relations.values.team = this.redTeam;
+        ms1.style.values.color = this.redTeam.team.values.teamColor;
+        ms1.position.values.x = -5000;
+        ms1.position.values.y = 0;
 
     }
     public spawnPlayer(tank: TankBody, client: Client) {
 
-         const { x, y } = this.findSpawnLocation();
+        const { x, y } = this.findSpawnLocation();
 
         if (Math.random() < 0.5) {
             tank.relations.values.team = this.blueTeam;
@@ -78,75 +79,80 @@ export default class MothershipArena extends ArenaEntity {
 
         if (client.camera) client.camera.relations.team = tank.relations.values.team;
     }
-	public updateScoreboard(scoreboardPlayers: Mothership[]) {
-                        this.arena.scoreboardAmount = 2;
+    public updateScoreboard(scoreboardPlayers: TankBody[]) {
 
-			const ms0 = this.mothershipBlue;
-			this.blueTeam.team.mothershipX = ms0.position.values.x;
-			this.blueTeam.team.mothershipY = ms0.position.values.y;
+        const blueMothership = this.mothershipBlue;
+        const redMothership = this.mothershipRed;
+        let amount = 0;
+        if (Entity.exists(blueMothership)) {
+            this.blueTeam.team.mothershipX = blueMothership.position.values.x;
+            this.blueTeam.team.mothershipY = blueMothership.position.values.y;
+            let idx = amount++;
+            /** @ts-ignore */
+            if (blueMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
+            /** @ts-ignore */
+            else this.arena.values.scoreboardColors[idx] = blueMothership.style.values.color;
+            /** @ts-ignore */
+            this.arena.values.scoreboardNames[idx] = "BLUE";
+            /** @ts-ignore */
+            this.arena.values.scoreboardScores[idx] = blueMothership.health.values.health;
+            /** @ts-ignore */
+            this.arena.values.scoreboardTanks[idx] = -1;
+            /** @ts-ignore */
+            this.arena.values.scoreboardSuffixes[idx] = " HP";
+        } else {
+            this.blueTeam.team.mothership &= ~MothershipFlags.showArrow;
+        }
+        if (Entity.exists(redMothership)) {
+            this.redTeam.team.mothershipX = redMothership.position.values.x;
+            this.redTeam.team.mothershipY = redMothership.position.values.y;
+            let idx = amount++;
+            /** @ts-ignore */
+            if (redMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
+            /** @ts-ignore */
+            else this.arena.values.scoreboardColors[idx] = redMothership.style.values.color;
+            /** @ts-ignore */
+            this.arena.values.scoreboardNames[idx] = "RED";
+            /** @ts-ignore */
+            this.arena.values.scoreboardScores[idx] = redMothership.health.values.health;
+            /** @ts-ignore */
+            this.arena.values.scoreboardTanks[idx] = -1;
+            /** @ts-ignore */
+            this.arena.values.scoreboardSuffixes[idx] = " HP";
+        } else {
+            this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
+        }
 
-			const ms1 = this.mothershipRed;
-			this.redTeam.team.mothershipX = ms1.position.values.x;
-			this.redTeam.team.mothershipY = ms1.position.values.y;
+        this.arena.scoreboardAmount = amount;
+    }
+    public tick(tick: number) {
+        super.tick(tick)
+        if (this.arenaState === ArenaState.OPEN) {
+            if (!Entity.exists(this.mothershipBlue)) {
+                this.game.broadcast()
+                    .u8(ClientBound.Notification)
+                    .stringNT("RED has destroyed BLUE's Mothership!")
+                    .u32(ColorsHexCode[Colors.TeamRed])
+                    .float(-1)
+                    .stringNT("").send();
 
-                        const player = this.mothershipBlue
-                        const player2 = this.mothershipRed
-			/** @ts-ignore */
-			if (player.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[0] = Colors.ScoreboardBar;
-			/** @ts-ignore */
-			else this.arena.values.scoreboardColors[0] = player.style.values.color;
-			/** @ts-ignore */
-			this.arena.values.scoreboardNames[0] = "BLUE";
-
-			/** @ts-ignore */
-			this.arena.values.scoreboardScores[0] = player.health.values.health;
-			/** @ts-ignore */
-			this.arena.values.scoreboardTanks[0] =-1;
-                                        this.arena.values.scoreboardSuffixes[0] = " HP"
-
-			/** @ts-ignore */
-			if (player2.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[0] = Colors.ScoreboardBar;
-			/** @ts-ignore */
-			else this.arena.values.scoreboardColors[1] = player2.style.values.color;
-			/** @ts-ignore */
-			this.arena.values.scoreboardNames[1] = "RED";
-
-			/** @ts-ignore */
-			this.arena.values.scoreboardScores[1] = player2.health.values.health;
-			/** @ts-ignore */
-			this.arena.values.scoreboardTanks[1] =-1;
-                                        this.arena.values.scoreboardSuffixes[1] = " HP"
-
-	}   
-public tick (tick: number) {
-   super.tick(tick)
-   if (this.mothershipBlue.health.values.health <= 0 && !this.hasFinished) {
-        this.game.broadcast()
-            .u8(ClientBound.Notification)
-            .stringNT("RED has destroyed BLUE's Mothership!")
-            .u32(0xF14E54)
-            .float(-1)
-            .stringNT("").send();
-	   
-             setTimeout(() => {
-		this.close();
-	    }, 10000); 
-
-            this.hasFinished = true;
-   }       
- else if (this.mothershipRed.health.values.health <= 0 && !this.hasFinished) {
-        this.game.broadcast()
-            .u8(ClientBound.Notification)
-            .stringNT("BLUE has destroyed RED's Mothership!")
-            .u32(0x00B1DE)
-            .float(-1)
-            .stringNT("").send();
-	
-             setTimeout(() => {
-		this.close();
-	    }, 10000); 
-	
-            this.hasFinished = true;
+                this.arenaState = ArenaState.OVER;
             }
-      }
+            if (!Entity.exists(this.mothershipRed)) {
+                this.game.broadcast()
+                    .u8(ClientBound.Notification)
+                    .stringNT("BLUE has destroyed RED's Mothership!")
+                    .u32(ColorsHexCode[Colors.TeamBlue])
+                    .float(-1)
+                    .stringNT("").send();
+
+                this.arenaState = ArenaState.OVER;
+            }
+            if (this.arenaState === ArenaState.OVER) {
+                setTimeout(() => {
+                    this.close();
+                }, 10000);
+            }
+        }
+    }
 }
