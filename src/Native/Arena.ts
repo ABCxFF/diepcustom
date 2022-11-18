@@ -35,8 +35,6 @@ import Summoner from "../Entity/Boss/Summoner";
 import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import Defender from "../Entity/Boss/Defender";
-//import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
-//import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
 import { bossSpawningInterval } from "../config";
 
 export enum ArenaState {

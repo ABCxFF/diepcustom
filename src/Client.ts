@@ -27,7 +27,7 @@ import Writer from "./Coder/Writer";
 
 import GameServer from "./Game";
 import Camera from "./Native/Camera";
-import ArenaEntity, { ArenaState } from "./Native/Arena";
+import { ArenaState } from "./Native/Arena";
 import ObjectEntity from "./Entity/Object";
 
 import TankDefinitions, { getTankById, TankCount } from "./Const/TankDefinitions";

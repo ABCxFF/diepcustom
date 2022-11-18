@@ -16,15 +16,11 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import MazeWall from "../../Entity/Misc/MazeWall";
 import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 
 import ShapeManager from "../../Entity/Shape/Manager";
-import { Inputs } from "../../Entity/AI";
-import { CameraEntity } from "../../Native/Camera";
-import TankBody from "../../Entity/Tank/TankBody";
-import { Colors, NametagFlags, ObjectFlags, StyleFlags, Tank } from "../../Const/Enums";
+import { NametagFlags, Tank } from "../../Const/Enums";
 import Dominator from "../../Entity/Misc/Dominator";
 import TeamBase from "../../Entity/Misc/TeamBase";
 import { SandboxShapeManager } from "../Sandbox";

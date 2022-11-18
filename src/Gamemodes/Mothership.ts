@@ -16,7 +16,6 @@
 import Client from "../Client";
 import { ClientBound, Colors, GUIFlags, MothershipFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
-import TeamBase from "../Entity/Misc/TeamBase";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
 import GameServer from "../Game";

@@ -20,7 +20,6 @@ import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 import ObjectEntity from "../../Entity/Object";
 
-import ShapeManager from "../../Entity/Shape/Manager";
 import Pentagon from "../../Entity/Shape/Pentagon";
 
 import { Colors, ObjectFlags } from "../../Const/Enums";

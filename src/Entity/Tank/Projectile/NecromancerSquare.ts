@@ -23,7 +23,6 @@ import { Colors, ObjectFlags, Tank } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { AI } from "../../AI";
 import { BarrelBase } from "../TankBody";
-import { TeamGroupEntity } from "../../Misc/TeamEntity";
 import AbstractShape from "../../Shape/AbstractShape";
 
 /**
