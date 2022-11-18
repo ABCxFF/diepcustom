@@ -16,12 +16,10 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, NametagFlags, Tank, Stat } from "../../Const/Enums";
+import { Colors, Tank, Stat } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
-import LivingEntity from "../Live";
-import Bullet from "../Tank/Projectile/Bullet";
 import TankBody from "../Tank/TankBody";
 
 /**
