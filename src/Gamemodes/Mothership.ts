@@ -23,6 +23,9 @@ import ArenaEntity, { ArenaState } from "../Native/Arena";
 import { Entity } from "../Native/Entity";
 
 
+// TODO
+// Replace RED and BLUE with TeamNames[etc], so we can apply to Dom and tag easily, also would make sorting of motherships easier (dynamic)
+
 const arenaSize = 11150;
 /**
  * Mothership Gamemode Arena
@@ -89,6 +92,7 @@ export default class MothershipArena extends ArenaEntity {
         const blueMothership = this.mothershipBlue;
         const redMothership = this.mothershipRed;
 
+
         const bhp = blueMothership.health.values.health;
         const rhp = redMothership.health.values.health;
 
@@ -116,7 +120,7 @@ export default class MothershipArena extends ArenaEntity {
             this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
         }
         if (Entity.exists(blueMothership)) {
-           let bhp = blueMothership.health.values.health;
+            let bhp = blueMothership.health.values.health;
             this.blueTeam.team.mothershipX = blueMothership.position.values.x;
             this.blueTeam.team.mothershipY = blueMothership.position.values.y;
             idx = rhp > bhp ? 1 : 0;
