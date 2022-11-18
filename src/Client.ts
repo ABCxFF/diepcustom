@@ -531,7 +531,7 @@ export default class Client {
         this.ws.terminate();
         this.game.clients.delete(this);
         this.inputs.deleted = true;
-        this.inputs.cachedFlags = this.inputs.flags = this.inputs.movement.magnitude = 0;
+        this.inputs.movement.magnitude = 0;
         this.terminated = true;
 
         this.game.ipCache[this.ipAddress] -= 1;
