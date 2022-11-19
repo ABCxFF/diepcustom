@@ -224,7 +224,7 @@ export default class ObjectEntity extends Entity {
         if (entity.physics.values.sides === 2) {
             if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
-            } else if (this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team || entity.physics.values.pushFactor === 0)) {
+            } else if ((!(entity.physics.values.objectFlags & ObjectFlags.base) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
                 // this is a bit off still. k
                 this.velocity.setPosition(this.position.values);
                 this.setVelocity(0, 0);
