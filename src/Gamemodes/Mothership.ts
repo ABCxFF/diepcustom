@@ -32,9 +32,9 @@ const arenaSize = 11150;
  */
 export default class MothershipArena extends ArenaEntity {
     /** Blue Team entity */
-    public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue);
+    public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue, "NOOBS HERE OK?");
     /** Red Team entity */
-    public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed);
+    public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed, "RED");
     /** Mothership for the blue team */
     public blueMothership: Mothership;
     /** Mothership for the red team */
@@ -107,7 +107,7 @@ export default class MothershipArena extends ArenaEntity {
             /** @ts-ignore */
             else this.arena.values.scoreboardColors[idy] = redMothership.style.values.color;
             /** @ts-ignore */
-            this.arena.values.scoreboardNames[idy] = "RED";
+            this.arena.values.scoreboardNames[idy] = this.redTeam.teamName;
             /** @ts-ignore */
             this.arena.values.scoreboardScores[idy] = redMothership.health.values.health;
             /** @ts-ignore */
@@ -126,7 +126,7 @@ export default class MothershipArena extends ArenaEntity {
             /** @ts-ignore */
             else this.arena.values.scoreboardColors[idx] = blueMothership.style.values.color;
             /** @ts-ignore */
-            this.arena.values.scoreboardNames[idx] = "BLUE";
+            this.arena.values.scoreboardNames[idx] = this.blueTeam.teamName;
             /** @ts-ignore */
             this.arena.values.scoreboardScores[idx] = blueMothership.health.values.health;
             /** @ts-ignore */
@@ -147,7 +147,7 @@ export default class MothershipArena extends ArenaEntity {
             if (!Entity.exists(this.blueMothership)) {
                 this.game.broadcast()
                     .u8(ClientBound.Notification)
-                    .stringNT("RED has destroyed BLUE's Mothership!")
+                    .stringNT(`${this.redTeam.teamName} has destroyed ${this.blueTeam.teamName}'s Mothership!`)
                     .u32(ColorsHexCode[Colors.TeamRed])
                     .float(-1)
                     .stringNT("").send();
@@ -157,7 +157,7 @@ export default class MothershipArena extends ArenaEntity {
             if (!Entity.exists(this.redMothership)) {
                 this.game.broadcast()
                     .u8(ClientBound.Notification)
-                    .stringNT("BLUE has destroyed RED's Mothership!")
+                    .stringNT(`${this.blueTeam.teamName} has destroyed ${this.redTeam.teamName}'s Mothership!`)
                     .u32(ColorsHexCode[Colors.TeamBlue])
                     .float(-1)
                     .stringNT("").send();
