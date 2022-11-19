@@ -59,5 +59,6 @@ export default class FallenMegaTrapper extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
+        this.sizeFactor = this.physics.values.size / 50;
     }
 }
