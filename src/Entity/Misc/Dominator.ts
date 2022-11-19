@@ -97,6 +97,11 @@ export default class Dominator extends TankBody {
 
         this.health.health = this.health.values.maxHealth;
 
+        for (let i = 1; i <= this.game.entities.lastId; ++i) {
+            const entity = this.game.entities.inner[i];
+            if (entity instanceof Bullet && entity.relations.values.owner === this) entity.destroy()
+        }
+
         if (this.ai.state === AIState.possessed) {
             this.ai.inputs.deleted = true;
             this.ai.inputs = this.inputs = new Inputs();

@@ -113,7 +113,6 @@ export default class Bullet extends LivingEntity {
 
     public tick(tick: number) {
         super.tick(tick);
-        if (this.relations.values.team !== this.tank.relations.values.team) this.destroy();
 
         if (tick === this.spawnTick + 1) this.addAcceleration(this.movementAngle, this.baseSpeed);
         else this.maintainVelocity(this.usePosAngle ? this.position.values.angle : this.movementAngle, this.baseAccel);
