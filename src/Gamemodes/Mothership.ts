@@ -32,7 +32,7 @@ const arenaSize = 11150;
  */
 export default class MothershipArena extends ArenaEntity {
     /** Blue Team entity */
-    public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue, "NOOBS HERE OK?");
+    public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue, "BLUE");
     /** Red Team entity */
     public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed, "RED");
     /** Mothership for the blue team */
