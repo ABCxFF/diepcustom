@@ -45,7 +45,7 @@ export default class Mothership extends TankBody {
 
         super(arena.game, camera, inputs);
 
-        this.relations.values.team = this;
+        this.relations.values.team = arena;
 
         this.style.values.color = Colors.Neutral;
 
