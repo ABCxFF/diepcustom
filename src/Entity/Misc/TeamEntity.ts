@@ -28,9 +28,9 @@ export class TeamEntity extends Entity implements TeamGroupEntity {
     /** This group makes `this` a team entity in the first place. */
     public team: TeamGroup = new TeamGroup(this);
 
-    public constructor(game: GameServer, color: Colors) {
+    public constructor(game: GameServer, color: Colors, name: string) {
         super(game);
-
         this.team.values.teamColor = color;
+        this.teamName = name;
     }
 }
