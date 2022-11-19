@@ -1,174 +1,113 @@
 /*
     DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
+
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import Client from "../Client";
-import { ClientBound, Colors, ColorsHexCode, GUIFlags, MothershipFlags } from "../Const/Enums";
-import Mothership from "../Entity/Misc/Mothership";
-import { TeamEntity } from "../Entity/Misc/TeamEntity";
-import TankBody from "../Entity/Tank/TankBody";
-import GameServer from "../Game";
-import ArenaEntity, { ArenaState } from "../Native/Arena";
-import { Entity } from "../Native/Entity";
+import { ClientInputs } from "../../Client";
+import { tps } from "../../config";
+import { Colors, Tank, Stat, ColorsHexCode } from "../../Const/Enums";
+import ArenaEntity from "../../Native/Arena";
+import { CameraEntity } from "../../Native/Camera";
+import { AI, AIState, Inputs } from "../AI";
+import TankBody from "../Tank/TankBody";
 
+const POSSESSION_TIMER = tps * 60 * 10;
 
-// TODO
-// Replace RED and BLUE with TeamNames[etc], so we can apply to Dom and tag easily, also would make sorting of motherships easier (dynamic)
-
-const arenaSize = 11150;
 /**
- * Mothership Gamemode Arena
+ * Mothership Entity
  */
-export default class MothershipArena extends ArenaEntity {
-    /** Blue Team entity */
-    public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue, "BLUE");
-    /** Red Team entity */
-    public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed, "RED");
-    /** Mothership for the blue team */
-    public blueMothership: Mothership;
-    /** Mothership for the red team */
-    public redMothership: Mothership;
+export default class Mothership extends TankBody {
+    /** Size of a Mothership */
+    //public static SIZE = 200;
 
-    public constructor(game: GameServer) {
-        super(game);
+    /** The AI that controls how the Mothership aims. */
+    public ai: AI;
 
-        this.arena.GUI |= GUIFlags.hideScorebar;
+    /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
+    public possessionStartTick: number = -1;
 
-        this.blueTeam.team.values.mothership |= MothershipFlags.showArrow;
-        this.redTeam.team.values.mothership |= MothershipFlags.showArrow;
+    public constructor(arena: ArenaEntity) {
 
-        this.updateBounds(arenaSize * 2, arenaSize * 2);
+        const inputs = new Inputs();
+        const camera = new CameraEntity(arena.game);
 
-        const { x, y } = this.findSpawnLocation();
+        camera.setLevel(140);
 
-        const ms0 = new Mothership(this);
-        const ms1 = new Mothership(this);
+        super(arena.game, camera, inputs);
 
-        ms0.relations.values.team = this.blueTeam;
-        ms0.style.values.color = this.blueTeam.team.values.teamColor;
-        ms0.position.values.x = y;
-        ms0.position.values.y = x;
+        this.relations.values.team = this;
 
-        ms1.relations.values.team = this.redTeam;
-        ms1.style.values.color = this.redTeam.team.values.teamColor;
-        ms1.position.values.x = x;
-        ms1.position.values.y = y;
+        this.style.values.color = Colors.Neutral;
 
-        this.blueMothership = ms0;
-        this.redMothership = ms1;
+        this.ai = new AI(this);
+        this.ai.inputs = inputs;
+        this.ai.viewRange = 2000;
+        
+        this.position.values.x = 0;
+        this.position.values.y = 0;
+        
+        this.setTank(Tank.Mothership);
+        
+        this.name.values.name = "Mothership"
+        
+        this.scoreReward = 0;
+        
+        camera.camera.values.player = this;
 
+        for (let i = Stat.MovementSpeed; i < Stat.HealthRegen; ++i) camera.camera.values.statLevels.values[i] = 7;
+        camera.camera.values.statLevels.values[Stat.HealthRegen] = 1;
+
+        const def = (this.definition = Object.assign({}, this.definition));
+        // 418 is what the normal health increase for stat/level would be, so we just subtract it and force it 7k
+        def.maxHealth = 7008 - 418;
     }
-    public spawnPlayer(tank: TankBody, client: Client) {
 
-        if (Math.random() < 0.5) {
-            const { x, y } = this.blueMothership.position.values;
-            tank.relations.values.team = this.blueTeam;
-            tank.style.values.color = this.blueTeam.team.values.teamColor;
-            tank.position.values.x = x;
-            tank.position.values.y = y;
-        } else {
-            const { x, y } = this.redMothership.position.values;
-            tank.relations.values.team = this.redTeam;
-            tank.style.values.color = this.redTeam.team.values.teamColor;
-            tank.position.values.x = x;
-            tank.position.values.y = y;
-        }
 
-        if (client.camera) client.camera.relations.team = tank.relations.values.team;
-    }
-    public updateScoreboard(scoreboardPlayers: TankBody[]) {
-
-        const blueMothership = this.blueMothership;
-        const redMothership = this.redMothership;
-
-        const bhp = blueMothership.health.values.health;
-        const rhp = redMothership.health.values.health;
-
-        let idx = rhp > bhp ? 1 : 0;
-        let idy = idx == 1 ? 0 : 1;
-
-        let amount = 2;
-        if (Entity.exists(redMothership)) {
-            this.redTeam.team.mothershipX = redMothership.position.values.x;
-            this.redTeam.team.mothershipY = redMothership.position.values.y;
-            /** @ts-ignore */
-            if (redMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idy] = Colors.ScoreboardBar;
-            /** @ts-ignore */
-            else this.arena.values.scoreboardColors[idy] = redMothership.style.values.color;
-            /** @ts-ignore */
-            this.arena.values.scoreboardNames[idy] = this.redTeam.teamName;
-            /** @ts-ignore */
-            this.arena.values.scoreboardScores[idy] = redMothership.health.values.health;
-            /** @ts-ignore */
-            this.arena.values.scoreboardTanks[idy] = -1;
-            /** @ts-ignore */
-            this.arena.values.scoreboardSuffixes[idy] = " HP";
-        } else {
-            amount--;
-            this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
-        }
-        if (Entity.exists(blueMothership)) {
-            this.blueTeam.team.mothershipX = blueMothership.position.values.x;
-            this.blueTeam.team.mothershipY = blueMothership.position.values.y;
-            /** @ts-ignore */
-            if (blueMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
-            /** @ts-ignore */
-            else this.arena.values.scoreboardColors[idx] = blueMothership.style.values.color;
-            /** @ts-ignore */
-            this.arena.values.scoreboardNames[idx] = this.blueTeam.teamName;
-            /** @ts-ignore */
-            this.arena.values.scoreboardScores[idx] = blueMothership.health.values.health;
-            /** @ts-ignore */
-            this.arena.values.scoreboardTanks[idx] = -1;
-            /** @ts-ignore */
-            this.arena.values.scoreboardSuffixes[idx] = " HP";
-        } else {
-            amount--;
-            this.blueTeam.team.mothership &= ~MothershipFlags.showArrow;
-        }
-        idx = rhp > bhp ? 1 : 0;
-        idy = idx == 1 ? 0 : 1;
-        this.arena.scoreboardAmount = amount;
-    }
     public tick(tick: number) {
-        super.tick(tick)
-        if (this.arenaState === ArenaState.OPEN) {
-            if (!Entity.exists(this.blueMothership)) {
-                this.game.broadcast()
-                    .u8(ClientBound.Notification)
-                    .stringNT(`${this.redTeam.teamName} has destroyed ${this.blueTeam.teamName}'s Mothership!`)
-                    .u32(ColorsHexCode[Colors.TeamRed])
-                    .float(-1)
-                    .stringNT("").send();
+        if (!this.barrels.length) return super.tick(tick)
 
-                this.arenaState = ArenaState.OVER;
-            }
-            if (!Entity.exists(this.redMothership)) {
-                this.game.broadcast()
-                    .u8(ClientBound.Notification)
-                    .stringNT(`${this.blueTeam.teamName} has destroyed ${this.redTeam.teamName}'s Mothership!`)
-                    .u32(ColorsHexCode[Colors.TeamBlue])
-                    .float(-1)
-                    .stringNT("").send();
+        this.inputs = this.ai.inputs;
 
-                this.arenaState = ArenaState.OVER;
-            }
-            if (this.arenaState === ArenaState.OVER) {
-                setTimeout(() => {
-                    this.close();
-                }, 10000);
+        if (this.ai.state === AIState.idle) {
+            const angle = this.position.values.angle + this.ai.passiveRotation;
+            const mag = Math.sqrt((this.inputs.mouse.x - this.position.values.x) ** 2 + (this.inputs.mouse.y - this.position.values.y) ** 2);
+            this.inputs.mouse.set({
+                x: this.position.values.x + Math.cos(angle) * mag,
+                y: this.position.values.y + Math.sin(angle) * mag
+            });
+        } else if (this.ai.state === AIState.possessed && this.possessionStartTick === -1) {
+            this.possessionStartTick = tick;
+        }
+        if (this.possessionStartTick !== -1 && this.ai.state !== AIState.possessed) {
+            this.possessionStartTick = -1;
+        }
+
+        // after 10 minutes, kick out the person possessing
+        if (this.possessionStartTick !== -1) {
+            if (this.possessionStartTick !== -1 && this.ai.state !== AIState.possessed) {
+                this.possessionStartTick = -1;
+            } else if (this.inputs instanceof ClientInputs) {
+                if (tick - this.possessionStartTick >= POSSESSION_TIMER) {
+                    this.inputs.deleted = true;
+                } else if (tick - this.possessionStartTick === Math.floor(POSSESSION_TIMER - 10 * tps)) {
+                    this.inputs.client.notify("You only have 10 seconds left in control of the Mothership", ColorsHexCode[this.style.values.color], 5_000, "");
+                }
             }
         }
+
+        super.tick(tick);
     }
 }
