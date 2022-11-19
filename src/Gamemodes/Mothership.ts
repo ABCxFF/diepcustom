@@ -35,10 +35,10 @@ export default class MothershipArena extends ArenaEntity {
     public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue);
     /** Red Team entity */
     public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed);
-
-    public mothershipBlue: Mothership = new Mothership(this);
-
-    public mothershipRed: Mothership = new Mothership(this);
+    /** Mothership for the blue team */
+    public blueMothership: Mothership;
+    /** Mothership for the red team */
+    public redMothership: Mothership;
 
     public constructor(game: GameServer) {
         super(game);
@@ -50,11 +50,10 @@ export default class MothershipArena extends ArenaEntity {
 
         this.updateBounds(arenaSize * 2, arenaSize * 2);
 
-        const ms0 = this.mothershipBlue;
-        const ms1 = this.mothershipRed;
-
-
         const { x, y } = this.findSpawnLocation();
+
+        const ms0 = new Mothership(this);
+        const ms1 = new Mothership(this);
 
         ms0.relations.values.team = this.blueTeam;
         ms0.style.values.color = this.blueTeam.team.values.teamColor;
@@ -66,32 +65,32 @@ export default class MothershipArena extends ArenaEntity {
         ms1.position.values.x = x;
         ms1.position.values.y = y;
 
+        this.blueMothership = ms0;
+        this.redMothership = ms1;
+
     }
     public spawnPlayer(tank: TankBody, client: Client) {
 
         if (Math.random() < 0.5) {
-            const { x, y } = this.mothershipBlue.position.values;
+            const { x, y } = this.blueMothership.position.values;
             tank.relations.values.team = this.blueTeam;
             tank.style.values.color = this.blueTeam.team.values.teamColor;
             tank.position.values.x = x;
             tank.position.values.y = y;
         } else {
-            const { x, y } = this.mothershipRed.position.values;
+            const { x, y } = this.redMothership.position.values;
             tank.relations.values.team = this.redTeam;
             tank.style.values.color = this.redTeam.team.values.teamColor;
             tank.position.values.x = x;
             tank.position.values.y = y;
         }
 
-
-
         if (client.camera) client.camera.relations.team = tank.relations.values.team;
     }
     public updateScoreboard(scoreboardPlayers: TankBody[]) {
 
-        const blueMothership = this.mothershipBlue;
-        const redMothership = this.mothershipRed;
-
+        const blueMothership = this.blueMothership;
+        const redMothership = this.redMothership;
 
         const bhp = blueMothership.health.values.health;
         const rhp = redMothership.health.values.health;
@@ -120,11 +119,8 @@ export default class MothershipArena extends ArenaEntity {
             this.redTeam.team.mothership &= ~MothershipFlags.showArrow;
         }
         if (Entity.exists(blueMothership)) {
-            let bhp = blueMothership.health.values.health;
             this.blueTeam.team.mothershipX = blueMothership.position.values.x;
             this.blueTeam.team.mothershipY = blueMothership.position.values.y;
-            idx = rhp > bhp ? 1 : 0;
-            idy = idx == 1 ? 0 : 1;
             /** @ts-ignore */
             if (blueMothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[idx] = Colors.ScoreboardBar;
             /** @ts-ignore */
@@ -141,13 +137,14 @@ export default class MothershipArena extends ArenaEntity {
             amount--;
             this.blueTeam.team.mothership &= ~MothershipFlags.showArrow;
         }
-
+        idx = rhp > bhp ? 1 : 0;
+        idy = idx == 1 ? 0 : 1;
         this.arena.scoreboardAmount = amount;
     }
     public tick(tick: number) {
         super.tick(tick)
         if (this.arenaState === ArenaState.OPEN) {
-            if (!Entity.exists(this.mothershipBlue)) {
+            if (!Entity.exists(this.blueMothership)) {
                 this.game.broadcast()
                     .u8(ClientBound.Notification)
                     .stringNT("RED has destroyed BLUE's Mothership!")
@@ -157,7 +154,7 @@ export default class MothershipArena extends ArenaEntity {
 
                 this.arenaState = ArenaState.OVER;
             }
-            if (!Entity.exists(this.mothershipRed)) {
+            if (!Entity.exists(this.redMothership)) {
                 this.game.broadcast()
                     .u8(ClientBound.Notification)
                     .stringNT("BLUE has destroyed RED's Mothership!")
