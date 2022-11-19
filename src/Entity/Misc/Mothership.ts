@@ -27,34 +27,26 @@ import TankBody from "../Tank/TankBody";
 const POSSESSION_TIMER = tps * 60 * 10;
 
 /**
- * Mothership Tank
+ * Mothership Entity
  */
 export default class Mothership extends TankBody {
-    /** Size of a Mothership */
-    public static SIZE = 200;
-
     /** The AI that controls how the Mothership aims. */
     public ai: AI;
 
     /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
     public possessionStartTick: number = -1;
 
-
     public constructor(arena: ArenaEntity) {
-
 
         const inputs = new Inputs();
         const camera = new CameraEntity(arena.game);
 
         camera.setLevel(140);
-        camera.sizeFactor = (Mothership.SIZE / 50);
 
         super(arena.game, camera, inputs);
 
         this.relations.values.team = arena;
-        this.physics.values.size = Mothership.SIZE;
-        // TODO(ABC):
-        // Add setTeam method for this
+
         this.style.values.color = Colors.Neutral;
 
         this.ai = new AI(this);
