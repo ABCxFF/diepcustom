@@ -224,7 +224,7 @@ export default class ObjectEntity extends Entity {
         if (entity.physics.values.sides === 2) {
             if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
-            } else if (this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
+            } else if ((!(entity.physics.values.objectFlags & ObjectFlags.base) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
                 // this is a bit off still. k
                 this.velocity.setPosition(this.position.values);
                 this.setVelocity(0, 0);
@@ -251,6 +251,7 @@ export default class ObjectEntity extends Entity {
             this.addAcceleration(kbAngle, kbMagnitude);
         }
     }
+
     /** Detects collisions. */
     protected findCollisions() {
         if (this.cachedTick === this.game.tick) return this.cachedCollisions;
@@ -267,7 +268,6 @@ export default class ObjectEntity extends Entity {
             const entity = entities[i];
             if (entity === this) continue;
             if (entity.deletionAnimation) continue;
-            if (entity.physics.values.objectFlags & ObjectFlags.base && entity.physics.values.pushFactor === 0) continue;
             if (entity.relations.values.team === this.relations.values.team) {
                 if ((entity.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) ||
                     (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision)) continue;
@@ -279,6 +279,7 @@ export default class ObjectEntity extends Entity {
             }
             
             if (this.relations.values.team === this.game.arena && (entity.physics.values.objectFlags & ObjectFlags.base)) continue;
+
             if (entity.physics.values.sides === 0) continue;
             if (entity.physics.values.sides === 2 && this.physics.values.sides === 2) {
                 // in Diep.io source code, rectangles do not support collisions
