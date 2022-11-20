@@ -23,6 +23,9 @@ import ArenaEntity, { ArenaState } from "../Native/Arena";
 import { Entity } from "../Native/Entity";
 
 
+// TODO
+// Replace RED and BLUE with TeamNames[etc], so we can apply to Dom and tag easily, also would make sorting of motherships easier (dynamic)
+
 const arenaSize = 11150;
 const TEAM_COLORS = [Colors.TeamBlue, Colors.TeamRed];
 
