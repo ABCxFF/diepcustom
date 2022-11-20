@@ -18,11 +18,13 @@
 
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
-import { Colors, Tank, Stat, ColorsHexCode } from "../../Const/Enums";
+import { Colors, Tank, Stat, ColorsHexCode, ClientBound, MothershipFlags } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
+import Live from "../Live";
 import TankBody from "../Tank/TankBody";
+import { TeamEntity } from "./TeamEntity";
 
 const POSSESSION_TIMER = tps * 60 * 10;
 
@@ -70,6 +72,30 @@ export default class Mothership extends TankBody {
         const def = (this.definition = Object.assign({}, this.definition));
         // 418 is what the normal health increase for stat/level would be, so we just subtract it and force it 7k
         def.maxHealth = 7008 - 418;
+    }
+
+    public onDeath(killer: Live): void {
+        const team = this.relations.values.team;
+        const teamIsATeam = team instanceof TeamEntity;
+
+        const killerTeam = killer.relations.values.team;
+        const killerTeamIsATeam = killerTeam instanceof TeamEntity;
+
+        // UNCOMMENT TO ALLOW SOLO KILLS
+        if (!killerTeamIsATeam) return;
+        this.game.broadcast()
+            .u8(ClientBound.Notification)
+            // If mothership has a team name, use it, otherwise just say has destroyed a mothership
+            .stringNT(`${killerTeamIsATeam ? killerTeam.teamName : (killer.name?.values.name || "an unnamed tank")} has destroyed ${teamIsATeam ? team.teamName + "'s" : "a"} Mothership!`)
+            .u32(killerTeamIsATeam ? ColorsHexCode[killerTeam.team.values.teamColor] : 0x000000)
+            .float(-1)
+            .stringNT("").send();   
+    }
+
+    public delete(): void {
+        // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
+        if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~MothershipFlags.hasMothership;
+        super.delete();
     }
 
 
