@@ -227,7 +227,7 @@ export enum GUIFlags {
  * The flag names for the `mothership` field of the team field group.
  */
 export enum MothershipFlags {
-    showArrow = 1 << 0
+    hasMothership = 1 << 0
 }
 /**
  * The flag names for the `camera` field of the camera field group.
