@@ -27,6 +27,84 @@ import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
 import LivingEntity from "../Live";
 
+/**
+ * Abstract class to represent an addon in game.
+ * 
+ * Addons are entities added on to a tank during its creation. There are two types:
+ * pre addons, and post addons. Pre addons are built before the barrels are built - for example
+ * a dominator's base is a pre addon. A post addon is an addon built after the barrels are
+ * built - for example the pronounciation of Ranger's barrel is a post addon.
+ * 
+ * Read [addons.md on diepindepth](https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md) 
+ * for more details and examples.
+ */
+export class Addon {
+    /** The current game server */
+    protected game: GameServer;
+    /** Helps the class determine size ratio as well as who is the owner */
+    protected owner: BarrelBase;
+
+    public constructor(owner: BarrelBase) {
+        this.owner = owner;
+        this.game = owner.game;
+    }
+
+    /**
+     * `createGuard` method creates a smasher-like guard shape. 
+     * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
+     * for more details and examples.
+     */
+    protected createGuard(sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number): GuardObject {
+        return new GuardObject(this.game, this.owner, sides, sizeRatio, offsetAngle, radiansPerTick);
+    }
+
+    /**
+     * `createAutoTurrets` method builds `count` auto turrets around the current
+     * tank's body. 
+     */
+    protected createAutoTurrets(count: number) {
+        const rotPerTick = AI.PASSIVE_ROTATION;
+        const rotator = this.createGuard(1, .1, 0, rotPerTick);
+
+        const ROT_OFFSET = 0.8;
+
+        if (rotator.style.values.styleFlags & StyleFlags.visible) rotator.style.values.styleFlags ^= StyleFlags.visible;
+
+        const PI2 = Math.PI * 2;
+        for (let i = 0; i < count; ++i) {
+            const base = new AutoTurret(rotator, AutoTurretMiniDefinition);
+
+            const angle = base.ai.inputs.mouse.angle = PI2 * (i / count);
+            base.ai.passiveRotation = rotPerTick;
+            base.ai.targetFilter = (target) => {
+                const angleToTarget = Math.atan2(target.position.values.y - this.owner.position.values.y, target.position.values.x - this.owner.position.values.x);
+                
+                const deltaAngle = Math.abs(angleToTarget - (angle + rotator.position.values.angle)) % (Math.PI * 2);
+
+                return deltaAngle < Math.PI / 2;
+            }
+
+            base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
+            base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+
+            if (base.style.values.styleFlags & StyleFlags.aboveParent) base.style.values.styleFlags ^= StyleFlags.aboveParent;
+
+            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+
+            const tickBase = base.tick;
+            base.tick = (tick: number) => {
+                base.position.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
+                base.position.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+
+                tickBase.call(base, tick);
+
+                if (base.ai.state === AIState.idle) base.position.angle = angle + rotator.position.values.angle;
+            }
+        }
+    }
+}
+
+
 const AutoTurretMiniDefinition: BarrelDefinition = {
     angle: 0,
     offset: 0,
@@ -55,7 +133,7 @@ const AutoTurretMiniDefinition: BarrelDefinition = {
  * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
  * for more details and examples.
  */
-export class GuardAddon extends ObjectEntity implements BarrelBase {
+export class GuardObject extends ObjectEntity implements BarrelBase {
     /***** From BarrelBase *****/
     public inputs: Inputs;
     public cameraEntity: Entity;
@@ -115,83 +193,6 @@ export class GuardAddon extends ObjectEntity implements BarrelBase {
         this.position.angle += this.radiansPerTick;
         // It won't ever do any collisions, so no need to tick the object
         // super.tick(tick);
-    }
-}
-
-/**
- * Abstract class to represent an addon in game.
- * 
- * Addons are entities added on to a tank during its creation. There are two types:
- * pre addons, and post addons. Pre addons are built before the barrels are built - for example
- * a dominator's base is a pre addon. A post addon is an addon built after the barrels are
- * built - for example the pronounciation of Ranger's barrel is a post addon.
- * 
- * Read [addons.md on diepindepth](https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md) 
- * for more details and examples.
- */
-export class Addon {
-    /** The current game server */
-    protected game: GameServer;
-    /** Helps the class determine size ratio as well as who is the owner */
-    protected owner: BarrelBase;
-
-    public constructor(owner: BarrelBase) {
-        this.owner = owner;
-        this.game = owner.game;
-    }
-
-    /**
-     * `createGuard` method creates a smasher-like guard shape. 
-     * Read (addons.md on diepindepth)[https://github.com/ABCxFF/diepindepth/blob/main/extras/addons.md]
-     * for more details and examples.
-     */
-    protected createGuard(sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number): GuardAddon {
-        return new GuardAddon(this.game, this.owner, sides, sizeRatio, offsetAngle, radiansPerTick);
-    }
-
-    /**
-     * `createAutoTurrets` method builds `count` auto turrets around the current
-     * tank's body. 
-     */
-    protected createAutoTurrets(count: number) {
-        const rotPerTick = AI.PASSIVE_ROTATION;
-        const rotator = this.createGuard(1, .1, 0, rotPerTick);
-
-        const ROT_OFFSET = 0.8;
-
-        if (rotator.style.values.styleFlags & StyleFlags.visible) rotator.style.values.styleFlags ^= StyleFlags.visible;
-
-        const PI2 = Math.PI * 2;
-        for (let i = 0; i < count; ++i) {
-            const base = new AutoTurret(rotator, AutoTurretMiniDefinition);
-
-            const angle = base.ai.inputs.mouse.angle = PI2 * (i / count);
-            base.ai.passiveRotation = rotPerTick;
-            base.ai.targetFilter = (target) => {
-                const angleToTarget = Math.atan2(target.position.values.y - this.owner.position.values.y, target.position.values.x - this.owner.position.values.x);
-                
-                const deltaAngle = Math.abs(angleToTarget - (angle + rotator.position.values.angle)) % (Math.PI * 2);
-
-                return deltaAngle < Math.PI / 2;
-            }
-
-            base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
-            base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
-
-            if (base.style.values.styleFlags & StyleFlags.aboveParent) base.style.values.styleFlags ^= StyleFlags.aboveParent;
-
-            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
-
-            const tickBase = base.tick;
-            base.tick = (tick: number) => {
-                base.position.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
-                base.position.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
-
-                tickBase.call(base, tick);
-
-                if (base.ai.state === AIState.idle) base.position.angle = angle + rotator.position.values.angle;
-            }
-        }
     }
 }
 
