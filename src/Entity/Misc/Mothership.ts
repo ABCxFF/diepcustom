@@ -82,7 +82,7 @@ export default class Mothership extends TankBody {
         const killerTeamIsATeam = killerTeam instanceof TeamEntity;
 
         // UNCOMMENT TO ALLOW SOLO KILLS
-        if (!killerTeamIsATeam) return;
+        // if (!killerTeamIsATeam) return;
         this.game.broadcast()
             .u8(ClientBound.Notification)
             // If mothership has a team name, use it, otherwise just say has destroyed a mothership
