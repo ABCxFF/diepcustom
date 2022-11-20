@@ -24,13 +24,39 @@ import { TeamGroup } from "../../Native/FieldGroups";
 
 export type TeamGroupEntity = Entity & { team: TeamGroup }
 
+export const ColorsTeamName: Record<Colors, string> = {
+    [Colors.Border]: "BORDER",
+    [Colors.Barrel]: "BARREL",
+    [Colors.Tank]: "TANK",
+    [Colors.TeamBlue]: "BLUE",
+    [Colors.TeamRed]: "RED",
+    [Colors.TeamPurple]: "PURPLE",
+    [Colors.TeamGreen]: "GREEN",
+    [Colors.Shiny]: "SHINY",
+    [Colors.EnemySquare]: "SQUARE",
+    [Colors.EnemyTriangle]: "TRIANGLE",
+    [Colors.EnemyPentagon]: "PENTAGON",
+    [Colors.EnemyCrasher]: "CRASHER",
+    [Colors.Neutral]: "ARENA",
+    [Colors.ScoreboardBar]: "SCOREBOARD",
+    [Colors.Box]: "MAZE",
+    [Colors.EnemyTank]: "ENEMY",
+    [Colors.NecromancerSquare]: "SUNCHIP",
+    [Colors.Fallen]: "FALLEN",
+    [Colors.kMaxColors]: "UNKNOWN"
+}
+
 export class TeamEntity extends Entity implements TeamGroupEntity {
     /** This group makes `this` a team entity in the first place. */
     public team: TeamGroup = new TeamGroup(this);
 
-    public constructor(game: GameServer, color: Colors) {
+    /** Used for notifications in team based gamemodes */
+    public teamName: string;
+
+    public constructor(game: GameServer, color: Colors, name: string = ColorsTeamName[color]) {
         super(game);
 
         this.team.values.teamColor = color;
+        this.teamName = name;
     }
 }

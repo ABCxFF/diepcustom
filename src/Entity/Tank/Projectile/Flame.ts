@@ -19,10 +19,8 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { BarrelBase } from "../TankBody";
-import { DevTank } from "../../../Const/DevTankDefinitions";
 
 export default class Flame extends Bullet {
     public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {

@@ -27,7 +27,7 @@ import Writer from "./Coder/Writer";
 
 import GameServer from "./Game";
 import Camera from "./Native/Camera";
-import ArenaEntity, { ArenaState } from "./Native/Arena";
+import { ArenaState } from "./Native/Arena";
 import ObjectEntity from "./Entity/Object";
 
 import TankDefinitions, { getTankById, TankCount } from "./Const/TankDefinitions";
@@ -539,6 +539,7 @@ export default class Client {
         this.ws.terminate();
         this.game.clients.delete(this);
         this.inputs.deleted = true;
+        this.inputs.movement.magnitude = 0;
         this.terminated = true;
 
         this.game.ipCache[this.ipAddress] -= 1;

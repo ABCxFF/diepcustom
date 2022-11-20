@@ -25,7 +25,6 @@ import TankBody from "../Entity/Tank/TankBody";
 
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import { Colors } from "../Const/Enums";
-import ShapeManager from "../Entity/Shape/Manager";
 
  const arenaSize = 11150;
  const baseWidth = 2007;

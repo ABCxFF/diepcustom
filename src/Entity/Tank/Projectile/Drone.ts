@@ -19,12 +19,12 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, Tank, StyleFlags } from "../../../Const/Enums";
+import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AI, AIState } from "../../AI";
 import { BarrelBase } from "../TankBody";
-import { DevTank } from "../../../Const/DevTankDefinitions";
+
 /**
  * The drone class represents the drone (projectile) entity in diep.
  */
@@ -91,7 +91,7 @@ export default class Drone extends Bullet {
     }
 
     public tick(tick: number) {
-        const usingAI = !this.canControlDrones || (!this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel());
+        const usingAI = !this.canControlDrones || this.tank.inputs.deleted || (!this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel());
         const inputs = !usingAI ? this.tank.inputs : this.ai.inputs;
 
         if (usingAI && this.ai.state === AIState.idle) {

@@ -18,43 +18,37 @@
 
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
-import { Colors, NametagFlags, Tank, Stat, ColorsHexCode } from "../../Const/Enums";
+import { Colors, Tank, Stat, ColorsHexCode, ClientBound, MothershipFlags } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
+import Live from "../Live";
 import TankBody from "../Tank/TankBody";
+import { TeamEntity } from "./TeamEntity";
 
 const POSSESSION_TIMER = tps * 60 * 10;
 
 /**
- * Mothership Tank
+ * Mothership Entity
  */
 export default class Mothership extends TankBody {
-    /** Size of a Mothership */
-    public static SIZE = 200;
-
     /** The AI that controls how the Mothership aims. */
     public ai: AI;
 
     /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
     public possessionStartTick: number = -1;
 
-
     public constructor(arena: ArenaEntity) {
-
 
         const inputs = new Inputs();
         const camera = new CameraEntity(arena.game);
 
         camera.setLevel(140);
-        camera.sizeFactor = (Mothership.SIZE / 50);
 
         super(arena.game, camera, inputs);
 
         this.relations.values.team = arena;
-        this.physics.values.size = Mothership.SIZE;
-        // TODO(ABC):
-        // Add setTeam method for this
+
         this.style.values.color = Colors.Neutral;
 
         this.ai = new AI(this);
@@ -78,6 +72,30 @@ export default class Mothership extends TankBody {
         const def = (this.definition = Object.assign({}, this.definition));
         // 418 is what the normal health increase for stat/level would be, so we just subtract it and force it 7k
         def.maxHealth = 7008 - 418;
+    }
+
+    public onDeath(killer: Live): void {
+        const team = this.relations.values.team;
+        const teamIsATeam = team instanceof TeamEntity;
+
+        const killerTeam = killer.relations.values.team;
+        const killerTeamIsATeam = killerTeam instanceof TeamEntity;
+
+        // UNCOMMENT TO ALLOW SOLO KILLS
+        if (!killerTeamIsATeam) return;
+        this.game.broadcast()
+            .u8(ClientBound.Notification)
+            // If mothership has a team name, use it, otherwise just say has destroyed a mothership
+            .stringNT(`${killerTeamIsATeam ? killerTeam.teamName : (killer.name?.values.name || "an unnamed tank")} has destroyed ${teamIsATeam ? team.teamName + "'s" : "a"} Mothership!`)
+            .u32(killerTeamIsATeam ? ColorsHexCode[killerTeam.team.values.teamColor] : 0x000000)
+            .float(-1)
+            .stringNT("").send();   
+    }
+
+    public delete(): void {
+        // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
+        if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~MothershipFlags.hasMothership;
+        super.delete();
     }
 
 

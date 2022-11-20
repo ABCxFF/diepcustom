@@ -17,7 +17,6 @@
 */
 
 import GameServer from "../../Game";
-import ObjectEntity from "../Object";
 
 import { HealthbarFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
 import { TeamGroupEntity } from "./TeamEntity";
