@@ -42,7 +42,7 @@ export class ShootCycle {
     /** The barrel this cycle is keeping track of. */
     private barrelEntity: Barrel;
     /** The current position in the cycle. */
-    private pos = 0;
+    private pos: number;
     /** The last known reload time of the barrel. */
     private reloadTime: number;
 
@@ -258,12 +258,13 @@ export default class Barrel extends ObjectEntity {
 
     public tick(tick: number) {
         this.resize();
+
+        this.relations.values.team = this.tank.relations.values.team;
+
         if (!this.tank.rootParent.deletionAnimation){
             this.attemptingShot = this.tank.inputs.attemptingShot();
             this.shootCycle.tick();
         }
-
-        this.relations.values.team = this.tank.relations.values.team;
 
         super.tick(tick);
     }
