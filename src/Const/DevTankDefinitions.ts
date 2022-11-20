@@ -16,7 +16,6 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Tank } from "./Enums";
 import { TankDefinition } from "./TankDefinitions";
 
 /**
@@ -817,7 +816,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 droneCount: 4294967295,
                 canControlDrones: false,
                 bullet: {
-                    type: "drone",
+                    type: "swarm",
                     sizeRatio: 0.5,
                     health: 1,
                     damage: 0.15,

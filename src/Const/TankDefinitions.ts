@@ -27,6 +27,12 @@ export type preAddonId = "dombase" | "launcher"
 /** A joint list of all post addon ids and pre addon ids. */
 export type addonId = preAddonId | postAddonId;
 
+/** The types of projectiles in the game */
+export type projectileId = "bullet" | "drone" | "trap" | "minion" | "skimmer" | "rocket" | "swarm" | "flame" | "wall" | "croc";
+
+/** The types of barrel addons that exist in the game */
+export type barrelAddonId = "trapLauncher";
+
 /** Increase in opacity when taking damage. */
 export const visibilityRateDamage = 0.2;
 
@@ -35,7 +41,7 @@ export const visibilityRateDamage = 0.2;
  */
 export interface BulletDefinition {
     /** The type of the bullet that the barrel shoots. */
-    type: "bullet" | "drone" | "trap" | "minion" | "skimmer" | "rocket" | "flame" | "wall" | "croc";
+    type: projectileId;
     /** Size of the bullet shot out of the barrel in relation to the barrel's size. */
     sizeRatio: number;
     /** Used to calculate the health of the bullet that the barrel shoots. */
@@ -79,7 +85,7 @@ export interface BarrelDefinition {
     /** Direction that the trapezoid is facing. Machine Gun's `trapezoidalDirection` is `0`, and Stalker's is `π`. */
     trapezoidDirection: number;
     /** Barrel addon. As of now only the trapper addon exists. */
-    addon: string | null;
+    addon: barrelAddonId | null;
     /** The maximum numbers of drones the barrel can spawn - only present if `bullet.type` === 'drone'. */
     droneCount?: number;
     /** Whether or not the drones are controllable - only present if `bullet.type` === 'drone'. */
@@ -6119,7 +6125,7 @@ const TankDefinitions = JSON.parse(`[
                 "droneCount": 4294967295,
                 "canControlDrones": false,
                 "bullet": {
-                    "type": "drone",
+                    "type": "swarm",
                     "sizeRatio": 0.7,
                     "health": 1,
                     "damage": 0.15,
@@ -6143,7 +6149,7 @@ const TankDefinitions = JSON.parse(`[
                 "droneCount": 4294967295,
                 "canControlDrones": false,
                 "bullet": {
-                    "type": "drone",
+                    "type": "swarm",
                     "sizeRatio": 0.7,
                     "health": 1,
                     "damage": 0.15,
@@ -6167,7 +6173,7 @@ const TankDefinitions = JSON.parse(`[
                 "droneCount": 4294967295,
                 "canControlDrones": true,
                 "bullet": {
-                    "type": "drone",
+                    "type": "swarm",
                     "sizeRatio": 0.7,
                     "health": 1,
                     "damage": 0.15,
@@ -6191,7 +6197,7 @@ const TankDefinitions = JSON.parse(`[
                 "droneCount": 4294967295,
                 "canControlDrones": true,
                 "bullet": {
-                    "type": "drone",
+                    "type": "swarm",
                     "sizeRatio": 0.7,
                     "health": 1,
                     "damage": 0.15,

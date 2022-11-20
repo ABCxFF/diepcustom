@@ -57,8 +57,6 @@ export default class Drone extends Bullet {
         this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
         this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
 
-        // TOD(ABCO:
-        // No hardcoded - unless it is hardcoded in diep (all signs show that it might be so far)
         if (barrel.definition.bullet.lifeLength !== -1) {
             this.lifeLength = 88 * barrel.definition.bullet.lifeLength;
         } else {
