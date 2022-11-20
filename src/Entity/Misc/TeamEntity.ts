@@ -37,7 +37,7 @@ export const ColorsTeamName: Record<Colors, string> = {
     [Colors.EnemyTriangle]: "TRIANGLE",
     [Colors.EnemyPentagon]: "PENTAGON",
     [Colors.EnemyCrasher]: "CRASHER",
-    [Colors.Neutral]: "ARENA",
+    [Colors.Neutral]: "a mysterious group",
     [Colors.ScoreboardBar]: "SCOREBOARD",
     [Colors.Box]: "MAZE",
     [Colors.EnemyTank]: "ENEMY",
