@@ -35,14 +35,17 @@ import Summoner from "../Entity/Boss/Summoner";
 import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import Defender from "../Entity/Boss/Defender";
-// import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
-// import FallenMegaTrapper from "../Entity/Misc/Boss/FallenMegaTrapper";
 import { bossSpawningInterval } from "../config";
 
 export enum ArenaState {
+	/** Alive, open */
 	OPEN = 0,
-	CLOSING = 1,
-	CLOSED = 2,
+	/** Game ended - someone won */
+	OVER = 1,
+	/** Lobby starts to close */
+	CLOSING = 2,
+	/** Lobby closed */
+	CLOSED = 3,
 }
 
 /**
@@ -115,7 +118,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	/**
 	 * Updates the scoreboard / leaderboard arena fields.
 	 */
-	private updateScoreboard(scoreboardPlayers: TankBody[]) {
+	protected updateScoreboard(scoreboardPlayers: TankBody[]) {
 		scoreboardPlayers.sort((p1, p2) => p2.score.values.score - p1.score.values.score)
 
 

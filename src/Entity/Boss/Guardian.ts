@@ -39,7 +39,7 @@ const GuardianSpawnerDefinition: BarrelDefinition = {
     canControlDrones: true,
     bullet: {
         type: "drone",
-        sizeRatio: 0.6,
+        sizeRatio: 21 / (71.4 / 2),
         health: 12.5,
         damage: 0.5,
         speed: 1.7,

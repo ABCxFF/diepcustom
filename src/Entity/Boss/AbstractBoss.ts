@@ -107,7 +107,7 @@ export default class AbstractBoss extends LivingEntity {
     /** Whether or not the broadcast message was sent "The ___ has spawned!" */
     private hasBeenWelcomed = false;
 
-    /** List of the booster's barrels. */
+    /** List of the boss barrels. */
     protected barrels: Barrel[] = [];
     /** The speed to maintain during movement. */
     public movementSpeed = 0.5;
@@ -122,7 +122,7 @@ export default class AbstractBoss extends LivingEntity {
         this.position.values.x = x;
         this.position.values.y = y;
         
-        this.relations.values.team = null;
+        this.relations.values.team = this.cameraEntity;
 
         this.physics.values.absorbtionFactor = 0.05;
         this.position.values.motion |= MotionFlags.absoluteRotation;

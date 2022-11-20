@@ -24,7 +24,6 @@ import TankBody from "./Tank/TankBody";
 import { visibilityRateDamage } from "../Const/TankDefinitions";
 import { StyleFlags } from "../Const/Enums";
 import { HealthGroup } from "../Native/FieldGroups";
-import Bullet from "./Tank/Projectile/Bullet";
 
 /**
  * An Abstract class for all entities with health.

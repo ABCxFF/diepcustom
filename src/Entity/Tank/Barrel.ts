@@ -33,8 +33,9 @@ import { BarrelDefinition, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
 import Flame from "./Projectile/Flame";
 import MazeWall from "../Misc/MazeWall";
-import { Entity } from "../../Native/Entity";
 import CrocSkimmer from "./Projectile/CrocSkimmer";
+import { BarrelAddon, BarrelAddonById } from "./BarrelAddons";
+import { Swarm } from "./Projectile/Swarm";
 /**
  * Class that determines when barrels can shoot, and when they can't.
  */
@@ -42,7 +43,7 @@ export class ShootCycle {
     /** The barrel this cycle is keeping track of. */
     private barrelEntity: Barrel;
     /** The current position in the cycle. */
-    private pos = 0;
+    private pos: number;
     /** The last known reload time of the barrel. */
     private reloadTime: number;
 
@@ -59,14 +60,11 @@ export class ShootCycle {
             this.reloadTime = reloadTime;
         }
 
-        /** @ts-ignore */
-        const dontAlwaysShoot = this.barrelEntity.tank.definition?.id === Tank.Battleship || this.barrelEntity.tank.definition?.id === DevTank.Squirrel;
-        /** @ts-ignore */
-        const alwaysShoot = this.barrelEntity.definition.forceFire;
+        const alwaysShoot = (this.barrelEntity.definition.forceFire) || (this.barrelEntity.definition.bullet.type === 'drone') || (this.barrelEntity.definition.bullet.type === 'minion');
 
         if (this.pos >= reloadTime) {
-            // When its not shooting dont shoot, unless its a drone tank besides battleship or dom
-            if (!(this.barrelEntity.attemptingShot || alwaysShoot) && ((this.barrelEntity.definition.bullet.type !== 'drone' && this.barrelEntity.definition.bullet.type !== 'minion') || dontAlwaysShoot)) {
+            // When its not shooting dont shoot, unless its a drone
+            if (!this.barrelEntity.attemptingShot && !alwaysShoot) {
                 this.pos = reloadTime;
                 return;
             }
@@ -88,45 +86,6 @@ export class ShootCycle {
 }
 
 /**
- * Addon like entity that is added onto trap launching barrels.
- * - Active when barrel.addon === "trapLauncher"
- */
-export class TrapLauncher extends ObjectEntity {
-    /** The barrel that this trap launcher is placed on. */
-    public barrelEntity: Barrel;
-
-    /** Resizes the trap launcher; when its barrel owner gets bigger, the trap launcher must as well. */
-    public constructor(barrel: Barrel) {
-        super(barrel.game);
-
-        this.barrelEntity = barrel;
-        this.setParent(barrel);
-        this.relations.values.team = barrel;
-        this.physics.values.objectFlags = ObjectFlags.isTrapezoid | ObjectFlags.unknown1;
-        this.style.values.color = Colors.Barrel;
-
-        this.physics.values.sides = 2;
-        this.physics.values.width = barrel.physics.values.width;
-        this.physics.values.size = barrel.physics.values.width * (20 / 42);
-        this.position.values.x = (barrel.physics.values.size + this.physics.values.size) / 2;
-    }
-
-    public resize() {
-        this.physics.sides = 2;
-        this.physics.width = this.barrelEntity.physics.values.width;
-        this.physics.size = this.barrelEntity.physics.values.width * (20 / 42);
-        this.position.x = (this.barrelEntity.physics.values.size + this.physics.values.size) / 2;
-    }
-
-
-    public tick(tick: number) {
-        super.tick(tick);
-
-        this.resize();
-    }
-}
-
-/**
  * The barrel class containing all barrel related data.
  * - Converts barrel definitions to diep objects
  * - Will contain shooting logic (or interact with it)
@@ -144,6 +103,9 @@ export default class Barrel extends ObjectEntity {
     public bulletAccel = 20;
     /** Number of drones that this barrel shot that are still alive. */
     public droneCount = 0;
+
+    /** The barrel's addons */
+    public addons: BarrelAddon[] = [];
 
     /** Always existant barrel field group, present on all barrels. */
     public barrel: BarrelGroup = new BarrelGroup(this);
@@ -171,8 +133,11 @@ export default class Barrel extends ObjectEntity {
         this.position.values.x = Math.cos(this.definition.angle) * size / 2 - Math.sin(this.definition.angle) * this.definition.offset * sizeFactor;
         this.position.values.y = Math.sin(this.definition.angle) * size / 2 + Math.cos(this.definition.angle) * this.definition.offset * sizeFactor;
 
-        if (barrelDefinition.addon === "trapLauncher") new TrapLauncher(this);
-        else if (barrelDefinition.addon === "domTrapLauncher") new TrapLauncher(this);
+        // addons are below barrel, use StyleFlags.aboveParent to go above parent
+        if (barrelDefinition.addon) {
+            const AddonConstructor = BarrelAddonById[barrelDefinition.addon];
+            if (AddonConstructor) this.addons.push(new AddonConstructor(this));
+        }
 
         this.barrel.values.trapezoidalDir = barrelDefinition.trapezoidDirection;
         this.shootCycle = new ShootCycle(this);
@@ -218,6 +183,9 @@ export default class Barrel extends ObjectEntity {
             case 'drone':
                 new Drone(this, this.tank, tankDefinition, angle);
                 break;
+            case 'swarm':
+                new Swarm(this, this.tank, tankDefinition, angle);
+                break;
             case 'minion':
                 new Minion(this, this.tank, tankDefinition, angle);
                 break;
@@ -258,12 +226,13 @@ export default class Barrel extends ObjectEntity {
 
     public tick(tick: number) {
         this.resize();
+
+        this.relations.values.team = this.tank.relations.values.team;
+
         if (!this.tank.rootParent.deletionAnimation){
             this.attemptingShot = this.tank.inputs.attemptingShot();
             this.shootCycle.tick();
         }
-
-        this.relations.values.team = this.tank.relations.values.team;
 
         super.tick(tick);
     }

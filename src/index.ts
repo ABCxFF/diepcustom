@@ -60,23 +60,31 @@ const server = http.createServer((req, res) => {
 
     if (ENABLE_CLIENT) {
         let file: string | null = null;
+        let contentType = "text/html"
         switch (req.url) {
             case "/":
                 file = config.clientLocation + "/index.html";
+                contentType = "text/html";
                 break;
             case "/loader.js":
                 file = config.clientLocation + "/loader.js";
+                contentType = "application/javascript";
                 break;
             case "/input.js":
                 file = config.clientLocation + "/input.js";
+                contentType = "application/javascript";
                 break;
             case "/dma.js":
                 file = config.clientLocation + "/dma.js";
+                contentType = "application/javascript";
                 break;
             case "/config.js":
                 file = config.clientLocation + "/config.js";
+                contentType = "application/javascript";
                 break;
         }
+
+        res.setHeader("Content-Type", contentType + "; charset=utf-8");
 
         if (file && fs.existsSync(file)) {
             res.writeHead(200);

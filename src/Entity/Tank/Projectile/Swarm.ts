@@ -16,33 +16,20 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import Barrel from "../Barrel";
-import Bullet from "./Bullet";
-
 import { TankDefinition } from "../../../Const/TankDefinitions";
+import Barrel from "../Barrel";
 import { BarrelBase } from "../TankBody";
+import Drone from "./Drone";
 
-export default class Flame extends Bullet {
-    public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
+/**
+ * The Swarm class represents the swarm (projectile) entity in diep - think BattleShip
+ */
+export class Swarm extends Drone {
+    public constructor(barrel: Barrel,  tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
         super(barrel, tank, tankDefinition, shootAngle);
-
-        this.baseSpeed *= 2;
-        this.baseAccel = 0;
-        this.damageReduction = 1;
-        
-        this.physics.values.sides = 4;
-        this.physics.values.absorbtionFactor = this.physics.values.pushFactor = 0;
-        this.lifeLength = 25 * barrel.definition.bullet.lifeLength;
+        this.ai.viewRange = 850 * tank.sizeFactor * 2;
     }
 
-    public destroy(animate?: boolean): void {
-        super.destroy(false);
-    }
-
-    public tick(tick: number) {
-        super.tick(tick);
-
-        this.damageReduction += 1 / 25;
-        this.style.opacity -= 1 / 25;
-    }
+    // TODO:
+    // Add the custom resting state AI (after fixing real drone's)
 }

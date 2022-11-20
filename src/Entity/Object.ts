@@ -19,7 +19,7 @@
 import * as util from "../util";
 import GameServer from "../Game";
 import Velocity from "../Physics/Velocity";
-import Vector, { VectorAbstract } from "../Physics/Vector";
+import Vector from "../Physics/Vector";
 
 import { PhysicsGroup, PositionGroup, RelationsGroup, StyleGroup } from "../Native/FieldGroups";
 import { Entity } from "../Native/Entity";
@@ -209,56 +209,47 @@ export default class ObjectEntity extends Entity {
     /** Applies knockback after hitting `entity` */
     protected receiveKnockback(entity: ObjectEntity) {
         let kbMagnitude = this.physics.values.absorbtionFactor * entity.physics.values.pushFactor;
-        let kbAngle = 0;
+        let kbAngle: number;
+        let diffY = this.position.values.y - entity.position.values.y;
+        let diffX = this.position.values.x - entity.position.values.x;
+        // Prevents drone stacking etc
+        if (diffX === 0 && diffY === 0) kbAngle = Math.random() * Math.PI * 2;
+        else kbAngle = Math.atan2(diffY, diffX);
 
-        if (entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base && entity.physics.values.pushFactor !== 0) {
+        if ((entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base) && !(this.position.values.motion & MotionFlags.canMoveThroughWalls))  {
+            this.accel.magnitude *= 0.3;
+            // this.velocity.magnitude *= 0.3;
+            kbMagnitude /= 0.3;
+        }
+        if (entity.physics.values.sides === 2) {
             if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
-            } else if (this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
+            } else if ((!(entity.physics.values.objectFlags & ObjectFlags.base) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
                 // this is a bit off still. k
                 this.velocity.setPosition(this.position.values);
                 this.setVelocity(0, 0);
                 this.destroy(true) // Kills off bullets etc
                 return;
             } else {
-                const onLeft = this.position.values.x < entity.position.values.x;
-                const onTop = this.position.values.y < entity.position.values.y;
-                const x = onLeft ? entity.position.values.x - entity.physics.values.size / 2 : entity.position.values.x + entity.physics.values.size / 2;
-                const y = onTop ? entity.position.values.y - entity.physics.values.width / 2 : entity.position.values.y + entity.physics.values.width / 2;
-                const dX = x - this.position.values.x;
-                const dY = y - this.position.values.y;
-
-                if(Math.abs(dX) < Math.abs(dY)) {
-                    if (onLeft) {
-                        kbAngle = 0;
-                        // this.position.values.x = entity.position.values.x - entity.physics.values.size / 2 - this.physics.values.size;
+                const relA = Math.cos(kbAngle) / entity.physics.values.size;
+                const relB = Math.sin(kbAngle) / entity.physics.values.width;
+                if (Math.abs(relA) <= Math.abs(relB)) {
+                    if (relB < 0) {
+                        this.addAcceleration(Math.PI * 3 / 2, kbMagnitude);
                     } else {
-                        kbAngle = Math.PI;
-                        // this.position.values.x = entity.position.values.x + entity.physics.values.size / 2 + this.physics.values.size;
+                        this.addAcceleration(Math.PI * 1 / 2, kbMagnitude);
                     }
                 } else {
-                    if (onTop) {
-                        kbAngle = Math.PI * 1 / 2;
-                        // this.position.values.y = entity.position.values.y - entity.physics.values.width / 2 - this.physics.values.size;
+                    if (relA < 0) {
+                        this.addAcceleration(Math.PI, kbMagnitude);
                     } else {
-                        kbAngle = Math.PI * 3 / 2;
-                        // this.position.values.y = entity.position.values.y + entity.physics.values.width / 2 + this.physics.values.size;
+                        this.addAcceleration(0, kbMagnitude);
                     }
                 }
-                kbAngle += Math.PI
-
-                this.addAcceleration(kbAngle, entity.physics.values.pushFactor * 6);
-                this.velocity.setPosition(this.position.values)
             }
         } else {
-            let diffY = this.position.values.y - entity.position.values.y;
-            let diffX = this.position.values.x - entity.position.values.x;
-            // Prevents drone stacking etc
-            if (diffX === 0 && diffY === 0) kbAngle = Math.random() * Math.PI * 2;
-            else kbAngle = Math.atan2(diffY, diffX);
+            this.addAcceleration(kbAngle, kbMagnitude);
         }
-
-        if (kbMagnitude !== 0) this.addAcceleration(kbAngle, kbMagnitude);
     }
 
     /** Detects collisions. */

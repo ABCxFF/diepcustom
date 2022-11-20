@@ -29,7 +29,7 @@ import { BarrelDefinition } from "../../Const/TankDefinitions";
 /**
  * Definitions (stats and data) of the mounted turret on Defender
  *
- * Same as mounted turret, just different color and stronger bullet
+ * Defender's gun
  */
 const MountedTurretDefinition: BarrelDefinition = {
     ...AutoTurretDefinition,
@@ -46,7 +46,7 @@ const MountedTurretDefinition: BarrelDefinition = {
  * Definitions (stats and data) of the trap launcher on Defender
  */
 const DefenderDefinition: BarrelDefinition = {
-    angle: Math.PI,
+    angle: 0,
     offset: 0,
     size: 120,
     width: 71.4,
@@ -79,7 +79,7 @@ const DEFENDER_SIZE = 150;
 export default class Defender extends AbstractBoss {
 
     /** Defender's trap launchers */
-    private defenderTrapLaunchers: Barrel[] = [];
+    private trappers: Barrel[] = [];
     /** See AbstractBoss.movementSpeed */
     public movementSpeed = 0.35;
 
@@ -94,7 +94,7 @@ export default class Defender extends AbstractBoss {
 
         for (let i = 0; i < 3; ++i) {
             // Add trap launcher
-            this.defenderTrapLaunchers.push(new Barrel(this, {
+            this.trappers.push(new Barrel(this, {
                 ...DefenderDefinition,
                 angle: Math.PI * 2 * ((i / 3) + 1 / 6)
             }));

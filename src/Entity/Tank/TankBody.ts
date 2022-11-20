@@ -17,7 +17,6 @@
 */
 
 import * as util from "../../util";
-import * as config from "../../config";
 
 import Square from "../Shape/Square";
 import NecromancerSquare from "./Projectile/NecromancerSquare";
@@ -35,7 +34,6 @@ import { getTankById, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
 import { Inputs } from "../AI";
 import AbstractBoss from "../Boss/AbstractBoss";
-import AbstractShape from "../Shape/AbstractShape";
 
 /**
  * Abstract type of entity which barrels can connect to.
