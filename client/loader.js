@@ -1,5 +1,5 @@
 /*
-    DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
+    DiepCustom - custom tank game server that shares diep.io"s WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
 
     This program is free software: you can redistribute it and/or modify
@@ -53,10 +53,19 @@ Module.tankDefinitionsTable = null;
 // commands
 Module.executeCommandFunctionIndex = null;
 Module.executionCallbackMap = {};
+Module.commandDefinitions = null;
 
 // name input
 Module.textInput = document.getElementById("textInput");
 Module.textInputContainer = document.getElementById("textInputContainer");
+
+// permission level is sent to client in the accept packet
+Module.permissionLevel = -1;
+
+// (polling) intervals, can be a number (ms), -1 aka never or -2 aka whenever a new connection is initiated  
+Module.reloadServersInterval = 60000;
+Module.reloadTanksInterval = -1;
+Module.reloadCommandsInterval = -2;
 
 // abort client
 Module.abort = cause => {
@@ -142,16 +151,28 @@ Module.allocateUTF8 = str => {
 
 // Refreshes UI Components
 Module.loadGamemodeButtons = () => {
-    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, 'struct', 28);
+    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
     if(vec.start) vec.destroy(); // remove old arenas
     // map server response to memory struct
-    vec.push(...Module.servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
+    vec.push(...Module.servers.map(server => ([
+        { offset: 0, type: "cstr", value: server.gamemode }, 
+        { offset: 12, type: "cstr", value: server.name }, 
+        { offset: 24, type: "i32", value: 0 }
+    ])));
+    // placeholders to prevent single/no gamemode bugs
+    for(let i = 0; i < 2 - Module.servers.length; ++i) {
+        vec.push(...[[
+            { offset: 0, type: "cstr", value: "ffa" }, 
+            { offset: 12, type: "cstr", value: "Placeholder" }, 
+            { offset: 24, type: "i32", value: 1 }
+        ]]);
+    }
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // not understood
 };
 
 // Refreshes UI Components
 Module.loadChangelog = (changelog) => {
-    const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
+    const vec = new $.Vector(MOD_CONFIG.memory.changelog, "cstr", 12);
     if(vec.start) vec.destroy(); // remove old changelog
     vec.push(...(changelog || CHANGELOG)); // either load custom or default
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1; // not understood
@@ -225,7 +246,18 @@ Module.executeCommand = execCtx => {
     const tokens = $(execCtx)[12].vector("cstr", 12);
     
     if(!cmd || !tokens.length) throw `Invalid execution context (ptr: ${execCtx}) received`;
-    if(typeof Module.executionCallbackMap[tokens[0]] !== "function") throw `${Module.executionCallbackMap[tokens]} for command ${cmd} is an invalid callback`;
+    if(typeof Module.executionCallbackMap[tokens[0]] !== "function") {
+        if(!Module.commandDefinitions.find(({ id }) => id === tokens[0])) {
+            throw `${Module.executionCallbackMap[tokens]} for command ${cmd} is an invalid callback`;
+        }
+        const encoder = new TextEncoder();
+        return Game.socket.send(new Uint8Array([
+            6,
+            ...encoder.encode(tokens[0]), 0,
+            tokens.slice(1).length,
+            ...tokens.slice(1).flatMap(token => [...encoder.encode(token), 0])
+        ]));
+    }
 
     // [id, ...args], we only need args
     Module.executionCallbackMap[tokens[0]](tokens.slice(1));
@@ -237,20 +269,20 @@ Module.executeCommand = execCtx => {
 */
 Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
     const cmdList = new $.List(MOD_CONFIG.memory.commandList, "struct", 24);
-    for(let { id, usage, description, callback } of commands) {
-        if(COMMANDS_LOOKUP[id]) continue; // ignore duplicates
+    for(let { id, usage, description, callback, permissionLevel } of commands) {
+        if(COMMANDS_LOOKUP[id] || permissionLevel > Module.permissionLevel) continue; // ignore duplicates
 
         // allocate Command
         const cmdPtr = Module.exports.malloc(40);
         $.writeStruct(cmdPtr, [
             { offset: 0, type: "cstr", value: id },
-            { offset: 12, type: "cstr", value: usage },
-            { offset: 24, type: "cstr", value: description },
+            { offset: 12, type: "cstr", value: usage || "" },
+            { offset: 24, type: "cstr", value: description || "" },
             { offset: 36, type: "u32", value: Module.executeCommandFunctionIndex } // we handle every custom command with the same function
         ]);
 
         COMMANDS_LOOKUP[id] = cmdPtr;
-        Module.executionCallbackMap[id] = callback;
+        if(callback) Module.executionCallbackMap[id] = callback;
 
         // allocate HashNode
         cmdList.push([
@@ -279,7 +311,7 @@ const wasmImports = {
     envGet: () => 0, // unused
     envSize: () => 0, // unused
     fdWrite: Module.fdWrite, // used for diep client console
-    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5), // no, default Math.round doesn't work :D
+    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5), // no, default Math.round doesn"t work :D
     timeString: () => 0, // unused
     wasmMemory: new WebAssembly.Memory(WASM_MEMORY),
     wasmTable: new WebAssembly.Table(WASM_TABLE)
@@ -487,10 +519,17 @@ Module.todo.push([() => {
             for(const tankDef of Module.tankDefinitionsTable) Module.exports.free(tankDef);
             Module.loadTankDefinitions();
         },
+        reloadCommands: async () => {
+            Module.commandDefinitions = await fetch(`${API_URL}commands`).then(res => res.json());
+            Module.loadCommands(Module.commandDefinitions); // remote
+            Module.loadCommands(); // local
+        },
         // sets changelog (input: [...""])
         changeChangelog: (lines) => Module.loadChangelog(lines),
         // main socket, see also Module.cp5.sockets[0]
-        socket: null,
+        get socket() {
+            return Module.cp5.sockets[0];
+        },
         // executes spawn command
         spawn: name => window.input.execute(`game_spawn ${name}`),
         // executes reconnect command
@@ -507,7 +546,30 @@ Module.todo.push([() => {
     Module.isRunning = true;
     Module.exports.wasmCallCtors();
     Module.exports.main();
+
+
+    const reloadServersInterval = () => setTimeout(() => {
+        reloadServersInterval();
+        if(Module.reloadServersInterval < 0) return;
+        Game.reloadServers(); 
+    }, Module.reloadServersInterval);
+    reloadServersInterval();
+
+    const reloadTanksInterval = () => setTimeout(() => {
+        reloadTanksInterval();
+        if(Module.reloadCommandsInterval < 0) return;
+        Game.reloadTanks();
+    }, Module.reloadTanksInterval);
+    reloadTanksInterval();
+
+    const reloadCommandsInterval = () => setTimeout(() => {
+        reloadCommandsInterval();
+        if(Module.reloadCommandsInterval < 0) return;
+        Game.reloadCommands();
+    }, Module.reloadCommandsInterval);
+    reloadCommandsInterval();
 }, false]);
+
 
 // Part of the original emscripten bootstrap
 class ASMConsts {
@@ -852,7 +914,8 @@ class ASMConsts {
     }
 
     static setLocation(newLocation) {
-        window.open (Module.UTF8ToString(newLocation));
+        // open in new tab instead
+        window.open(Module.UTF8ToString(newLocation));
     }
 
     static contextDrawImage(ctxId, imgId) {
@@ -1060,7 +1123,7 @@ class ASMConsts {
 
     static createWebSocket(url) {
         url = Module.UTF8ToString(url);
-        if (url.split('.').length === 4) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.indexOf('.'))}`;
+        if (url.split(".").length === 4) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.indexOf("."))}`;
         else if (url.endsWith(":443")) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.length - 4)}`
         else return prompt("Error loading into game. Take a picture of this then send to our support server (github.com/ABCxFF/diepcustom)", url);
     
@@ -1081,6 +1144,16 @@ class ASMConsts {
         };
         ws.onmessage = function(e) {
             const view = new Uint8Array(e.data);
+            if(view[0] === 7) {
+                let out = 0, i = 0, at = 1;
+                while(view[at] & 0x80) {
+                    out |= (view[at++] & 0x7f) << i;
+                    i += 7;
+                }
+                out |= (view[at++] & 0x7f) << i;
+                Module.permissionLevel = (0 - (out & 1)) ^ (out >>> 1);
+                window.Game.reloadCommands();
+            }
             const ptr = Module.exports.malloc(view.length);
             Module.HEAP8.set(view, ptr);
             ws.events.push([1, ptr, view.length]);
@@ -1092,8 +1165,12 @@ class ASMConsts {
             Module.cp5.sockets[i] = ws;
             return i;
         }
+
+        if(Module.reloadServersInterval === -2) Game.reloadServers();
+        if(Module.reloadTanksInterval === -2) Game.reloadTanks(); 
+        if(Module.reloadCommandsInterval === -2) Game.reloadCommands();
+
         Module.cp5.sockets.push(ws);
-        window.Game.socket = ws;
         return Module.cp5.sockets.length - 1;
     }
 
