@@ -47,7 +47,7 @@ export const mode: string = process.env.NODE_ENV || "development";
 export const enableApi: boolean = true;
 
 /** Rest API location (root of all other endpoints), ignored if enableApi is false */
-export const apiLocation: string = "api"
+export const apiLocation: string = "api";
 
 /** Is hosting a client */
 export const enableClient: boolean = true;
