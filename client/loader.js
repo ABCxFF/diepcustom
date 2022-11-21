@@ -16,29 +16,65 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+// make module globally accessable
 window.Module = {};
 
+// todolist
 Module.todo = [];
 
+// todo status
 Module.status = null;
+
+// is the todo list done?
 Module.isRunning = false;
+
+// has the module been aborted?
 Module.isAborted = false;
+
+// exception name
 Module.exception = null;
+
+// function index for dynamic calling of the main func
 Module.mainFunc = null;
+
+// content contexts
 Module.cp5 = null;
+
+// client input
 window.input = null;
+
+// arenas
 Module.servers = null;
+
+// tanks
 Module.tankDefinitions = null;
 Module.tankDefinitionsTable = null;
+
+// commands
+Module.executeCommandFunctionIndex = null;
+Module.executionCallbackMap = {};
+Module.commandDefinitions = null;
+
+// name input
 Module.textInput = document.getElementById("textInput");
 Module.textInputContainer = document.getElementById("textInputContainer");
 
+// permission level is sent to client in the accept packet
+Module.permissionLevel = -1;
+
+// (polling) intervals, can be a number (ms), -1 aka never or -2 aka whenever a new connection is initiated  
+Module.reloadServersInterval = 60000;
+Module.reloadTanksInterval = -1;
+Module.reloadCommandsInterval = -2;
+
+// abort client
 Module.abort = cause => {
     Module.isAborted = true;
     Module.isRunning = false;
     throw new WebAssembly.RuntimeError(`abort(${cause})`);
 };
 
+// run ASMConst method, basically replaces a lot of "real wasm imports"
 Module.runASMConst = (code, sigPtr, argbuf) => {
     const args = [];
     let char;
@@ -52,12 +88,14 @@ Module.runASMConst = (code, sigPtr, argbuf) => {
     return ASMConsts[ASM_CONSTS[code]].apply(null, args);
 };
 
+// initializing the looper
 Module.setLoop = func => {
     if(!Module.isRunning || Module.isAborted || Module.exception === "quit") return;
     Module.mainFunc = func;
     window.requestAnimationFrame(Module.loop);
 };
 
+// process todo
 Module.run = async () => {
     let args = [];
     while(Module.todo.length) {
@@ -68,6 +106,7 @@ Module.run = async () => {
     }
 };
 
+// looper, 1 animation frame = 1 main call, except for stack unwinds
 Module.loop = () => {
     if(!Module.isRunning || Module.isAborted || Module.exception === "quit") return;
     switch(Module.exception) {
@@ -82,55 +121,78 @@ Module.loop = () => {
     }
 };
 
+// exit runtime (no unwind, originally unwind would be catched here)
 Module.exit = status => {
     Module.exception = "quit";
     Module.isRunning = false;
     throw `Stopped runtime with status ${status}`;
 };
 
+// read utf8 from memory
 Module.UTF8ToString = ptr => ptr ? new TextDecoder().decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr))) : "";
 
+// i/o write used for console, not fully understood
 Module.fdWrite = (stream, ptr, count, res) => {
     let out = 0;
     for(let i = 0; i < count; i++) out += Module.HEAP32[(ptr + (i * 8 + 4)) >> 2];
     Module.HEAP32[res >> 2] = out;
 };
 
+// write utf8 to memory
 Module.allocateUTF8 = str => {
     if(!str) return 0;
     const encoded = new TextEncoder().encode(str);
-    const ptr = Module.exports.malloc(encoded.byteLength + 1); // stringNT
+    const ptr = Module.exports.malloc(encoded.byteLength + 1); // stringNT aka *char[]
     if(!ptr) return;
     Module.HEAPU8.set(encoded, ptr);
     Module.HEAPU8[ptr + encoded.byteLength] = 0;
     return ptr;
 };
 
+// Refreshes UI Components
 Module.loadGamemodeButtons = () => {
-    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, 'struct', 28);
-    if(vec.start) vec.delete();
-    vec.push(...Module.servers.map(server => ([{ offset: 0, type: 'cstr', value: server.gamemode }, { offset: 12, type: 'cstr', value: server.name }, { offset: 24, type: 'i32', value: 0 }])));
-    Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12);
+    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
+    if(vec.start) vec.destroy(); // remove old arenas
+    // map server response to memory struct
+    vec.push(...Module.servers.map(server => ([
+        { offset: 0, type: "cstr", value: server.gamemode }, 
+        { offset: 12, type: "cstr", value: server.name }, 
+        { offset: 24, type: "i32", value: 0 }
+    ])));
+    // placeholders to prevent single/no gamemode bugs
+    const placeholderId = Module.servers.find(e => e.gamemode === 'ffa') ? 'survival' : 'ffa'
+    for(let i = 0; i < 2 - Module.servers.length; ++i) {
+        vec.push(...[[
+            { offset: 0, type: "cstr", value: placeholderId }, 
+            { offset: 12, type: "cstr", value: "Placeholder" }, 
+            { offset: 24, type: "i32", value: 1 }
+        ]]);
+    }
+    Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // not understood
 };
 
-Module.loadChangelog = (changelog=CHANGELOG) => {
-    const vec = new $.Vector(MOD_CONFIG.memory.changelog, 'cstr', 12);
-    if(vec.start) vec.delete();
-    vec.push(...changelog);
-    $(MOD_CONFIG.memory.changelogLoaded).i8 = 1;
+// Refreshes UI Components
+Module.loadChangelog = (changelog) => {
+    const vec = new $.Vector(MOD_CONFIG.memory.changelog, "cstr", 12);
+    if(vec.start) vec.destroy(); // remove old changelog
+    vec.push(...(changelog || CHANGELOG)); // either load custom or default
+    $(MOD_CONFIG.memory.changelogLoaded).i8 = 1; // not understood
 };
 
+// Ignore Hashtable, instead read from custom table
 Module.getTankDefinition = tankId => {
     if(!Module.tankDefinitions) return 0;
-    if(!Module.tankDefinitionsTable) Module.loadTankDefinitions();
+    if(!Module.tankDefinitionsTable) Module.loadTankDefinitions(); // load tankdefs dynmically when requested
     if(!Module.tankDefinitionsTable[tankId]) return 0;
-    return Module.tankDefinitionsTable[tankId] + 12;
+    return Module.tankDefinitionsTable[tankId] + 12; // 12 bytes for tankIds
 };
+
+Module.getCommand = cmdIdPtr => COMMANDS_LOOKUP[$(cmdIdPtr).cstr] || 0;
 
 Module.loadTankDefinitions = () => {
     const writeTankDef = (ptr, tank) => {
         // Please note that this is not the full tank/barrel struct but just the portion needed for the client to function properly
-        const barrels = tank.barrels ? tank.barrels.map(barrel => {
+        const barrels = tank.barrels ? tank.barrels.map(barrel => { // barrel fields
             return [
                 { offset: 0, type: "f32", value: barrel.angle },
                 { offset: 4, type: "f32", value: barrel.delay },
@@ -145,7 +207,7 @@ Module.loadTankDefinitions = () => {
             ];
         }) : [];
 
-        const fields = [
+        const fields = [ // tankdef fields
             { offset: 4, type: "u32", value: tank.id },
             { offset: 8, type: "u32", value: tank.id },
             { offset: 12, type: "u32", value: tank.id },
@@ -163,11 +225,12 @@ Module.loadTankDefinitions = () => {
         $.writeStruct(ptr, fields);
     };
 
-    Module.tankDefinitionsTable = new Array(Module.tankDefinitions.length).fill(0);
+    // TODO Rewrite with new $.List datastructure
+    Module.tankDefinitionsTable = new Array(Module.tankDefinitions.length).fill(0); // clear memory
     let lastPtr = MOD_CONFIG.memory.tankDefinitions;
     for(const tank of Module.tankDefinitions) {
         if(!tank) continue;
-        const ptr = Module.exports.malloc(244);
+        const ptr = Module.exports.malloc(244); // length of a tankdef
         Module.HEAPU8.subarray(ptr, ptr + 244).fill(0);
         $(lastPtr).i32 = ptr;
         writeTankDef(ptr, tank);
@@ -175,17 +238,71 @@ Module.loadTankDefinitions = () => {
         lastPtr = ptr;
     }
 
-    $(MOD_CONFIG.memory.tankDefinitionsCount).i32 = Module.tankDefinitions.filter(e => Boolean(e)).length;
+    $(MOD_CONFIG.memory.tankDefinitionsCount).i32 = Module.tankDefinitions.filter(e => Boolean(e)).length; // tankId xor based off this
+};
+
+// Executes a command callback from a command context
+Module.executeCommand = execCtx => {
+    const cmd = $(execCtx)[0].cstr;
+    const tokens = $(execCtx)[12].vector("cstr", 12);
+    
+    if(!cmd || !tokens.length) throw `Invalid execution context (ptr: ${execCtx}) received`;
+    if(typeof Module.executionCallbackMap[tokens[0]] !== "function") {
+        if(!Module.commandDefinitions.find(({ id }) => id === tokens[0])) {
+            throw `${Module.executionCallbackMap[tokens]} for command ${cmd} is an invalid callback`;
+        }
+        const encoder = new TextEncoder();
+        return Game.socket.send(new Uint8Array([
+            6,
+            ...encoder.encode(tokens[0]), 0,
+            tokens.slice(1).length,
+            ...tokens.slice(1).flatMap(token => [...encoder.encode(token), 0])
+        ]));
+    }
+
+    // [id, ...args], we only need args
+    Module.executionCallbackMap[tokens[0]](tokens.slice(1));
+};
+
+/*
+    Command object: { id, usage, description, callback }
+    The execute command function will not check for validity of arguments, you need to do that on your own
+*/
+Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
+    const cmdList = new $.List(MOD_CONFIG.memory.commandList, "struct", 24);
+    for(let { id, usage, description, callback, permissionLevel } of commands) {
+        if(COMMANDS_LOOKUP[id] || permissionLevel > Module.permissionLevel) continue; // ignore duplicates
+
+        // allocate Command
+        const cmdPtr = Module.exports.malloc(40);
+        $.writeStruct(cmdPtr, [
+            { offset: 0, type: "cstr", value: id },
+            { offset: 12, type: "cstr", value: usage || "" },
+            { offset: 24, type: "cstr", value: description || "" },
+            { offset: 36, type: "u32", value: Module.executeCommandFunctionIndex } // we handle every custom command with the same function
+        ]);
+
+        COMMANDS_LOOKUP[id] = cmdPtr;
+        if(callback) Module.executionCallbackMap[id] = callback;
+
+        // allocate HashNode
+        cmdList.push([
+            { offset: 0, type: "u32", value: 0 }, // next node
+            { offset: 4, type: "u32", value: 0 }, // hash
+            { offset: 8, type: "cstr", value: id }, // command id
+            { offset: 20, type: "$", value: cmdPtr } // command def ptr
+        ]);
+    }
 };
 
 const wasmImports = {
     assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + UTF8ToString(condition) + ", at: " + [filename ? UTF8ToString(filename) : "unknown filename", line, func ? UTF8ToString(func) : "unknown function"]),
     mapFile: () => -1, // unused
-    sysMunmap: (addr, len) => addr === -1 || !len ? -28 : 0, 
+    sysMunmap: (addr, len) => addr === -1 || !len ? -28 : 0, // not really used
     abort: Module.abort,
     asmConstsDII: Module.runASMConst,
     asmConstsIII: Module.runASMConst,
-    exitLive: () => Module.exception = "unwind", // unwind
+    exitLive: () => Module.exception = "unwind", // unwind stack
     exitForce: () => Module.exit(1), // exit / quit
     getNow: () => performance.now(),
     memCopyBig: (dest, src, num) => { Module.HEAPU8.copyWithin(dest, src, src + num) }, // for large packets
@@ -195,7 +312,7 @@ const wasmImports = {
     envGet: () => 0, // unused
     envSize: () => 0, // unused
     fdWrite: Module.fdWrite, // used for diep client console
-    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5),
+    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5), // no, default Math.round doesn't work :D
     timeString: () => 0, // unused
     wasmMemory: new WebAssembly.Memory(WASM_MEMORY),
     wasmTable: new WebAssembly.Table(WASM_TABLE)
@@ -203,12 +320,14 @@ const wasmImports = {
 
 Module.todo.push([() => {
     Module.status = "PREPARE";
+    // map imports to config
     Module.imports = { a: Object.fromEntries(Object.entries(WASM_IMPORTS).map(([key, name]) => [key, wasmImports[name]])) };
     return [];
 }, false]);
 
 Module.todo.push([() => {
     Module.status = "FETCH";
+    // fetch necessary info and build
     return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch(`${API_URL}servers`).then(res => res.json()), fetch(`${API_URL}tanks`).then(res => res.json())];
 }, true]);
 
@@ -219,96 +338,150 @@ Module.todo.push([(dependency, servers, tanks) => {
     
     const parser = new WailParser(new Uint8Array(dependency));
     
+    // original function, we want to modify these
     const originalVectorDone = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadVectorDone);
     const originalLoadChangelog = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadChangelog);
     const originalLoadGamemodeButtons = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadGamemodeButtons);
     const originalLoadTankDefs = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadTankDefinitions);
     const originalGetTankDef = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.getTankDefinition);
+    const originalFindCommand = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.findCommand);
     
-    const loadGamemodeButtons = parser.addImportEntry({
-        moduleStr: "mods",
-        fieldStr: "loadGamemodeButtons",
-        kind: "func",
-        type: parser.addTypeEntry({
+    // function types
+    const types = {
+        // void []
+        vn: parser.addTypeEntry({
             form: "func",
             params: [],
             returnType: null
-        })
-    });
-
-    const loadChangelog = parser.addImportEntry({
-        moduleStr: "mods",
-        fieldStr: "loadChangelog",
-        kind: "func",
-        type: parser.addTypeEntry({
+        }),
+        // void [int]
+        vi: parser.addTypeEntry({
             form: "func",
-            params: [],
+            params: ["i32"],
             returnType: null
-        })
-    });
-
-    const getTankDefinition = parser.addImportEntry({
-        moduleStr: "mods",
-        fieldStr: "getTankDefinition",
-        kind: "func",
-        type: parser.addTypeEntry({
+        }),
+        // int [int]
+        ii: parser.addTypeEntry({
             form: "func",
             params: ["i32"],
             returnType: "i32"
         })
-    });
+    }
 
+    // custom imports
+    const imports = {
+        loadGamemodeButtons: parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "loadGamemodeButtons",
+            kind: "func",
+            type: types.vn 
+        }),
+        loadChangelog: parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "loadChangelog",
+            kind: "func",
+            type: types.vn
+        }),
+        getTankDefinition: parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "getTankDefinition",
+            kind: "func",
+            type: types.ii
+        }),
+        findCommand: parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "findCommand",
+            kind: "func",
+            type: types.ii
+        }),
+        executeCommand: parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "executeCommand",
+            kind: "func",
+            type: types.vi
+        })
+    }
+
+
+    // Modded imports, see above
     Module.imports.mods = {
         loadGamemodeButtons: Module.loadGamemodeButtons,
         loadChangelog: Module.loadChangelog,
-        getTankDefinition: Module.getTankDefinition
+        getTankDefinition: Module.getTankDefinition,
+        findCommand: Module.getCommand,
+        executeCommand: Module.executeCommand
     };
 
+    // export to be able to add as a function table element
+    parser.addExportEntry(imports.executeCommand, {
+        fieldStr: "executeCommand",
+        kind: "func"
+    });
+
+    // not understood entirely
     parser.addExportEntry(originalVectorDone, {
         fieldStr: "loadVectorDone",
         kind: "func"
     });
     
+    // parses & modifies code function by function
     parser.addCodeElementParser(null, function({ index, bytes }) {
         switch(index) {
+            // modify load changelog function
             case originalLoadChangelog.i32(): // we only need the part where it checks if the changelog is already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.changelog),
-                    OP_CALL, ...VarUint32ToArray(loadChangelog.i32()),
+                    OP_CALL, ...VarUint32ToArray(imports.loadChangelog.i32()),
                     OP_RETURN,
                     ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.changelog)
-                  ]);
+                ]);
+            // modify load gamemode buttons function
             case originalLoadGamemodeButtons.i32(): // we only need the part where it checks if the buttons are already loaded to avoid too many import calls
                 return new Uint8Array([
                     ...bytes.subarray(0, MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons),
-                    OP_CALL, ...VarUint32ToArray(loadGamemodeButtons.i32()),
+                    OP_CALL, ...VarUint32ToArray(imports.loadGamemodeButtons.i32()),
                     OP_RETURN,
                     ...bytes.subarray(MOD_CONFIG.wasmFunctionHookOffset.gamemodeButtons)
                 ]);
+            // overwrite get tankdef function
             case originalGetTankDef.i32(): // we modify this to call a js function which then returns the tank def ptr from a table
                 return new Uint8Array([
                     OP_GET_LOCAL, 0,
-                    OP_CALL, ...VarUint32ToArray(getTankDefinition.i32()),
+                    OP_CALL, ...VarUint32ToArray(imports.getTankDefinition.i32()),
                     OP_RETURN,
                     OP_END
                 ]);
+            // overwrite find command function
+            case originalFindCommand.i32():
+                return new Uint8Array([
+                    OP_GET_LOCAL, 0,
+                    OP_CALL, ...VarUint32ToArray(imports.findCommand.i32()),
+                    OP_RETURN,
+                    OP_END
+                ]);
+            // delete tankdefs loading function
             case originalLoadTankDefs.i32(): // we dont want this to run anymore because it will call the original tank wrapper function
                 return new Uint8Array([
                     OP_END
                 ]);
+            // no interesting index
             default:
                 return false;
         }
     });
 
+    // parse modded wasm
     parser.parse();
+    // instantiate
     return [new Promise(resolve => WebAssembly.instantiate(parser.write(), Module.imports).then(res => resolve(res.instance), reason => Module.abort(reason)))];
 }, true]);
 
 Module.todo.push([instance => {
     Module.status = "INITIALIZE";
+    // Exports
     Module.exports = Object.fromEntries(Object.entries(instance.exports).map(([key, func]) => [WASM_EXPORTS[key], func]));    
     Module.rawExports = instance.exports;
+    // Memory
     Module.memBuf = wasmImports.wasmMemory.buffer,
     Module.HEAPU8 = new Uint8Array(Module.memBuf);
     Module.HEAP8 = new Int8Array(Module.memBuf);
@@ -320,41 +493,86 @@ Module.todo.push([instance => {
     Module.HEAPF64 = new Float64Array(Module.memBuf);
     Module.HEAPU64 = new BigUint64Array(Module.memBuf);
     Module.HEAP64 = new BigInt64Array(Module.memBuf);
+    // Cp5 Contexts
     Module.cp5 = {
         contexts: [],
         images: [],
         sockets: [],
         patterns: []
     };
+    // window.input & misc, see input.js
     window.setupInput();
+    // Diep Memory Analyzer, see dma.js
     window.setupDMA();
     return [];
 }, false]);
 
 Module.todo.push([() => {
     window.Game = {
+        // refetches servers & resets gamemode buttons
         reloadServers: async () => {
             Module.servers = await fetch(`${API_URL}servers`).then(res => res.json());
             Module.loadGamemodeButtons();
         },
+        // refetches tankdefs & resets them
         reloadTanks: async () => {
             Module.tankDefinitions = await fetch(`${API_URL}tanks`).then(res => res.json());
             for(const tankDef of Module.tankDefinitionsTable) Module.exports.free(tankDef);
             Module.loadTankDefinitions();
         },
+        reloadCommands: async () => {
+            Module.commandDefinitions = await fetch(`${API_URL}commands`).then(res => res.json());
+            Module.loadCommands(Module.commandDefinitions); // remote
+            Module.loadCommands(); // local
+        },
+        // sets changelog (input: [...""])
         changeChangelog: (lines) => Module.loadChangelog(lines),
-        socket: null,
+        // main socket, see also Module.cp5.sockets[0]
+        get socket() {
+            return Module.cp5.sockets[0];
+        },
+        // executes spawn command
         spawn: name => window.input.execute(`game_spawn ${name}`),
+        // executes reconnect command
         reconnect: () => window.input.execute(`lb_reconnect`)
     };
+
+    // custom commands
+    Module.executeCommandFunctionIndex = Module.imports.a.table.grow(1);
+    Module.imports.a.table.set(Module.executeCommandFunctionIndex, Module.rawExports.executeCommand);
     
     Module.status = "START";
+    // emscripten requirements
     Module.HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     Module.isRunning = true;
     Module.exports.wasmCallCtors();
     Module.exports.main();
+
+
+    const reloadServersInterval = () => setTimeout(() => {
+        reloadServersInterval();
+        if(Module.reloadServersInterval < 0) return;
+        Game.reloadServers(); 
+    }, Module.reloadServersInterval);
+    reloadServersInterval();
+
+    const reloadTanksInterval = () => setTimeout(() => {
+        reloadTanksInterval();
+        if(Module.reloadCommandsInterval < 0) return;
+        Game.reloadTanks();
+    }, Module.reloadTanksInterval);
+    reloadTanksInterval();
+
+    const reloadCommandsInterval = () => setTimeout(() => {
+        reloadCommandsInterval();
+        if(Module.reloadCommandsInterval < 0) return;
+        Game.reloadCommands();
+    }, Module.reloadCommandsInterval);
+    reloadCommandsInterval();
 }, false]);
 
+
+// Part of the original emscripten bootstrap
 class ASMConsts {
     static createCanvasCtxWithAlpha(canvasId, alpha) {
         const canvas = document.getElementById(Module.UTF8ToString(canvasId));
@@ -697,7 +915,8 @@ class ASMConsts {
     }
 
     static setLocation(newLocation) {
-        window.localStorage = Module.UTF8ToString(newLocation);
+        // open in new tab instead
+        window.open(Module.UTF8ToString(newLocation));
     }
 
     static contextDrawImage(ctxId, imgId) {
@@ -905,7 +1124,7 @@ class ASMConsts {
 
     static createWebSocket(url) {
         url = Module.UTF8ToString(url);
-        if (url.split('.').length === 4) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.indexOf('.'))}`;
+        if (url.split(".").length === 4) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.indexOf("."))}`;
         else if (url.endsWith(":443")) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.length - 4)}`
         else return prompt("Error loading into game. Take a picture of this then send to our support server (github.com/ABCxFF/diepcustom)", url);
     
@@ -926,6 +1145,16 @@ class ASMConsts {
         };
         ws.onmessage = function(e) {
             const view = new Uint8Array(e.data);
+            if(view[0] === 7) {
+                let out = 0, i = 0, at = 1;
+                while(view[at] & 0x80) {
+                    out |= (view[at++] & 0x7f) << i;
+                    i += 7;
+                }
+                out |= (view[at++] & 0x7f) << i;
+                Module.permissionLevel = (0 - (out & 1)) ^ (out >>> 1);
+                window.Game.reloadCommands();
+            }
             const ptr = Module.exports.malloc(view.length);
             Module.HEAP8.set(view, ptr);
             ws.events.push([1, ptr, view.length]);
@@ -937,8 +1166,12 @@ class ASMConsts {
             Module.cp5.sockets[i] = ws;
             return i;
         }
+
+        if(Module.reloadServersInterval === -2) Game.reloadServers();
+        if(Module.reloadTanksInterval === -2) Game.reloadTanks(); 
+        if(Module.reloadCommandsInterval === -2) Game.reloadCommands();
+
         Module.cp5.sockets.push(ws);
-        window.Game.socket = ws;
         return Module.cp5.sockets.length - 1;
     }
 

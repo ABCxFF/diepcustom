@@ -6760,3 +6760,7 @@ export const TankCount = TankDefinitions.reduce((a, b) => b ? a + 1 : a, 0);
 export const getTankById = function (id: number): TankDefinition | null {
     return (id < 0 ? DevTankDefinitions[~id] : TankDefinitions[id]) || null;
 }
+
+export const getTankByName = function (tankName: string): TankDefinition | null {
+    return TankDefinitions.find(tank => tank && tank.name === tankName) || DevTankDefinitions.find(tank => tank && tank.name === tankName) || null;
+}
