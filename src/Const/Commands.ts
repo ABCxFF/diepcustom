@@ -139,13 +139,13 @@ export const commandCallbacks = {
         player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
     },
     game_claim: (client: Client, entityArg: string) => {
-        const TEntity = {
-            "ArenaCloser": ArenaCloser,
-            "Dominator": Dominator,
-            "Shape": AbstractShape,
-            "Boss": AbstractBoss,
-            "AutoTurret": AutoTurret
-        }[entityArg];
+        const TEntity = new Map([
+          ["ArenaCloser", ArenaCloser],
+          ["Dominator", Dominator],
+          ["Shape", AbstractShape],
+          ["Boss", AbstractBoss],
+          ["AutoTurret", AutoTurret]
+        ]).get(entityArg);
 
         if (!TEntity || !client.camera?.game.entities.AIs.length) return;
 
@@ -153,6 +153,7 @@ export const commandCallbacks = {
         for (let i = 0; i < AIs.length; ++i) {
             if (!(AIs[i].owner instanceof TEntity)) continue;
             client.possess(AIs[i]);
+            return;
         }
     },
     admin_godmode: (client: Client) => {
@@ -169,20 +170,20 @@ export const commandCallbacks = {
         const x = parseInt(xArg || "");
         const y = parseInt(yArg || "");
         const game = client.camera?.game;
-        const TEntity = {
-            "Defender": Defender,
-            "Summoner": Summoner,
-            "Guardian": Guardian,
-            "FallenOverlord": FallenOverlord,
-            "FallenBooster": FallenBooster,
-            "FallenAC": FallenAC,
-            "FallenSpike": FallenSpike,
-            "ArenaCloser": ArenaCloser,
-            "Crasher": Crasher,
-            "Pentagon": Pentagon,
-            "Square": Square,
-            "Triangle": Triangle,
-        }[entityArg];
+        const TEntity = new Map([
+            ["Defender", Defender],
+            ["Summoner", Summoner],
+            ["Guardian", Guardian],
+            ["FallenOverlord", FallenOverlord],
+            ["FallenBooster", FallenBooster],
+            ["FallenAC", FallenAC],
+            ["FallenSpike", FallenSpike],
+            ["ArenaCloser", ArenaCloser],
+            ["Crasher", Crasher],
+            ["Pentagon", Pentagon],
+            ["Square", Square],
+            ["Triangle", Triangle]
+        ])[entityArg];
 
         if (isNaN(count) || count < 0 || !game || !TEntity) return;
 
@@ -206,14 +207,14 @@ export const commandCallbacks = {
         client?.camera?.game.arena.close();
     },
     admin_kill_entity: (client: Client, entityArg: string) => {
-        const TEntity = {
-            "ArenaCloser": ArenaCloser,
-            "Dominator": Dominator,
-            "Bullet": Bullet,
-            "Tank": TankBody,
-            "Shape": AbstractShape,
-            "Boss": AbstractBoss
-        }[entityArg];
+        const TEntity = new Map([
+          ["ArenaCloser", ArenaCloser],
+          ["Dominator", Dominator],
+          ["Bullet", Bullet],
+          ["Tank", TankBody],
+          ["Shape", AbstractShape],
+          ["Boss", AbstractBoss]
+        ])[entityArg];
         const game = client.camera?.game;
         if (!TEntity || !game) return;
 
@@ -226,11 +227,11 @@ export const commandCallbacks = {
 
 export const executeCommand = (client: Client, cmd: string, args: string[]) => {
     if (!commandDefinitions.hasOwnProperty(cmd) || !commandCallbacks.hasOwnProperty(cmd)) {
-        return saveToVLog(`Someones tried to run the invalid command ${cmd}`);
+        return saveToVLog(`${client.toString()} tried to run the invalid command ${cmd}`);
     }
 
     if (client.accessLevel < commandDefinitions[cmd as CommandID].permissionLevel) {
-        return saveToVLog(`Someone tried to run the command ${cmd} with a permission that was too low`);
+        return saveToVLog(`${client.toString()} tried to run the command ${cmd} with a permission that was too low`);
     }
 
     commandCallbacks[cmd as CommandID](client, ...args);
