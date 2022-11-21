@@ -311,7 +311,7 @@ const wasmImports = {
     envGet: () => 0, // unused
     envSize: () => 0, // unused
     fdWrite: Module.fdWrite, // used for diep client console
-    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5), // no, default Math.round doesn"t work :D
+    roundF: d => d >= 0 ? Math.floor(d + 0.5) : Math.ceil(d - 0.5), // no, default Math.round doesn't work :D
     timeString: () => 0, // unused
     wasmMemory: new WebAssembly.Memory(WASM_MEMORY),
     wasmTable: new WebAssembly.Table(WASM_TABLE)
