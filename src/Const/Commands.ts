@@ -225,7 +225,7 @@ export const commandCallbacks = {
 } as Record<CommandID, CommandCallback>
 
 export const executeCommand = (client: Client, cmd: string, args: string[]) => {
-    if (!commandDefinitions[cmd as CommandID] || !commandCallbacks[cmd as CommandID]) {
+    if (!commandDefinitions.hasOwnProperty(cmd) || !commandCallbacks.hasOwnProperty(cmd)) {
         return saveToVLog(`Someones tried to run the invalid command ${cmd}`);
     }
 
