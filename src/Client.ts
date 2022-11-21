@@ -247,7 +247,7 @@ export default class Client {
             }
 
             // Finish handshake
-            this.write().u8(ClientBound.Accept).send();
+            this.write().u8(ClientBound.Accept).vi(this.accessLevel).send();
             this.write().u8(ClientBound.ServerInfo).stringNT(this.game.gamemode).stringNT(config.host).send();
             this.write().u8(ClientBound.PlayerCount).vu(GameServer.globalPlayerCount).send();
             this.camera = new Camera(this.game, this);
