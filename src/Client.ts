@@ -494,7 +494,7 @@ export default class Client {
         if (!this.camera?.camera || ai.state === AIState.possessed) return false;
 
         this.inputs.deleted = true;
-        ai.inputs = this.inputs = new ClientInputs();
+        ai.inputs = this.inputs = new ClientInputs(this);
         this.inputs.isPossessing = true;
         ai.isTaken = true;
         ai.state = AIState.possessed;
