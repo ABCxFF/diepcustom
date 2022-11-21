@@ -475,6 +475,7 @@ export default class Client {
                 return;
             }
             case ServerBound.TCPInit:
+                if(!config.enableCommands) return;
                 const cmd = r.stringNT();
                 const argsLength = r.u8();
                 const args: string[] = [];
@@ -489,7 +490,7 @@ export default class Client {
         }
     }
     
-    /** Attempts possessing of an AI */
+    /** Attempts possession of an AI */
     public possess(ai: AI) {
         if (!this.camera?.camera || ai.state === AIState.possessed) return false;
 
