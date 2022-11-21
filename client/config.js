@@ -290,7 +290,7 @@ const CUSTOM_COMMANDS = [
         "callback": args => {
             if(args[0]) {
                 const num = parseInt(args[0]);
-                if(isNaN(isNum)) {
+                if(isNaN(num)) {
                     switch(args[0]) {
                         case "never":
                             return Module.reloadServersInterval = -1;
@@ -309,7 +309,7 @@ const CUSTOM_COMMANDS = [
         "callback": args => {
             if(args[0]) {
                 const num = parseInt(args[0]);
-                if(isNaN(isNum)) {
+                if(isNaN(num)) {
                     switch(args[0]) {
                         case "never":
                             return Module.reloadTanksInterval = -1;
@@ -328,7 +328,7 @@ const CUSTOM_COMMANDS = [
         "callback": args => {
             if(args[0]) {
                 const num = parseInt(args[0]);
-                if(isNaN(isNum)) {
+                if(isNaN(num)) {
                     switch(args[0]) {
                         case "never":
                             return Module.reloadCommandsInterval = -1;
