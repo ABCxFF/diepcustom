@@ -24,6 +24,7 @@ import * as util from "./util";
 import GameServer from "./Game";
 import auth from "./Auth";
 import TankDefinitions from "./Const/TankDefinitions";
+import { commandDefinitions } from "./Const/Commands";
 
 const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
