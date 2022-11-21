@@ -11,6 +11,7 @@ import ArenaCloser from "../Entity/Misc/ArenaCloser";
 import FallenAC from "../Entity/Misc/Boss/FallenAC";
 import FallenSpike from "../Entity/Misc/Boss/FallenSpike";
 import Dominator from "../Entity/Misc/Dominator";
+import ObjectEntity from "../Entity/Object";
 import AbstractShape from "../Entity/Shape/AbstractShape";
 import Crasher from "../Entity/Shape/Crasher";
 import Pentagon from "../Entity/Shape/Pentagon";
@@ -145,7 +146,7 @@ export const commandCallbacks = {
           ["Shape", AbstractShape],
           ["Boss", AbstractBoss],
           ["AutoTurret", AutoTurret]
-        ]).get(entityArg);
+        ] as [string, typeof ObjectEntity][]).get(entityArg)
 
         if (!TEntity || !client.camera?.game.entities.AIs.length) return;
 
@@ -183,7 +184,7 @@ export const commandCallbacks = {
             ["Pentagon", Pentagon],
             ["Square", Square],
             ["Triangle", Triangle]
-        ])[entityArg];
+        ] as [string, typeof ObjectEntity][]).get(entityArg);
 
         if (isNaN(count) || count < 0 || !game || !TEntity) return;
 
@@ -214,7 +215,7 @@ export const commandCallbacks = {
           ["Tank", TankBody],
           ["Shape", AbstractShape],
           ["Boss", AbstractBoss]
-        ])[entityArg];
+        ] as [string, typeof LivingEntity][]).get(entityArg);
         const game = client.camera?.game;
         if (!TEntity || !game) return;
 
