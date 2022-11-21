@@ -460,54 +460,8 @@ export default class Client {
                     });
 
                     for (let i = 0; i < AIs.length; ++i) {
-                        if (AIs[i].state !== AIState.possessed && ((!AIs[i].isTaken && AIs[i].owner.relations.values.team === camera.relations.values.team)|| this.accessLevel === config.AccessLevel.FullAccess)) {
-                        // if (AIs[i].state !== AIState.possessed && (AIs[i].owner.relations.values.team === camera.relations.values.team|| this.accessLevel === config.AccessLevel.FullAccess)) {
-                            const ai = AIs[i];
-
-                            this.inputs.deleted = true;
-                            ai.inputs = this.inputs = new ClientInputs(this);
-                            this.inputs.isPossessing = true;
-                            ai.isTaken = true;
-                            ai.state = AIState.possessed;
-
-                            // Silly workaround to change color of player when needed
-                            if (camera.camera.values.player instanceof ObjectEntity) camera.camera.values.player.state |= camera.camera.values.player.style.state.color = 1;
-
-                            camera.camera.tankOverride = ai.owner.name?.values.name || "";
-                            
-                            camera.camera.tank = 53;
-                            
-                            // AI stats, confirmed by Mounted Turret videos
-                            for (let i = 0; i < StatCount; ++i) camera.camera.statLevels[i as Stat] = 0;
-                            for (let i = 0; i < StatCount; ++i) camera.camera.statLimits[i as Stat] = 7;
-                            for (let i = 0; i < StatCount; ++i) camera.camera.statNames[i as Stat] = "";
-
-
-                            camera.camera.killedBy = "";
-                            camera.camera.player = ai.owner;
-                            camera.camera.movementSpeed = ai.movementSpeed;
-
-                            if (ai.owner instanceof TankBody) {
-                                // If its a TankBody, set the stats, level, and tank to that of the TankBody
-                                camera.camera.tank = ai.owner.cameraEntity.camera.values.tank;
-                                camera.setLevel(ai.owner.cameraEntity.camera.values.level);
-                                
-                                for (let i = 0; i < StatCount; ++i) camera.camera.statLevels[i as Stat] = ai.owner.cameraEntity.camera.statLevels.values[i];
-                                for (let i = 0; i < StatCount; ++i) camera.camera.statLimits[i as Stat] = ai.owner.cameraEntity.camera.statLimits.values[i];
-                                for (let i = 0; i < StatCount; ++i) camera.camera.statNames[i as Stat] = ai.owner.cameraEntity.camera.statNames.values[i];
-
-                                camera.camera.FOV = 0.35;
-                            } else if (ai.owner instanceof AbstractBoss) {
-                                camera.setLevel(75);
-                                camera.camera.FOV = 0.25;
-                            } else {
-                                camera.setLevel(30);
-                                // this.camera.movementSpeed = 0;
-                            }
-                            
-                            camera.camera.statsAvailable = 0;
-                            camera.camera.scorebar = 0;
-
+                        if (((!AIs[i].isTaken && AIs[i].owner.relations.values.team === camera.relations.values.team) || this.accessLevel === config.AccessLevel.FullAccess)) {
+                            if(!this.possess(AIs[i])) continue;
                             this.notify("Press H to surrender control of your tank", 0x000000, 5000);
                             return;
                         }
@@ -525,6 +479,55 @@ export default class Client {
                 util.log("Suspicious activies have been evaded")
                 return this.ban();
         }
+    }
+    
+    /** Attempts possessing of an AI */
+    public possess(ai: AI) {
+        if (!this.camera?.camera || ai.state === AIState.possessed) return false;
+
+        this.inputs.deleted = true;
+        ai.inputs = this.inputs = new ClientInputs();
+        this.inputs.isPossessing = true;
+        ai.isTaken = true;
+        ai.state = AIState.possessed;
+
+        // Silly workaround to change color of player when needed
+        if (this.camera?.camera.values.player instanceof ObjectEntity) this.camera.camera.values.player.state |= this.camera.camera.values.player.style.state.color = 1;
+
+        this.camera.camera.tankOverride = ai.owner.name?.values.name || "";
+        
+        this.camera.camera.tank = 53;
+        
+        // AI stats, confirmed by Mounted Turret videos
+        for (let i = 0; i < StatCount; ++i) this.camera.camera.statLevels[i as Stat] = 0;
+        for (let i = 0; i < StatCount; ++i) this.camera.camera.statLimits[i as Stat] = 7;
+        for (let i = 0; i < StatCount; ++i) this.camera.camera.statNames[i as Stat] = "";
+
+
+        this.camera.camera.killedBy = "";
+        this.camera.camera.player = ai.owner;
+        this.camera.camera.movementSpeed = ai.movementSpeed;
+
+        if (ai.owner instanceof TankBody) {
+            // If its a TankBody, set the stats, level, and tank to that of the TankBody
+            this.camera.camera.tank = ai.owner.cameraEntity.camera.values.tank;
+            this.camera.setLevel(ai.owner.cameraEntity.camera.values.level);
+            
+            for (let i = 0; i < StatCount; ++i) this.camera.camera.statLevels[i as Stat] = ai.owner.cameraEntity.camera.statLevels.values[i];
+            for (let i = 0; i < StatCount; ++i) this.camera.camera.statLimits[i as Stat] = ai.owner.cameraEntity.camera.statLimits.values[i];
+            for (let i = 0; i < StatCount; ++i) this.camera.camera.statNames[i as Stat] = ai.owner.cameraEntity.camera.statNames.values[i];
+
+            this.camera.camera.FOV = 0.35;
+        } else if (ai.owner instanceof AbstractBoss) {
+            this.camera.setLevel(75);
+            this.camera.camera.FOV = 0.25;
+        } else {
+            this.camera.setLevel(30);
+        }
+        
+        this.camera.camera.statsAvailable = 0;
+        this.camera.camera.scorebar = 0;
+        return true;
     }
 
     /** Sends a notification packet to the client. */
