@@ -278,11 +278,74 @@ const ADDON_MAP = {
 
 const CUSTOM_COMMANDS = [
     {
-        "id": "cmd_test",
-        "usage": "[printNumber]",
-        "description": "Test command to check if custom commands are working",
+        "id": "test",
+        "description": "Test command to check if custom commands are working, prints 'Hello World' to the console",
         "callback": args => { // array of strings, you need to parse them yourself
-            console.log(`Test Command Run, ${args[0]}, ${parseInt(args[0])}`);
+            console.log("Hello World");
+        }
+    }, {
+        "id": "util_reload_servers",
+        "usage": "[?interval]",
+        "description": "Sets the interval in which gamemodes are reloaded automatically (milliseconds, 'never' or 'connect') or reloads once if no interval is given",
+        "callback": args => {
+            if(args[0]) {
+                const num = parseInt(args[0]);
+                if(isNaN(isNum)) {
+                    switch(args[0]) {
+                        case "never":
+                            return Module.reloadServersInterval = -1;
+                        case "connect":
+                            return Module.reloadServersInterval = -2;
+                    }
+                }
+                return Module.reloadServersInterval = num;
+            }
+            Game.reloadServers();
+        }
+    }, {
+        "id": "util_reload_tanks",
+        "usage": "[?interval]",
+        "description": "Sets the interval in which tanks are reloaded automatically (milliseconds, 'never' or 'connect') or reloads once if no interval is given",
+        "callback": args => {
+            if(args[0]) {
+                const num = parseInt(args[0]);
+                if(isNaN(isNum)) {
+                    switch(args[0]) {
+                        case "never":
+                            return Module.reloadTanksInterval = -1;
+                        case "connect":
+                            return Module.reloadTanksInterval = -2;
+                    }
+                }
+                return Module.reloadTanksInterval = num;
+            }
+            Game.reloadTanks();
+        }
+    }, {
+        "id": "util_reload_commands",
+        "usage": "[?interval]",
+        "description": "Sets the interval in which commands are reloaded automatically (milliseconds, 'never' or 'connect') or reloads once if no interval is given",
+        "callback": args => {
+            if(args[0]) {
+                const num = parseInt(args[0]);
+                if(isNaN(isNum)) {
+                    switch(args[0]) {
+                        case "never":
+                            return Module.reloadCommandsInterval = -1;
+                        case "connect":
+                            return Module.reloadCommandsInterval = -2;
+                    }
+                }
+                return Module.reloadCommandsInterval = num;
+            }
+            Game.reloadCommands();
+        }
+    }, {
+        "id": "util_set_changelog",
+        "usage": "[line 1\\n] [line 2] ...",
+        "description": "Sets the changelog to the given text, remember to use \\n before and after each line",
+        "callback": args => {
+            Game.changeChangelog(args.join(' ').split("\\n"));
         }
     }
 ];
