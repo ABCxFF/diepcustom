@@ -163,7 +163,7 @@ Module.loadGamemodeButtons = () => {
     const placeholderId = Module.servers.find(e => e.gamemode === 'ffa') ? 'survival' : 'ffa'
     for(let i = 0; i < 2 - Module.servers.length; ++i) {
         vec.push(...[[
-            { offset: 0, type: "cstr", value: "ffa" }, 
+            { offset: 0, type: "cstr", value: placeholderId }, 
             { offset: 12, type: "cstr", value: "Placeholder" }, 
             { offset: 24, type: "i32", value: 1 }
         ]]);
