@@ -57,10 +57,9 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify(games.filter(({ running }) => running).map(({ gamemode, name }) => ({ gamemode, name }))));
             case "/commands":
                 res.writeHead(200);
-                return res.end(JSON.stringify(Object.values(commandDefinitions)));
+                return res.end(JSON.stringify(config.enableCommands ? Object.values(commandDefinitions) : []));
         }
     }
-
 
     if (ENABLE_CLIENT) {
         let file: string | null = null;
