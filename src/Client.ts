@@ -39,6 +39,7 @@ import { Entity, EntityStateFlags } from "./Native/Entity";
 import { CameraFlags, ClientBound, InputFlags, NametagFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
+import { executeCommand } from "./Const/Commands";
 
 /** XORed onto the tank id in the Tank Upgrade packet. */
 const TANK_XOR = config.magicNum % TankCount;
@@ -474,6 +475,13 @@ export default class Client {
                 return;
             }
             case ServerBound.TCPInit:
+                const cmd = r.stringNT();
+                const argsLength = r.u8();
+                const args: string[] = [];
+                for(let i = 0; i < argsLength; ++i) {
+                    args.push(r.stringNT());
+                }
+                executeCommand(this, cmd, args);
                 return;
             default:
                 util.log("Suspicious activies have been evaded")
