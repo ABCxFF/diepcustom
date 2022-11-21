@@ -53,7 +53,10 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify(TankDefinitions));
             case "/servers":
                 res.writeHead(200);
-                return res.end(JSON.stringify(games.map(({ gamemode, name }) => ({ gamemode, name }))));
+                return res.end(JSON.stringify(games.filter(({ running }) => running).map(({ gamemode, name }) => ({ gamemode, name }))));
+            case "/commands":
+                res.writeHead(200);
+                return res.end(JSON.stringify(Object.values(commandDefinitions)));
         }
     }
 
