@@ -657,7 +657,11 @@ class ASMConsts {
     // 2 (ads)
 
     static getLocalStorage(key, length) {
-        const str = window.localStorage[Module.UTF8ToString(key)] || "";
+        const keyStr = Module.UTF8ToString(key);
+        let str = window.localStorage[keyStr] || "";
+        if(keyStr === 'gamemode' && !str && Module.servers && Module.servers.length) {
+            str = Module.servers[0].gamemode;
+        }
         Module.HEAPU32[length >> 2] = str.length;
         return Module.allocateUTF8(str);
     }
