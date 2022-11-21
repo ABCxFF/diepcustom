@@ -1,5 +1,5 @@
 /*
-    DiepCustom - custom tank game server that shares diep.io"s WebSocket protocol
+    DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
 
     This program is free software: you can redistribute it and/or modify
