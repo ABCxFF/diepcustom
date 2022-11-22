@@ -1944,15 +1944,15 @@ const DevTankDefinitions: TankDefinition[] = [
                 "max": 7
             },
             {
-                name: "Bullet Damage",
+                name: "Drone Damage",
                 "max": 7
             },
             {
-                name: "Bullet Penetration",
+                name: "Drone Health",
                 "max": 7
             },
             {
-                name: "Bullet Speed",
+                name: "Drone Speed",
                 "max": 7
             },
             {
