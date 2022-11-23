@@ -87,9 +87,9 @@ class BossMovementControl {
  */
 export default class AbstractBoss extends LivingEntity {
     /** Always existant name field group, present in all bosses. */
-    public name: NameGroup= new NameGroup(this);
+    public name: NameGroup = new NameGroup(this);
     /** Alternate name, eg Guardian and Guardian of the Pentagons to appear in notifications" */
-    public altName = "";
+    public altName: string | null = null;
 
     /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
     public sizeFactor = 1;

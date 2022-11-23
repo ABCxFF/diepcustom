@@ -50,10 +50,6 @@ export const AutoTurretDefinition: BarrelDefinition = {
     }
 };
 
-// const sizeRatio = 0.56 * 50;
-// const widthRatio = 1.1 * 50;
-const baseRatio = .5 * 50;
-
 /**
  * Auto Turret Barrel + Barrel Base
  */
@@ -76,8 +72,10 @@ export default class AutoTurret extends ObjectEntity {
 
     /** The reload time of the turret. */
     public reloadTime = 15;
+    /** The size of the auto turret base */
+    public baseSize: number;
 
-    public constructor(owner: BarrelBase, turretDefinition: BarrelDefinition = AutoTurretDefinition) {
+    public constructor(owner: BarrelBase, turretDefinition: BarrelDefinition = AutoTurretDefinition, baseSize: number = 25) {
         super(owner.game);
 
         this.cameraEntity = owner.cameraEntity;
@@ -92,7 +90,8 @@ export default class AutoTurret extends ObjectEntity {
         this.relations.values.team = owner.relations.values.team;
 
         this.physics.values.sides = 1;
-        this.physics.values.size = baseRatio * this.sizeFactor;
+        this.baseSize = baseSize;
+        this.physics.values.size = this.baseSize * this.sizeFactor;
 
         this.style.values.color = Colors.Barrel;
         this.style.values.styleFlags |= StyleFlags.aboveParent;
@@ -127,7 +126,7 @@ export default class AutoTurret extends ObjectEntity {
     public tick(tick: number) {
         if (this.inputs !== this.ai.inputs) this.inputs = this.ai.inputs;
 
-        this.physics.size = baseRatio * this.sizeFactor;
+        this.physics.size = this.baseSize * this.sizeFactor;
 
         this.ai.aimSpeed = this.turret.bulletAccel;
         // Top Speed
