@@ -63,8 +63,7 @@ export default class Bullet extends LivingEntity {
 
         this.relations.values.owner = tank;
 
-        if (tank.isChild && (tank.style.values.styleFlags & StyleFlags.aboveParent)) tank.style.zIndex = barrel.game.entities.zIndex++;
-        else tank.rootParent.style.zIndex = barrel.game.entities.zIndex++;
+        tank.rootParent.style.zIndex = barrel.game.entities.zIndex++;
 
         const bulletDefinition = barrel.definition.bullet;
         const sizeFactor = tank.sizeFactor;
