@@ -46,7 +46,6 @@ export default class FallenOverlord extends AbstractBoss {
 
         this.sizeFactor = this.physics.values.size / 50;
         if (this.ai.state !== AIState.possessed) {
-            this.inputs.flags = 0;
             this.position.angle += this.ai.passiveRotation;
         }
     }
