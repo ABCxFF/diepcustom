@@ -74,7 +74,7 @@ export default class Summoner extends AbstractBoss {
         for (let i = 0; i < 4; ++i) {
             this.spawners.push(new Barrel(this, {
                 ...SummonerSpawnerDefinition,
-                angle: Math.PI * 2 * ((i / 4) + 1 / 4)
+                angle: Math.PI * 2 * (i / 4)
             }));
 
     }
