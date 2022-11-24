@@ -74,7 +74,7 @@ export default class Summoner extends AbstractBoss {
         for (let i = 0; i < 4; ++i) {
             this.spawners.push(new Barrel(this, {
                 ...SummonerSpawnerDefinition,
-                angle: Math.PI * 2 * ((i / 4) + 1 / 4)
+                angle: Math.PI * 2 * (i / 4)
             }));
 
     }
@@ -85,7 +85,6 @@ export default class Summoner extends AbstractBoss {
 
         this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / SUMMONER_SIZE;
         if (this.ai.state !== AIState.possessed) {
-            this.inputs.flags = 0;
             this.position.angle += this.ai.passiveRotation;
         }
     }

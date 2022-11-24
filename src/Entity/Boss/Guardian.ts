@@ -79,8 +79,5 @@ export default class Guardian extends AbstractBoss {
         super.tick(tick);
         // Let it scale with the guardian
         this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / GUARDIAN_SIZE;
-        if (this.ai.state !== AIState.possessed) {
-            this.inputs.flags = 0;
-        }
     }
 }
