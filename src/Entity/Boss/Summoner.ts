@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
 import AbstractBoss from "./AbstractBoss";
 
-import { Colors, Tank, InputFlags } from "../../Const/Enums";
+import { Colors, Tank } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
