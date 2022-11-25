@@ -2294,7 +2294,6 @@ const TankDefinitions = JSON.parse(`[
                 "addon": null,
                 "droneCount": 0,
                 "canControlDrones": true,
-                 
                 "bullet": {
                     "type": "necrodrone",
                     "sizeRatio": 1,
@@ -2320,7 +2319,7 @@ const TankDefinitions = JSON.parse(`[
                 "droneCount": 0,
                 "canControlDrones": true,
                 "bullet": {
-                    "type": "drone",
+                    "type": "necrodrone",
                     "sizeRatio": 1,
                     "health": 2,
                     "damage": 0.42,
