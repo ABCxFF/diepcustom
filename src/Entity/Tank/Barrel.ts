@@ -36,6 +36,7 @@ import MazeWall from "../Misc/MazeWall";
 import CrocSkimmer from "./Projectile/CrocSkimmer";
 import { BarrelAddon, BarrelAddonById } from "./BarrelAddons";
 import { Swarm } from "./Projectile/Swarm";
+import NecromancerSquare from "./Projectile/NecromancerSquare";
 /**
  * Class that determines when barrels can shoot, and when they can't.
  */
@@ -182,6 +183,9 @@ export default class Barrel extends ObjectEntity {
                 break;
             case 'drone':
                 new Drone(this, this.tank, tankDefinition, angle);
+                break;
+            case 'necrodrone':
+                new NecromancerSquare(this, this.tank, tankDefinition, angle);
                 break;
             case 'swarm':
                 new Swarm(this, this.tank, tankDefinition, angle);
