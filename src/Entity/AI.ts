@@ -71,8 +71,8 @@ export class Inputs {
 export class AI {
     /** Default static rotation that Auto Turrets rotate when in passive mode. */
     public static PASSIVE_ROTATION = 0.01;
-    /** Whether or not the AI is available for taking... */
-    public isTaken = false;
+    /** Whether a player < FullAccess can claim */
+    public isClaimable: boolean = false;
     
     /** Specific rotation of the AI in passive mode. */
     public passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
@@ -97,8 +97,7 @@ export class AI {
     /** Target filter letting owner classes filter what can't be a target by position - false = not valid target */
     public targetFilter: (possibleTargetPos: VectorAbstract) => boolean;
 
-    public constructor(owner: ObjectEntity) {
-
+    public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;
         this.game = owner.game;
 
@@ -108,6 +107,7 @@ export class AI {
         });
 
         this.targetFilter = () => true;
+        if (claimable) this.isClaimable = true;
 
         this.game.entities.AIs.push(this);
     }
@@ -229,7 +229,6 @@ export class AI {
             if (!this.inputs.deleted) return;
             
             this.inputs = new Inputs();
-            this.isTaken = false; // Only possessed when not taken
         }
         
         const target = this.findTarget();

@@ -62,7 +62,7 @@ export default class Dominator extends TankBody {
         // Add setTeam method for this
         this.style.values.color = Colors.Neutral;
 
-        this.ai = new AI(this);
+        this.ai = new AI(this, true);
         this.ai.inputs = inputs;
         this.ai.movementSpeed = 0;
         this.ai.viewRange = 2000;

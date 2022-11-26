@@ -72,7 +72,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     /** The current tank definition / tank id. */
     private _currentTank: Tank | DevTank = Tank.Basic;
     /** Whether or not the spawn invulnerability happened already. */
-    private spawnProtectionEnded = false;
+    public spawnProtectionEnded = false;
 
     public constructor(game: GameServer, camera: CameraEntity, inputs: Inputs) {
         super(game);

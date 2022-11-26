@@ -52,7 +52,7 @@ export default class Mothership extends TankBody {
 
         this.style.values.color = Colors.Neutral;
 
-        this.ai = new AI(this);
+        this.ai = new AI(this, true);
         this.ai.inputs = inputs;
         this.ai.viewRange = 2000;
         

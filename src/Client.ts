@@ -36,7 +36,7 @@ import TankBody from "./Entity/Tank/TankBody";
 
 import Vector, { VectorAbstract } from "./Physics/Vector";
 import { Entity, EntityStateFlags } from "./Native/Entity";
-import { CameraFlags, ClientBound, GUIFlags, InputFlags, NametagFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
+import { CameraFlags, ClientBound, GUIFlags, InputFlags, NametagFlags, ServerBound, Stat, StatCount, StyleFlags, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
@@ -302,11 +302,18 @@ export default class Client {
                 // No AI
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
 
-                if ((flags & InputFlags.godmode) && (this.accessLevel >= config.AccessLevel.BetaAccess || true)) {
-                    player.name.nametag |= NametagFlags.cheats;
-                    this.devCheatsUsed = 1;
+                if ((flags & InputFlags.godmode)) {
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess) {
+                        player.name.nametag |= NametagFlags.cheats;
+                        this.devCheatsUsed = 1;
 
-                    player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
+                        player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
+                    } else if (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) {
+                        // TODO:
+                        // Make it real invincibility
+                        if (!player.spawnProtectionEnded) player.spawnProtectionEnded = true;
+                        else player.style.styleFlags ^= StyleFlags.invincibility;
+                    }
                 }
 
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
@@ -316,28 +323,30 @@ export default class Client {
                     player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
-                    player.name.nametag |= NametagFlags.cheats;
-                    this.devCheatsUsed = 1;
-                    
-                    let tank = player.currentTank;
-                    if (tank >= 0) {
-                        tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
-
-                        while (!TankDefinitions[tank] || (TankDefinitions[tank]?.flags.devOnly && this.accessLevel < config.AccessLevel.FullAccess)) {
-                            tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
-                        }
-                    } else {
-                        const isDeveloper = this.accessLevel === config.AccessLevel.FullAccess;
-                        tank = ~tank;
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats)) {
+                        player.name.nametag |= NametagFlags.cheats;
+                        this.devCheatsUsed = 1;
                         
-                        tank = (tank + 1) % DevTankDefinitions.length;
-                        while (!DevTankDefinitions[tank] || DevTankDefinitions[tank].flags.devOnly === true && !isDeveloper) {
-                            tank = (tank + 1) % DevTankDefinitions.length;
-                        }
-                        tank = ~tank;
-                    }
+                        let tank = player.currentTank;
+                        if (tank >= 0) {
+                            tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
 
-                    player.setTank(tank);
+                            while (!TankDefinitions[tank] || (TankDefinitions[tank]?.flags.devOnly && this.accessLevel < config.AccessLevel.FullAccess)) {
+                                tank = (tank + TankDefinitions.length - 1) % TankDefinitions.length;
+                            }
+                        } else {
+                            const isDeveloper = this.accessLevel === config.AccessLevel.FullAccess;
+                            tank = ~tank;
+                            
+                            tank = (tank + 1) % DevTankDefinitions.length;
+                            while (!DevTankDefinitions[tank] || DevTankDefinitions[tank].flags.devOnly === true && !isDeveloper) {
+                                tank = (tank + 1) % DevTankDefinitions.length;
+                            }
+                            tank = ~tank;
+                        }
+
+                        player.setTank(tank);
+                    }
                 }
                 if (flags & InputFlags.levelup) {
                     // If full access, or if the game allows cheating and lvl is < 45, or if the player is a BT access level and lvl is < 45
@@ -349,12 +358,14 @@ export default class Client {
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
-                    player.name.nametag |= NametagFlags.cheats;
-                    this.devCheatsUsed = 1;
-                    
-                    this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
-                    camera.camera.killedBy = player.name.values.name;
-                    player.destroy();
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats)) {
+                        player.name.nametag |= NametagFlags.cheats;
+                        this.devCheatsUsed = 1;
+                        
+                        this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
+                        camera.camera.killedBy = player.name.values.name;
+                        player.destroy();
+                    }
                 }
                 return;
             }
@@ -464,7 +475,7 @@ export default class Client {
                     });
 
                     for (let i = 0; i < AIs.length; ++i) {
-                        if (((!AIs[i].isTaken && AIs[i].owner.relations.values.team === camera.relations.values.team) || this.accessLevel === config.AccessLevel.FullAccess)) {
+                        if ((AIs[i].state !== AIState.possessed) && ((AIs[i].owner.relations.values.team === camera.relations.values.team && AIs[i].isClaimable) || this.accessLevel === config.AccessLevel.FullAccess)) {
                             if(!this.possess(AIs[i])) continue;
                             this.notify("Press H to surrender control of your tank", 0x000000, 5000);
                             return;
@@ -500,7 +511,6 @@ export default class Client {
         this.inputs.deleted = true;
         ai.inputs = this.inputs = new ClientInputs(this);
         this.inputs.isPossessing = true;
-        ai.isTaken = true;
         ai.state = AIState.possessed;
 
         // Silly workaround to change color of player when needed
