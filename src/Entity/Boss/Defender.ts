@@ -25,6 +25,7 @@ import { Colors, Tank, MotionFlags } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
+import { PI2 } from "../../util";
 
 /**
  * Definitions (stats and data) of the mounted turret on Defender
@@ -97,7 +98,7 @@ export default class Defender extends AbstractBoss {
             // Add trap launcher
             this.trappers.push(new Barrel(this, {
                 ...DefenderDefinition,
-                angle: Math.PI * 2 * ((i / 3) - 1 / 6)
+                angle: PI2 * ((i / 3) - 1 / 6)
             }));
 
             // TODO:
@@ -105,7 +106,7 @@ export default class Defender extends AbstractBoss {
             const base = new AutoTurret(this, MountedTurretDefinition);
             base.influencedByOwnerInputs = true;
 
-            const angle = base.ai.inputs.mouse.angle = Math.PI * 2 * (i / 3);
+            const angle = base.ai.inputs.mouse.angle = PI2 * (i / 3);
 
             base.position.values.y = this.physics.values.size * Math.sin(angle) * 0.6;
             base.position.values.x = this.physics.values.size * Math.cos(angle) * 0.6;

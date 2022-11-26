@@ -16,6 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+import { PI2 } from "../util";
 import { TankDefinition } from "./TankDefinitions";
 
 /**
@@ -334,7 +335,7 @@ const DevTankDefinitions: TankDefinition[] = [
         borderWidth: 15,
         barrels: [
             {
-                angle: (Math.PI * 2) / 7 * 0,
+                angle: PI2/ 7 * 0,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -356,7 +357,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 1,
+                angle: PI2/ 7 * 1,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -378,7 +379,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 2,
+                angle: PI2/ 7 * 2,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -400,7 +401,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 3,
+                angle: PI2/ 7 * 3,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -422,7 +423,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 4,
+                angle: PI2/ 7 * 4,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -444,7 +445,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 5,
+                angle: PI2/ 7 * 5,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -466,7 +467,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 7 * 6,
+                angle: PI2/ 7 * 6,
                 offset: 0,
                 size: 100,
                 width: 60,
@@ -571,7 +572,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: Math.PI * 2 / 3,
+                angle: PI2 / 3,
                 offset: 0,
                 size: 65,
                 width: 42,
@@ -1790,7 +1791,7 @@ const DevTankDefinitions: TankDefinition[] = [
         borderWidth: 15,
         barrels: [
             {
-                angle: (Math.PI * 2) / 6 * 1,
+                angle: PI2/ 6 * 1,
                 offset: 0,
                 size: 70,
                 width: 42,
@@ -1814,7 +1815,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 6 * 3,
+                angle: PI2/ 6 * 3,
                 offset: 0,
                 size: 70,
                 width: 42,
@@ -1838,7 +1839,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 6 * 5,
+                angle: PI2/ 6 * 5,
                 offset: 0,
                 size: 70,
                 width: 42,
@@ -1862,7 +1863,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 6 * 2,
+                angle: PI2/ 6 * 2,
                 offset: 0,
                 size: 70,
                 width: 42,
@@ -1886,7 +1887,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 6 * 4,
+                angle: PI2/ 6 * 4,
                 offset: 0,
                 size: 70,
                 width: 42,
@@ -1910,7 +1911,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: (Math.PI * 2) / 6 * 6,
+                angle: PI2/ 6 * 6,
                 offset: 0,
                 size: 70,
                 width: 42,

@@ -21,6 +21,7 @@ import TankBody from "../Entity/Tank/TankBody";
 import GameServer from "../Game";
 import ArenaEntity, { ArenaState } from "../Native/Arena";
 import { Entity } from "../Native/Entity";
+import { PI2 } from "../util";
 
 
 // TODO
@@ -44,7 +45,7 @@ export default class MothershipArena extends ArenaEntity {
         this.arena.GUI |= GUIFlags.hideScorebar;
 
         // little fun thing to support multiple teams - spread colors around map
-        let randAngle = Math.random() * Math.PI * 2;
+        let randAngle = Math.random() * PI2;
         for (const teamColor of TEAM_COLORS) {
             const team = new TeamEntity(this.game, teamColor);
             this.teams.push(team);
@@ -57,7 +58,7 @@ export default class MothershipArena extends ArenaEntity {
             mot.position.values.x = Math.cos(randAngle) * arenaSize * 0.75;
             mot.position.values.y = Math.sin(randAngle) * arenaSize * 0.75;
 
-            randAngle += Math.PI * 2 / TEAM_COLORS.length;
+            randAngle += PI2 / TEAM_COLORS.length;
         }
 
         this.updateBounds(arenaSize * 2, arenaSize * 2);
