@@ -91,12 +91,15 @@ export const enum AccessLevel {
     NoAccess     = -1
 }
 
-// Every access level, including and above this one is unbannable via client.ban()
+/** Every access level, including and above this one is unbannable via client.ban() */
 export const unbannableLevelMinimum: AccessLevel = AccessLevel.FullAccess;
+
+/** Default access level, client's without valid password's will get set to this */
+export const defaultAccessLevel: AccessLevel = AccessLevel.BetaAccess;
 
 /** The developer tokens by role (UNNECESSARY UNLESS DISCORD INTEGRATION) */
 export const devTokens: Record<string, AccessLevel> = {
-    "*": AccessLevel.BetaAccess
+    "*": defaultAccessLevel
 }
 
 /** Should always be set to the url (UNNECESSARY UNLESS DISCORD INTEGRATION) */
