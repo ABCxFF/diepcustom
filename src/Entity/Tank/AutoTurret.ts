@@ -145,8 +145,8 @@ export default class AutoTurret extends ObjectEntity {
 
             if (this.ai.targetFilter({x: x + deltaPos.x, y: y + deltaPos.y}) === false) useAI = true;
             else {
-                if (this.owner.inputs.attemptingRepel()) this.inputs.flags |= InputFlags.rightclick | InputFlags.leftclick;
-                else if (this.owner.inputs.attemptingShot()) this.inputs.flags |= InputFlags.leftclick;
+                // if (this.owner.inputs.attemptingRepel()) this.inputs.flags |= InputFlags.rightclick;
+                this.inputs.flags |= InputFlags.leftclick;
                 this.position.angle = Math.atan2(deltaPos.y, deltaPos.x);
                 this.ai.state |= AIState.hasTarget;
             }

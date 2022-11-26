@@ -50,7 +50,7 @@ export default class MothershipArena extends ArenaEntity {
             const team = new TeamEntity(this.game, teamColor);
             this.teams.push(team);
 
-            const mot = new Mothership(this);
+            const mot = new Mothership(this.game);
             this.motherships.push(mot);
     
             mot.relations.values.team = team;

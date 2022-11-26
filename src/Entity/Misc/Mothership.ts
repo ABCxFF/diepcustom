@@ -19,6 +19,7 @@
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
 import { Colors, Tank, Stat, ColorsHexCode, ClientBound, MothershipFlags } from "../../Const/Enums";
+import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
@@ -38,16 +39,16 @@ export default class Mothership extends TankBody {
     /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
     public possessionStartTick: number = -1;
 
-    public constructor(arena: ArenaEntity) {
+    public constructor(game: GameServer) {
 
         const inputs = new Inputs();
-        const camera = new CameraEntity(arena.game);
+        const camera = new CameraEntity(game);
 
         camera.setLevel(140);
 
-        super(arena.game, camera, inputs);
+        super(game, camera, inputs);
 
-        this.relations.values.team = arena;
+        this.relations.values.team = game.arena;
 
         this.style.values.color = Colors.Neutral;
 
