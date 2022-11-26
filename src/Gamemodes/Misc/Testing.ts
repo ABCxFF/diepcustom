@@ -24,7 +24,7 @@ import TankBody from "../../Entity/Tank/TankBody";
 import { CameraEntity } from "../../Native/Camera";
 import { Inputs } from "../../Entity/AI";
 import { DevTank } from "../../Const/DevTankDefinitions";
-import { Tank } from "../../Const/Enums";
+import { GUIFlags, Tank } from "../../Const/Enums";
 import Client from "../../Client";
 import FallenSpike from "../../Entity/Misc/Boss/FallenSpike";
 import FallenOverlord from "../../Entity/Boss/FallenOverlord";
@@ -48,7 +48,7 @@ export default class TestingArena extends ArenaEntity {
         super(game);
 
         this.updateBounds(4000, 4000);
-
+        this.arena.values.GUI |= GUIFlags.canUseCheats;
         setTimeout(() => {
             new FallenOverlord(game);
             new FallenSpike(game);

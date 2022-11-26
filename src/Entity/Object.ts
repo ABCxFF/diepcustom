@@ -213,7 +213,7 @@ export default class ObjectEntity extends Entity {
         let diffY = this.position.values.y - entity.position.values.y;
         let diffX = this.position.values.x - entity.position.values.x;
         // Prevents drone stacking etc
-        if (diffX === 0 && diffY === 0) kbAngle = Math.random() * Math.PI * 2;
+        if (diffX === 0 && diffY === 0) kbAngle = Math.random() * util.PI2;
         else kbAngle = Math.atan2(diffY, diffX);
 
         if ((entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base) && !(this.position.values.motion & MotionFlags.canMoveThroughWalls))  {

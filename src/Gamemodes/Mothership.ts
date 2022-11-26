@@ -14,13 +14,14 @@
 */
 
 import Client from "../Client";
-import { ClientBound, Colors, ColorsHexCode, GUIFlags, MothershipFlags } from "../Const/Enums";
+import { Colors, GUIFlags, MothershipFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
 import GameServer from "../Game";
 import ArenaEntity, { ArenaState } from "../Native/Arena";
 import { Entity } from "../Native/Entity";
+import { PI2 } from "../util";
 
 
 // TODO
@@ -38,18 +39,21 @@ export default class MothershipArena extends ArenaEntity {
     /** Motherships in game */
     public motherships: Mothership[] = [];
 
+    /** Maps clients to their mothership */
+    public playerTeamMotMap: Map<Client, Mothership> = new Map();
+
     public constructor(game: GameServer) {
         super(game);
 
         this.arena.GUI |= GUIFlags.hideScorebar;
 
         // little fun thing to support multiple teams - spread colors around map
-        let randAngle = Math.random() * Math.PI * 2;
+        let randAngle = Math.random() * PI2;
         for (const teamColor of TEAM_COLORS) {
             const team = new TeamEntity(this.game, teamColor);
             this.teams.push(team);
 
-            const mot = new Mothership(this);
+            const mot = new Mothership(this.game);
             this.motherships.push(mot);
     
             mot.relations.values.team = team;
@@ -57,21 +61,23 @@ export default class MothershipArena extends ArenaEntity {
             mot.position.values.x = Math.cos(randAngle) * arenaSize * 0.75;
             mot.position.values.y = Math.sin(randAngle) * arenaSize * 0.75;
 
-            randAngle += Math.PI * 2 / TEAM_COLORS.length;
+            randAngle += PI2 / TEAM_COLORS.length;
         }
 
         this.updateBounds(arenaSize * 2, arenaSize * 2);
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
-        const team = this.teams[~~(Math.random() * this.teams.length)];
+        const mothership = this.playerTeamMotMap.get(client) || this.motherships[~~(Math.random() * this.motherships.length)];
+        this.playerTeamMotMap.set(client, mothership);
 
-        tank.relations.values.team = team;
-        tank.style.values.color = team.team.values.teamColor;
+        tank.relations.values.team = mothership.relations.values.team;
+        tank.style.values.color = mothership.style.values.color;
 
-        if (team.team.values.mothership & MothershipFlags.hasMothership) {
-            tank.position.values.x = team.team.values.mothershipX;
-            tank.position.values.y = team.team.values.mothershipY;
+        // TODO: Possess mothership if its unpossessed
+        if (Entity.exists(mothership)) {
+            tank.position.values.x = mothership.position.values.x;
+            tank.position.values.y = mothership.position.values.y;
         } else {
             const { x, y } = this.findSpawnLocation();
 

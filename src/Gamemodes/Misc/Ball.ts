@@ -22,7 +22,7 @@ import ObjectEntity from "../../Entity/Object";
 
 import Pentagon from "../../Entity/Shape/Pentagon";
 
-import { Colors, ObjectFlags } from "../../Const/Enums";
+import { Colors, GUIFlags, ObjectFlags } from "../../Const/Enums";
 import { NameGroup } from "../../Native/FieldGroups";
 import AbstractShape from "../../Entity/Shape/AbstractShape";
 import { SandboxShapeManager } from "../Sandbox";
@@ -54,6 +54,7 @@ export default class BallArena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
 
+        this.arena.values.GUI |= GUIFlags.canUseCheats;
         this.updateBounds(2500, 2500);
 
         const ball = new ObjectEntity(game);

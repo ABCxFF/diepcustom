@@ -52,6 +52,17 @@ export const removeFast = (array: any[], index: number) => {
 export const constrain = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value));
 }
+
+/** 2π */
+export const PI2 = Math.PI * 2;
+
+/**
+ * Normalize angle (ex: 4π-> 0π, 3π -> 1π)
+ */
+export const normalizeAngle = (angle: number) => {
+    return ((angle % PI2) + PI2) % PI2;
+}
+
 /**
  * Logs - Used to have a webhook log here
  */

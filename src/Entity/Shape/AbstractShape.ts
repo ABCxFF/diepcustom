@@ -22,6 +22,7 @@ import LivingEntity from "../Live";
 import { Colors, MotionFlags, NametagFlags } from "../../Const/Enums";
 import { NameGroup } from "../../Native/FieldGroups";
 import { AI } from "../AI";
+import { normalizeAngle, PI2 } from "../../util";
 
 /**
  * Ticks between turns
@@ -68,11 +69,11 @@ export default class AbstractShape extends LivingEntity {
         // shape names are by default hidden
         this.name.values.nametag = NametagFlags.hidden;
         this.position.values.motion |= MotionFlags.absoluteRotation;
-        this.orbitAngle = this.position.values.angle = (Math.random() * Math.PI * 2);
+        this.orbitAngle = this.position.values.angle = (Math.random() * PI2);
     }
 
     protected turnTo(angle: number) {
-        if ((((this.orbitAngle - angle) % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2) < 0.20) return;
+        if (normalizeAngle(this.orbitAngle - angle) < 0.20) return;
         this.targetTurningAngle = angle;
         this.isTurning = TURN_TIMEOUT;
     }
@@ -97,7 +98,7 @@ export default class AbstractShape extends LivingEntity {
         }
         this.position.angle += this.rotationRate;
         this.orbitAngle += this.orbitRate + (this.isTurning === TURN_TIMEOUT ? this.orbitRate * 10 : 0);
-        if (this.isTurning === TURN_TIMEOUT && (((this.orbitAngle - this.targetTurningAngle) % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2) < 0.20) {
+        if (this.isTurning === TURN_TIMEOUT && (((this.orbitAngle - this.targetTurningAngle) % (PI2)) + (PI2)) % (PI2) < 0.20) {
             this.isTurning -= 1;
         } else if (this.isTurning !== TURN_TIMEOUT && this.isTurning !== 0) this.isTurning -= 1;
 

@@ -24,6 +24,7 @@ import { Colors, Tank } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
+import { PI2 } from "../../util";
 
 const SummonerSpawnerDefinition: BarrelDefinition = {
     angle: Math.PI,
@@ -74,7 +75,7 @@ export default class Summoner extends AbstractBoss {
         for (let i = 0; i < 4; ++i) {
             this.spawners.push(new Barrel(this, {
                 ...SummonerSpawnerDefinition,
-                angle: Math.PI * 2 * ((i / 4) - 1 / 4)
+                angle: PI2 * 2 * ((i / 4) - 1 / 4)
             }));
 
     }

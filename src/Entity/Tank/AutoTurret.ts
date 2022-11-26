@@ -20,7 +20,7 @@ import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
 
 import { BarrelBase } from "./TankBody";
-import { Colors, MotionFlags, NametagFlags, ObjectFlags, Stat, StyleFlags } from "../../Const/Enums";
+import { Colors, InputFlags, MotionFlags, NametagFlags, ObjectFlags, Stat, StyleFlags } from "../../Const/Enums";
 import { BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
@@ -69,6 +69,9 @@ export default class AutoTurret extends ObjectEntity {
     public inputs: Inputs;
     /** Camera entity / team of the turret. */
     public cameraEntity: Entity;
+
+    /** If set to true, (auto 5 auto 3), player can influence auto turret's */
+    public influencedByOwnerInputs: boolean = false;
 
     /** The reload time of the turret. */
     public reloadTime = 15;
@@ -134,13 +137,29 @@ export default class AutoTurret extends ObjectEntity {
 
         this.reloadTime = this.owner.reloadTime;
 
-        if (this.ai.state === AIState.idle) {
-            this.position.angle += this.ai.passiveRotation;
-            this.turret.attemptingShot = false;
-        } else {
-            // Uh. Yeah
+        let useAI = !(this.influencedByOwnerInputs && (this.owner.inputs.attemptingRepel() || this.owner.inputs.attemptingShot()));
+        if (!useAI) {
             const {x, y} = this.getWorldPosition();
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+            let flip = this.owner.inputs.attemptingRepel() ? -1 : 1;
+            const deltaPos = {x: (this.owner.inputs.mouse.x - x) * flip, y: (this.owner.inputs.mouse.y - y) * flip}
+
+            if (this.ai.targetFilter({x: x + deltaPos.x, y: y + deltaPos.y}) === false) useAI = true;
+            else {
+                // if (this.owner.inputs.attemptingRepel()) this.inputs.flags |= InputFlags.rightclick;
+                this.inputs.flags |= InputFlags.leftclick;
+                this.position.angle = Math.atan2(deltaPos.y, deltaPos.x);
+                this.ai.state |= AIState.hasTarget;
+            }
+        }
+        if (useAI) {
+            if (this.ai.state === AIState.idle) {
+                this.position.angle += this.ai.passiveRotation;
+                this.turret.attemptingShot = false;
+            } else {
+                // Uh. Yeah
+                const {x, y} = this.getWorldPosition();
+                this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+            }
         }
     }
 }

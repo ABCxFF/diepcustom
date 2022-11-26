@@ -24,12 +24,13 @@ import { TankDefinition } from "../../../Const/TankDefinitions";
 import { AI } from "../../AI";
 import { BarrelBase } from "../TankBody";
 import AbstractShape from "../../Shape/AbstractShape";
+import LivingEntity from "../../Live";
 
 /**
  * The drone class represents the drone (projectile) entity in diep.
  */
 export default class NecromancerSquare extends Drone {
-    public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number, shape: AbstractShape) {
+    public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
         super(barrel, tank, tankDefinition, shootAngle);
 
         const bulletDefinition = barrel.definition.bullet;
@@ -37,12 +38,9 @@ export default class NecromancerSquare extends Drone {
         this.ai = new AI(this);
         this.ai.viewRange = 900;
 
-        this.physics.values.sides = shape.physics.values.sides;
-        this.physics.values.size = shape.physics.values.size;
-        /** @ts-ignore */
-        this.damagePerTick *= shape.damagePerTick / 8;
-        /** @ts-ignore */
-        this.health.values.maxHealth = this.health.values.health *= (shape.damagePerTick / 8);
+        this.physics.values.sides = 4;
+        // this.physics.values.size = 55 * Math.SQRT1_2 * bulletDefinition.sizeRatio;
+
         // if (shape.isShiny) this.health.values.maxHealth = this.health.values.health *= 10
         this.style.values.color = tank.relations.values.team?.team?.values.teamColor || Colors.NecromancerSquare;
         if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
@@ -62,5 +60,22 @@ export default class NecromancerSquare extends Drone {
         this.physics.values.absorbtionFactor = bulletDefinition.absorbtionFactor;
 
         this.baseSpeed = 0;
+    }
+
+    /** Given a shape, it will create a necromancer square using stats from the shape */
+    public static fromShape(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shape: LivingEntity): NecromancerSquare {
+        const sunchip = new NecromancerSquare(barrel, tank, tankDefinition, shape.position.values.angle);
+        sunchip.physics.values.sides = shape.physics.values.sides;
+        sunchip.physics.values.size = shape.physics.values.size;
+        sunchip.position.values.x = shape.position.values.x;
+        sunchip.position.values.y = shape.position.values.y;
+        sunchip.position.values.angle = shape.position.values.angle;
+        
+        /** @ts-ignore */
+        const shapeDamagePerTick: number = shape.damagePerTick;
+
+        sunchip.damagePerTick *= shapeDamagePerTick / 8;
+        sunchip.health.values.maxHealth = (sunchip.health.values.health *= (shapeDamagePerTick / 8));
+        return sunchip;
     }
 }

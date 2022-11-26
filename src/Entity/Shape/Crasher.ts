@@ -56,7 +56,6 @@ export default class Crasher extends AbstractShape {
 
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
-        this.ai.isTaken = true;
         this.ai.aimSpeed = (this.ai.movementSpeed = this.targettingSpeed);
     }
 

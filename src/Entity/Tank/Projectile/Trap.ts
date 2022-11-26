@@ -23,6 +23,7 @@ import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { BarrelBase } from "../TankBody";
 import { DevTank } from "../../../Const/DevTankDefinitions";
+import { PI2 } from "../../../util";
 
 /**
  * The trap class represents the trap (projectile) entity in diep.
@@ -47,7 +48,7 @@ export default class Trap extends Bullet {
         if (tankDefinition && tankDefinition.id === DevTank.Bouncy) this.collisionEnd = this.lifeLength - 1;
         
         // Check this?
-        this.position.values.angle = Math.random() * Math.PI * 2;
+        this.position.values.angle = Math.random() * PI2;
     }
 
     public tick(tick: number) {

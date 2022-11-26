@@ -17,7 +17,7 @@
 */
 
 import GameServer from "../Game";
-import Vector from "../Physics/Vector";
+import Vector, { VectorAbstract } from "../Physics/Vector";
 import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
 import TankBody from "./Tank/TankBody";
@@ -71,8 +71,8 @@ export class Inputs {
 export class AI {
     /** Default static rotation that Auto Turrets rotate when in passive mode. */
     public static PASSIVE_ROTATION = 0.01;
-    /** Whether or not the AI is available for taking... */
-    public isTaken = false;
+    /** Whether a player < FullAccess can claim */
+    public isClaimable: boolean = false;
     
     /** Specific rotation of the AI in passive mode. */
     public passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
@@ -94,10 +94,10 @@ export class AI {
     /** The speed at which the ai can reach the target. */
     public aimSpeed = 1;
 
-    public targetFilter: (possibleTarget: ObjectEntity) => boolean;
+    /** Target filter letting owner classes filter what can't be a target by position - false = not valid target */
+    public targetFilter: (possibleTargetPos: VectorAbstract) => boolean;
 
-    public constructor(owner: ObjectEntity) {
-
+    public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;
         this.game = owner.game;
 
@@ -107,6 +107,7 @@ export class AI {
         });
 
         this.targetFilter = () => true;
+        if (claimable) this.isClaimable = true;
 
         this.game.entities.AIs.push(this);
     }
@@ -124,7 +125,7 @@ export class AI {
             if (team !== this.target.relations.values.team && this.target.physics.values.sides !== 0) {
                 // confirm its within range
                 const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
-                if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
+                if (this.targetFilter(this.target.position.values) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
                 
             }
 
@@ -150,7 +151,7 @@ export class AI {
             
             if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
 
-            if (!this.targetFilter(entity)) continue; // Custom check
+            if (!this.targetFilter(entity.position.values)) continue; // Custom check
 
             if (entity instanceof TankBody) return this.target = entity;
 
@@ -228,7 +229,6 @@ export class AI {
             if (!this.inputs.deleted) return;
             
             this.inputs = new Inputs();
-            this.isTaken = false; // Only possessed when not taken
         }
         
         const target = this.findTarget();

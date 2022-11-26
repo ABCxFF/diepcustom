@@ -72,7 +72,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     /** The current tank definition / tank id. */
     private _currentTank: Tank | DevTank = Tank.Basic;
     /** Whether or not the spawn invulnerability happened already. */
-    private spawnProtectionEnded = false;
+    public spawnProtectionEnded = false;
 
     public constructor(game: GameServer, camera: CameraEntity, inputs: Inputs) {
         super(game);
@@ -179,28 +179,30 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         // TODO(ABC):
         // This is actually not how necromancers claim squares.
-        // if (entity instanceof AbstractShape && this._currentTank === Tank.Necromancer && this.barrels[0].droneCount < (22 + this.cameraEntity.camera.values.statLevels.values[Stat.Reload] * 2)) {
-        /** @ts-ignore */
-        // ALL_ENTITIES is an easter egg... gives backdoorer ability to enable claiming of all necro squares
-        if ((process['ALL_ENTITIES'] || entity instanceof Square) && this._currentTank === Tank.Necromancer && this.barrels.length && this.barrels[0].droneCount < (22 + this.cameraEntity.camera.values.statLevels.values[Stat.Reload] * 2)) {
-            // No destroy it on the next tick to make it look more like the way diep does it.
-            entity.destroy(true);
-            if (entity.deletionAnimation) {
-                entity.deletionAnimation.frame = 0;
-                entity.style.opacity = 1;
+        if (entity instanceof Square && this.definition.flags.canClaimSquares && this.barrels.length) {
+            // If can claim, pick a random barrel that has drones it can still shoot, then shoot
+            const MAX_DRONES_PER_BARREL = 11 + this.cameraEntity.camera.values.statLevels.values[Stat.Reload];
+            const barrelsToShoot = this.barrels.filter((e) => e.definition.bullet.type === "necrodrone" && e.droneCount < MAX_DRONES_PER_BARREL);
+
+            if (barrelsToShoot.length) {
+                const barrelToShoot = barrelsToShoot[~~(Math.random()*barrelsToShoot.length)];
+
+                // No destroy it on the next tick to make it look more like the way diep does it.
+                entity.destroy(true);
+                if (entity.deletionAnimation) {
+                    entity.deletionAnimation.frame = 0;
+                    entity.style.opacity = 1;
+                }
+
+                const sunchip = NecromancerSquare.fromShape(barrelToShoot, this, this.definition, entity);
             }
-            /**@ts-ignore */
-            const sunchip = new NecromancerSquare(this.barrels[0] /* :P */, this, this.definition, entity.position.values.angle, entity);
-            sunchip.position.values.x = entity.position.values.x;
-            sunchip.position.values.y = entity.position.values.y;
-            sunchip.physics.values.size = entity.physics.values.size;
         }
     }
 
     /** See LivingEntity.onDeath */
    public onDeath(killer: LivingEntity) {
         if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
-
+        if (!(this.cameraEntity.camera.player === this)) return;
         this.cameraEntity.spectatee = killer;
         this.cameraEntity.camera.FOV = 0.4;
         this.cameraEntity.camera.killedBy = (killer.name && killer.name.values.name) || "";
@@ -210,8 +212,10 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     public destroy(animate=true) {
         // Stats etc
         if (!animate && Entity.exists(this.cameraEntity)) {
-            this.cameraEntity.camera.deathTick = this.game.tick;
-            this.cameraEntity.camera.respawnLevel = Math.min(Math.max(this.cameraEntity.camera.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.camera.values.level) * 3.2796));
+            if (this.cameraEntity.camera.player === this) {
+                this.cameraEntity.camera.deathTick = this.game.tick;
+                this.cameraEntity.camera.respawnLevel = Math.min(Math.max(this.cameraEntity.camera.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.camera.values.level) * 3.2796));
+            }
 
             // Wipe this nonsense
             this.barrels = [];

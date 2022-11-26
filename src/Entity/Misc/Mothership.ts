@@ -19,6 +19,7 @@
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
 import { Colors, Tank, Stat, ColorsHexCode, ClientBound, MothershipFlags } from "../../Const/Enums";
+import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
@@ -38,20 +39,20 @@ export default class Mothership extends TankBody {
     /** If the mothership's AI ever gets possessed, this is the tick that the possession started. */
     public possessionStartTick: number = -1;
 
-    public constructor(arena: ArenaEntity) {
+    public constructor(game: GameServer) {
 
         const inputs = new Inputs();
-        const camera = new CameraEntity(arena.game);
+        const camera = new CameraEntity(game);
 
         camera.setLevel(140);
 
-        super(arena.game, camera, inputs);
+        super(game, camera, inputs);
 
-        this.relations.values.team = arena;
+        this.relations.values.team = game.arena;
 
         this.style.values.color = Colors.Neutral;
 
-        this.ai = new AI(this);
+        this.ai = new AI(this, true);
         this.ai.inputs = inputs;
         this.ai.viewRange = 2000;
         
@@ -95,6 +96,7 @@ export default class Mothership extends TankBody {
     public delete(): void {
         // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
         if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~MothershipFlags.hasMothership;
+        this.ai.inputs.deleted = true;
         super.delete();
     }
 
