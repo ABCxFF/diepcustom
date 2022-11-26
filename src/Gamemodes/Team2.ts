@@ -39,12 +39,12 @@ export default class Teams2Arena extends ArenaEntity {
     public blueTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamBlue);
     /** Red Team entity */
     public redTeam: TeamEntity = new TeamEntity(this.game, Colors.TeamRed);
-    /** Limits shape count 100 */
-   //     protected shapes: ShapeManager = new class extends ShapeManager {
-   //     protected get wantedShapes() {
-   //         return 64;
-   //     }
-   // }(this);
+    // /** Limits shape count 100 */
+    //     protected shapes: ShapeManager = new class extends ShapeManager {
+    //     protected get wantedShapes() {
+    //         return 64;
+    //     }
+    // }(this);
     
     public constructor(game: GameServer) {
         super(game);
