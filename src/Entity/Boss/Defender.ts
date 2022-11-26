@@ -107,7 +107,6 @@ export default class Defender extends AbstractBoss {
             base.influencedByOwnerInputs = true;
 
             const angle = base.ai.inputs.mouse.angle = PI2 * (i / 3);
-            base.ai.passiveRotation = Math.abs(base.ai.passiveRotation);
 
             base.position.values.y = this.physics.values.size * Math.sin(angle) * 0.6;
             base.position.values.x = this.physics.values.size * Math.cos(angle) * 0.6;
