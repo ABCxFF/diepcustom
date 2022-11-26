@@ -96,6 +96,7 @@ export default class Mothership extends TankBody {
     public delete(): void {
         // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
         if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~MothershipFlags.hasMothership;
+        this.ai.inputs.deleted = true;
         super.delete();
     }
 

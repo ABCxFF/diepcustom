@@ -603,6 +603,7 @@ export default class Client {
         } else if (this.inputs.deleted) {
             this.inputs = new ClientInputs(this);
             this.camera.camera.player = null;
+            this.camera.camera.respawnLevel = 0;
             this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
         }
         if (tick >= this.lastPingTick + 300) {
