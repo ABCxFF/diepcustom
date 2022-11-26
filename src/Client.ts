@@ -36,7 +36,7 @@ import TankBody from "./Entity/Tank/TankBody";
 
 import Vector, { VectorAbstract } from "./Physics/Vector";
 import { Entity, EntityStateFlags } from "./Native/Entity";
-import { CameraFlags, ClientBound, InputFlags, NametagFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
+import { CameraFlags, ClientBound, GUIFlags, InputFlags, NametagFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
@@ -213,7 +213,7 @@ export default class Client {
                 return;
             }
             // Hardcoded dev password
-            if (!config.devPasswordHash || createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
+            if (config.devPasswordHash && createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
                 this.accessLevel = config.AccessLevel.FullAccess;
                 util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.gamemode + "`) with `full` access.", 0x5A65EA);
             } else if (auth && pw) {
@@ -239,6 +239,8 @@ export default class Client {
             } else if (auth) {
                 util.saveToLog("Client Terminated", "Unknown client terminated due to lack of authentication:: " + this.toString(), 0x6AEE32);
                 return this.terminate();
+            } else {
+                this.accessLevel = config.defaultAccessLevel;
             }
 
             if (this.accessLevel === config.AccessLevel.NoAccess) {
@@ -338,7 +340,8 @@ export default class Client {
                     player.setTank(tank);
                 }
                 if (flags & InputFlags.levelup) {
-                    if ((this.accessLevel === config.AccessLevel.FullAccess) || camera.camera.values.level < 45) {
+                    // If full access, or if the game allows cheating and lvl is < 45, or if the player is a BT access level and lvl is < 45
+                    if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.camera.values.level < 45 && ((this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
                         player.name.nametag |= NametagFlags.cheats;
                         this.devCheatsUsed = 1;
                         

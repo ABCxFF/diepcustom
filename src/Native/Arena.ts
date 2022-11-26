@@ -119,34 +119,34 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	 * Updates the scoreboard / leaderboard arena fields.
 	 */
 	protected updateScoreboard(scoreboardPlayers: TankBody[]) {
-		scoreboardPlayers.sort((p1, p2) => p2.score.values.score - p1.score.values.score)
 
 
-		const scoreboardCount = this.arena.scoreboardAmount = Math.min(scoreboardPlayers.length, 10);
+		const scoreboardCount = this.arena.scoreboardAmount = (this.arena.values.GUI & GUIFlags.hideScorebar) ? 0 : Math.min(scoreboardPlayers.length, 10);
 
 		if (scoreboardCount) {
+			scoreboardPlayers.sort((p1, p2) => p2.score.values.score - p1.score.values.score);
+
 			const leader = scoreboardPlayers[0];
 			this.arena.leaderX = leader.position.values.x;
 			this.arena.leaderY = leader.position.values.y;
 			this.arena.GUI |= GUIFlags.showLeaderArrow;
+			let i;
+			for (i = 0; i < scoreboardCount; ++i) {
+				const player = scoreboardPlayers[i];
+				
+				/** @ts-ignore */
+				if (player.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[i] = Colors.ScoreboardBar;
+				/** @ts-ignore */
+				else this.arena.values.scoreboardColors[i] = player.style.values.color;
+				/** @ts-ignore */
+				this.arena.values.scoreboardNames[i] = player.name.values.name;
+				
+				/** @ts-ignore */
+				this.arena.values.scoreboardScores[i] = player.score.values.score;
+				/** @ts-ignore */ // _currentTank only since ts ignore
+				this.arena.values.scoreboardTanks[i] = player._currentTank;
+			}
 		} else if (this.arena.values.GUI & GUIFlags.showLeaderArrow) this.arena.GUI ^= GUIFlags.showLeaderArrow;
-
-		let i;
-		for (i = 0; i < scoreboardCount; ++i) {
-			const player = scoreboardPlayers[i];
-			
-			/** @ts-ignore */
-			if (player.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[i] = Colors.ScoreboardBar;
-			/** @ts-ignore */
-			else this.arena.values.scoreboardColors[i] = player.style.values.color;
-			/** @ts-ignore */
-			this.arena.values.scoreboardNames[i] = player.name.values.name;
-			
-			/** @ts-ignore */
-			this.arena.values.scoreboardScores[i] = player.score.values.score;
-			/** @ts-ignore */ // _currentTank only since ts ignore
-			this.arena.values.scoreboardTanks[i] = player._currentTank;
-		}
 	}
 
 	/**

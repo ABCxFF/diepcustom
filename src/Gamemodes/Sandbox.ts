@@ -20,6 +20,7 @@ import GameServer from "../Game";
 import ArenaEntity from "../Native/Arena";
 
 import ShapeManager from "../Entity/Shape/Manager";
+import { GUIFlags } from "../Const/Enums";
 
 /**
  * Manage shape count
@@ -45,7 +46,7 @@ export default class SandboxArena extends ArenaEntity {
         super(game);
 
 		this.updateBounds(2500, 2500);
-
+        this.arena.values.GUI |= GUIFlags.canUseCheats;
 		// const w1 = new MazeWall(this.game, 0, 0, 500, 500);
     }
 
