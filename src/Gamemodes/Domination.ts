@@ -43,6 +43,7 @@ export default class DominationArena extends ArenaEntity {
 
     public constructor(game: GameServer) {
         super(game);
+        this.shapeScoreRewardMultiplier = 2.0;
 
         this.updateBounds(arenaSize * 2, arenaSize * 2)
 

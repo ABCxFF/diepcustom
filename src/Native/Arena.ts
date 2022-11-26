@@ -64,6 +64,8 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	/** Whether or not the arena allows new players to spawn. */
 	public arenaState: number = ArenaState.OPEN;
 
+	public shapeScoreRewardMultiplier: number = 1;
+
 	/** The current boss spawned into the game */
 	public boss: AbstractBoss | null = null;
 

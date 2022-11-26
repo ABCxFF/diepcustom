@@ -44,6 +44,7 @@ export default class MothershipArena extends ArenaEntity {
 
     public constructor(game: GameServer) {
         super(game);
+        this.shapeScoreRewardMultiplier = 3.0;
 
         this.arena.GUI |= GUIFlags.hideScorebar;
 
