@@ -89,6 +89,8 @@ export default class ShapeManager {
             }
         }
 
+        shape.scoreReward *= this.arena.shapeScoreRewardMultiplier;
+
         return shape;
         // this.shapeCount += 1;
     }
