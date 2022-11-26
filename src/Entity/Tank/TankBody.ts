@@ -212,8 +212,10 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     public destroy(animate=true) {
         // Stats etc
         if (!animate && Entity.exists(this.cameraEntity)) {
-            this.cameraEntity.camera.deathTick = this.game.tick;
-            this.cameraEntity.camera.respawnLevel = Math.min(Math.max(this.cameraEntity.camera.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.camera.values.level) * 3.2796));
+            if (this.cameraEntity.camera.player === this) {
+                this.cameraEntity.camera.deathTick = this.game.tick;
+                this.cameraEntity.camera.respawnLevel = Math.min(Math.max(this.cameraEntity.camera.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.camera.values.level) * 3.2796));
+            }
 
             // Wipe this nonsense
             this.barrels = [];

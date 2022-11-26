@@ -14,7 +14,7 @@
 */
 
 import Client from "../Client";
-import { ClientBound, Colors, ColorsHexCode, GUIFlags, MothershipFlags } from "../Const/Enums";
+import { Colors, GUIFlags, MothershipFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
@@ -38,6 +38,9 @@ export default class MothershipArena extends ArenaEntity {
     public teams: TeamEntity[] = [];
     /** Motherships in game */
     public motherships: Mothership[] = [];
+
+    /** Maps clients to their mothership */
+    public playerTeamMotMap: Map<Client, Mothership> = new Map();
 
     public constructor(game: GameServer) {
         super(game);
@@ -65,14 +68,16 @@ export default class MothershipArena extends ArenaEntity {
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
-        const team = this.teams[~~(Math.random() * this.teams.length)];
+        const mothership = this.playerTeamMotMap.get(client) || this.motherships[~~(Math.random() * this.motherships.length)];
+        this.playerTeamMotMap.set(client, mothership);
 
-        tank.relations.values.team = team;
-        tank.style.values.color = team.team.values.teamColor;
+        tank.relations.values.team = mothership.relations.values.team;
+        tank.style.values.color = mothership.style.values.color;
 
-        if (team.team.values.mothership & MothershipFlags.hasMothership) {
-            tank.position.values.x = team.team.values.mothershipX;
-            tank.position.values.y = team.team.values.mothershipY;
+        // TODO: Possess mothership if its unpossessed
+        if (Entity.exists(mothership)) {
+            tank.position.values.x = mothership.position.values.x;
+            tank.position.values.y = mothership.position.values.y;
         } else {
             const { x, y } = this.findSpawnLocation();
 
