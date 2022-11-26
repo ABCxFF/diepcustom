@@ -440,7 +440,7 @@ export default class Client {
                 return this.ban();
             case ServerBound.ToRespawn:
                 // Doesn't matter if the player is alive or not in real diep.
-                if (camera.camera.values.camera & CameraFlags.showDeathStats) camera.camera.camera ^= CameraFlags.showDeathStats;
+                camera.camera.camera &= ~CameraFlags.showDeathStats;
                 // if (this.game.arena.arenaState !== ArenaState.OPEN) return this.terminate();
                 return;
             case ServerBound.TakeTank: {
@@ -615,6 +615,7 @@ export default class Client {
             this.camera.camera.player = null;
             this.camera.camera.respawnLevel = 0;
             this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
+            this.camera.camera.camera &= ~CameraFlags.showDeathStats;
         }
         if (tick >= this.lastPingTick + 300) {
             return this.terminate();

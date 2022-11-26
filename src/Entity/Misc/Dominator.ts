@@ -99,7 +99,7 @@ export default class Dominator extends TankBody {
 
         for (let i = 1; i <= this.game.entities.lastId; ++i) {
             const entity = this.game.entities.inner[i];
-            if (entity instanceof Bullet && entity.relations.values.owner === this) entity.destroy()
+            if (entity instanceof Bullet && entity.relations.values.owner === this) entity.destroy();
         }
 
         if (this.ai.state === AIState.possessed) {
