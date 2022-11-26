@@ -17,7 +17,7 @@
 */
 
 import GameServer from "../Game";
-import Vector from "../Physics/Vector";
+import Vector, { VectorAbstract } from "../Physics/Vector";
 import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
 import TankBody from "./Tank/TankBody";
@@ -94,7 +94,8 @@ export class AI {
     /** The speed at which the ai can reach the target. */
     public aimSpeed = 1;
 
-    public targetFilter: (possibleTarget: ObjectEntity) => boolean;
+    /** Target filter letting owner classes filter what can't be a target by position - false = not valid target */
+    public targetFilter: (possibleTargetPos: VectorAbstract) => boolean;
 
     public constructor(owner: ObjectEntity) {
 
@@ -124,7 +125,7 @@ export class AI {
             if (team !== this.target.relations.values.team && this.target.physics.values.sides !== 0) {
                 // confirm its within range
                 const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
-                if (this.targetFilter(this.target) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
+                if (this.targetFilter(this.target.position.values) && targetDistSq < ( this.viewRange ** 2 ) * 2) return this.target; // this range is inaccurate i think
                 
             }
 
@@ -150,7 +151,7 @@ export class AI {
             
             if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
 
-            if (!this.targetFilter(entity)) continue; // Custom check
+            if (!this.targetFilter(entity.position.values)) continue; // Custom check
 
             if (entity instanceof TankBody) return this.target = entity;
 

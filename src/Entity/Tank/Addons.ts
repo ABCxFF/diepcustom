@@ -26,6 +26,7 @@ import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
 import LivingEntity from "../Live";
+import { normalizeAngle, PI2 } from "../../util";
 
 /**
  * Abstract class to represent an addon in game.
@@ -64,31 +65,34 @@ export class Addon {
      */
     protected createAutoTurrets(count: number) {
         const rotPerTick = AI.PASSIVE_ROTATION;
-        const rotator = this.createGuard(1, .1, 0, rotPerTick);
+        const MAX_ANGLE_RANGE = PI2 / 4; // keep within 90º each side
+
+        const rotator = this.createGuard(1, .1, 0, rotPerTick) as GuardObject & { turrets: AutoTurret[] };
+        rotator.turrets = [];
 
         const ROT_OFFSET = 0.8;
 
         if (rotator.style.values.styleFlags & StyleFlags.visible) rotator.style.values.styleFlags ^= StyleFlags.visible;
 
-        const PI2 = Math.PI * 2;
         for (let i = 0; i < count; ++i) {
             const base = new AutoTurret(rotator, AutoTurretMiniDefinition);
+            base.influencedByOwnerInputs = true;
 
             const angle = base.ai.inputs.mouse.angle = PI2 * (i / count);
             base.ai.passiveRotation = rotPerTick;
-            base.ai.targetFilter = (target) => {
-                const angleToTarget = Math.atan2(target.position.values.y - this.owner.position.values.y, target.position.values.x - this.owner.position.values.x);
+            base.ai.targetFilter = (targetPos) => {
+                const pos = base.getWorldPosition();
+                const angleToTarget = Math.atan2(targetPos.y - pos.y, targetPos.x - pos.x);
                 
-                const deltaAngle = Math.abs(angleToTarget - (angle + rotator.position.values.angle)) % (Math.PI * 2);
+                const deltaAngle = normalizeAngle(angleToTarget - ((angle + rotator.position.values.angle)));
 
-                return deltaAngle < Math.PI / 2;
+                return deltaAngle < MAX_ANGLE_RANGE || deltaAngle > (PI2 - MAX_ANGLE_RANGE);
             }
 
             base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
             base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
 
             if (base.style.values.styleFlags & StyleFlags.aboveParent) base.style.values.styleFlags ^= StyleFlags.aboveParent;
-
             base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
 
             const tickBase = base.tick;
@@ -100,7 +104,11 @@ export class Addon {
 
                 if (base.ai.state === AIState.idle) base.position.angle = angle + rotator.position.values.angle;
             }
+
+            rotator.turrets.push(base);
         }
+
+        return rotator;
     }
 }
 

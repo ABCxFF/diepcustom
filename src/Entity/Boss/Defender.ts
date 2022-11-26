@@ -89,6 +89,7 @@ export default class Defender extends AbstractBoss {
         this.style.values.color = Colors.EnemyTriangle;
         this.relations.values.team = this.game.arena;
         this.physics.values.size = DEFENDER_SIZE * Math.SQRT1_2;
+        this.ai.viewRange = 0;
         this.sizeFactor = 1;
         this.physics.values.sides = 3;
 
@@ -102,6 +103,7 @@ export default class Defender extends AbstractBoss {
             // TODO:
             // Maybe make this into a class of itself - DefenderAutoTurret
             const base = new AutoTurret(this, MountedTurretDefinition);
+            base.influencedByOwnerInputs = true;
 
             const angle = base.ai.inputs.mouse.angle = Math.PI * 2 * (i / 3);
 
