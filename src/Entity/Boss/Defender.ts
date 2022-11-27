@@ -36,7 +36,7 @@ const MountedTurretDefinition: BarrelDefinition = {
     ...AutoTurretDefinition,
     bullet: {
         ...AutoTurretDefinition.bullet,
-        speed: 2,
+        speed: 2.3,
         damage: 0.75,
         health: 12.5,
         color: Colors.Neutral
@@ -63,7 +63,7 @@ const DefenderDefinition: BarrelDefinition = {
         sizeRatio: 0.8,
         health: 12.5,
         damage: 4,
-        speed: 3,
+        speed: 5,
         scatterRate: 1,
         lifeLength: 5,
         absorbtionFactor: 1,
@@ -128,7 +128,7 @@ export default class Defender extends AbstractBoss {
 
        this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
-            this.position.angle += this.ai.passiveRotation * 1.5;
+            this.position.angle += this.ai.passiveRotation * Math.PI / 2;
         }
     }
 }
