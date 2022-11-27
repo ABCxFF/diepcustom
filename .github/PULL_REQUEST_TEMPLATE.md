@@ -9,5 +9,5 @@ Closes [issue link]
 ### Summarize what's being changed (include any screenshots, code, or other media if available):
 <!-- Let us know what you are changing. Share anything that could provide the most context. -->
 ### Confirm the following:
-- [ ] I have tested these changes (by compiling, running, and playing) and have seen no differences in gameplay
+- [ ] I have tested these changes (by compiling, running, and playing) and have seen no unintended differences in gameplay
 
