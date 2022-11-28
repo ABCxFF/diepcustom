@@ -29,6 +29,7 @@ export enum CommandID {
     gameSetTank = "game_set_tank",
     gameSetLevel = "game_set_level",
     gameSetScore = "game_set_score",
+    gameAddUpgradePoints = "game_add_upgrade_points",
     gameTeleport = "game_teleport",
     gameClaim = "game_claim",
     adminGodmode = "admin_godmode",
@@ -66,6 +67,12 @@ export const commandDefinitions = {
         id: CommandID.gameSetScore,
         usage: "[score]",
         description: "Changes your score to the given whole number",
+        permissionLevel: AccessLevel.BetaAccess
+    },
+    game_add_upgrade_points: {
+        id: CommandID.gameAddUpgradePoints,
+        usage: "[points]",
+        description: "Changes your upgrade points",
         permissionLevel: AccessLevel.BetaAccess
     },
     game_teleport: {
@@ -128,6 +135,13 @@ export const commandCallbacks = {
         const player = client.camera?.camera.player;
         if (isNaN(score) || score > Number.MAX_SAFE_INTEGER || score < Number.MIN_SAFE_INTEGER || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
         camera.scorebar = score;
+    },
+    game_add_upgrade_points: (client: Client, pointsArg: string) => {
+        const points = parseInt(pointsArg);
+        const camera = client.camera?.camera;
+        const player = client.camera?.camera.player;
+        if (isNaN(points) || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
+        camera.statsAvailable += points;
     },
     game_teleport: (client: Client, xArg: string, yArg: string) => {
         const x = parseInt(xArg);
