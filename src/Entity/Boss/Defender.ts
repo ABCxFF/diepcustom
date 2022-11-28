@@ -65,7 +65,7 @@ const DefenderDefinition: BarrelDefinition = {
         damage: 4,
         speed: 5,
         scatterRate: 1,
-        lifeLength: 5,
+        lifeLength: 8,
         absorbtionFactor: 1,
         color: Colors.Neutral
     }
