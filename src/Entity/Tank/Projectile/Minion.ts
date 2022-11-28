@@ -73,11 +73,13 @@ export default class Minion extends Drone implements BarrelBase {
     public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
         super(barrel, tank, tankDefinition, shootAngle);
 
+        const bulletDefinition = barrel.definition.bullet;
+
         this.inputs = this.ai.inputs;
         this.ai.viewRange = 900;
         this.usePosAngle = false;
 
-        this.physics.values.sides = 1;
+        this.physics.values.sides = bulletDefinition.sides ?? 1;
         this.physics.values.size *= 1.2;
         
         if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
