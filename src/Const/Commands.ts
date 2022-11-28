@@ -22,13 +22,15 @@ import Bullet from "../Entity/Tank/Projectile/Bullet";
 import TankBody from "../Entity/Tank/TankBody";
 import { Entity, EntityStateFlags } from "../Native/Entity";
 import { saveToVLog } from "../util";
-import { StyleFlags } from "./Enums";
+import { Stat, StatCount, StyleFlags } from "./Enums";
 import { getTankByName } from "./TankDefinitions"
 
 export enum CommandID {
     gameSetTank = "game_set_tank",
     gameSetLevel = "game_set_level",
     gameSetScore = "game_set_score",
+    gameSetStat = "game_set_stat",
+    gameSetStatMax = "game_set_stat_max",
     gameAddUpgradePoints = "game_add_upgrade_points",
     gameTeleport = "game_teleport",
     gameClaim = "game_claim",
@@ -67,6 +69,18 @@ export const commandDefinitions = {
         id: CommandID.gameSetScore,
         usage: "[score]",
         description: "Changes your score to the given whole number",
+        permissionLevel: AccessLevel.BetaAccess
+    },
+    game_set_stat: {
+        id: CommandID.gameSetStat,
+        usage: "[stat num] [points]",
+        description: "Set the value of one of your statuses. Values can be greater than the capacity. [stat num] is equivalent to the number that appears in the UI",
+        permissionLevel: AccessLevel.BetaAccess
+    },
+    game_set_stat_max: {
+        id: CommandID.gameSetStatMax,
+        usage: "[stat num] [max]",
+        description: "Set the max value of one of your statuses. [stat num] is equivalent to the number that appears in the UI",
         permissionLevel: AccessLevel.BetaAccess
     },
     game_add_upgrade_points: {
@@ -136,11 +150,29 @@ export const commandCallbacks = {
         if (isNaN(score) || score > Number.MAX_SAFE_INTEGER || score < Number.MIN_SAFE_INTEGER || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
         camera.scorebar = score;
     },
+    game_set_stat_max: (client: Client, statIdArg: string, statMaxArg: string) => {
+        const statId = StatCount - parseInt(statIdArg);
+        const statMax = parseInt(statMaxArg);
+        const camera = client.camera?.camera;
+        const player = client.camera?.camera.player;
+        if (statId < 0 || statId >= StatCount || isNaN(statId) || isNaN(statMax) || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
+        const clampedStatMax = Math.max(statMax, 0);
+        camera.statLimits[statId as Stat] = clampedStatMax;
+        camera.statLevels[statId as Stat] = Math.min(camera.statLevels[statId as Stat], clampedStatMax);
+    },
+    game_set_stat: (client: Client, statIdArg: string, statPointsArg: string) => {
+        const statId = StatCount - parseInt(statIdArg);
+        const statPoints = parseInt(statPointsArg);
+        const camera = client.camera?.camera;
+        const player = client.camera?.camera.player;
+        if (statId < 0 || statId >= StatCount || isNaN(statId) || isNaN(statPoints) || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
+        camera.statLevels[statId as Stat] = statPoints;
+    },
     game_add_upgrade_points: (client: Client, pointsArg: string) => {
         const points = parseInt(pointsArg);
         const camera = client.camera?.camera;
         const player = client.camera?.camera.player;
-        if (isNaN(points) || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
+        if (isNaN(points) || points > Number.MAX_SAFE_INTEGER || points < Number.MIN_SAFE_INTEGER || !Entity.exists(player) || !(player instanceof TankBody) || !camera) return;
         camera.statsAvailable += points;
     },
     game_teleport: (client: Client, xArg: string, yArg: string) => {
