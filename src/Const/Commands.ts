@@ -86,7 +86,7 @@ export const commandDefinitions = {
     game_add_upgrade_points: {
         id: CommandID.gameAddUpgradePoints,
         usage: "[points]",
-        description: "Changes your upgrade points",
+        description: "Add upgrade points",
         permissionLevel: AccessLevel.BetaAccess
     },
     game_teleport: {
