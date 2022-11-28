@@ -35,9 +35,11 @@ export default class Trap extends Bullet {
     public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
         super(barrel, tank, tankDefinition, shootAngle);
 
+        const bulletDefinition = barrel.definition.bullet;
+
         this.baseSpeed = (barrel.bulletAccel / 2) + 30 - Math.random() * barrel.definition.bullet.scatterRate;
         this.baseAccel = 0;
-        this.physics.values.sides = 3;
+        this.physics.values.sides = bulletDefinition.sides ?? 3;
         if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
         this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
         this.style.values.styleFlags |= StyleFlags.trap | StyleFlags.star;
