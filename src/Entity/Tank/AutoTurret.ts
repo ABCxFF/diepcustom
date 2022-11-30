@@ -129,6 +129,8 @@ export default class AutoTurret extends ObjectEntity {
     public tick(tick: number) {
         if (this.inputs !== this.ai.inputs) this.inputs = this.ai.inputs;
 
+       if (this.ai.state === AIState.hasTarget) this.ai.passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
+
         this.physics.size = this.baseSize * this.sizeFactor;
 
         this.ai.aimSpeed = this.turret.bulletAccel;
@@ -149,8 +151,6 @@ export default class AutoTurret extends ObjectEntity {
                 this.inputs.flags |= InputFlags.leftclick;
                 this.position.angle = Math.atan2(deltaPos.y, deltaPos.x);
                 this.ai.state |= AIState.hasTarget;
-
-               if (this.ai.state === AIState.hasTarget) this.ai.passiveRotation = Math.random() < .5 ? this.ai.PASSIVE_ROTATION : this.ai.PASSIVE_ROTATION;
             }
         }
         if (useAI) {
