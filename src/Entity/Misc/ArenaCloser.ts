@@ -52,6 +52,7 @@ export default class ArenaCloser extends TankBody {
         this.ai = new AI(this);
         this.ai.inputs = inputs;
         this.ai.viewRange = Infinity;
+        this.ai._ticksPerAIUpdate = 1;
 
         this.health.values.healthbar |= HealthbarFlags.hidden;
 

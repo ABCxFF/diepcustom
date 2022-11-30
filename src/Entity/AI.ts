@@ -24,9 +24,12 @@ import TankBody from "./Tank/TankBody";
 
 import { InputFlags, ObjectFlags } from "../Const/Enums";
 import { Entity } from "../Native/Entity";
+import { tps } from "../config";
 
 // Beware
 // The logic in this file is somewhat messed up
+
+const TICKS_PER_AI_UPDATE = 2 * tps;
 
 /**
  * Used for simplifying the current state of the AI.
@@ -97,9 +100,15 @@ export class AI {
     /** Target filter letting owner classes filter what can't be a target by position - false = not valid target */
     public targetFilter: (possibleTargetPos: VectorAbstract) => boolean;
 
+    /** Stores the creation of the AI, used to optimize ticking */
+    private _creationTick: number;
+    /** Stores the amount of ticks per AI update (for caching) */
+    public _ticksPerAIUpdate: number = TICKS_PER_AI_UPDATE;
+
     public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;
         this.game = owner.game;
+        this._creationTick = this.game.tick;
 
         this.inputs.mouse.set({
             x: 20,
@@ -113,7 +122,7 @@ export class AI {
     }
 
     /* Finds the closest entity in a different team */
-    public findTarget() {
+    public findTarget(tick: number) {
         const rootPos = this.owner.rootParent.position.values;
         const team = this.owner.relations.values.team;
 
@@ -130,6 +139,8 @@ export class AI {
             }
 
         }
+
+        if (((tick - this._creationTick) % this._ticksPerAIUpdate) !== 1) return;
         
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
@@ -153,7 +164,14 @@ export class AI {
 
             if (!this.targetFilter(entity.position.values)) continue; // Custom check
 
-            if (entity instanceof TankBody) return this.target = entity;
+            // TODO(ABC): Find out why this was put here
+            if (entity instanceof TankBody) {
+                if (!(closestEntity instanceof TankBody)) {
+                    closestEntity = entity;
+                    closestDistSq = (entity.position.values.x - rootPos.x) ** 2 + (entity.position.values.y - rootPos.y) ** 2;
+                    continue;
+                }  
+            } else if (closestEntity instanceof TankBody) continue;
 
             const distSq = (entity.position.values.x - rootPos.x) ** 2 + (entity.position.values.y - rootPos.y) ** 2;
 
@@ -223,7 +241,6 @@ export class AI {
     }
 
     public tick(tick: number) {
-
         // If its being posessed, but its possessor is deleted... then just restart;
         if (this.state === AIState.possessed) {
             if (!this.inputs.deleted) return;
@@ -231,7 +248,7 @@ export class AI {
             this.inputs = new Inputs();
         }
         
-        const target = this.findTarget();
+        const target = this.findTarget(tick);
 
         if (!target) {
             this.inputs.flags = 0;
