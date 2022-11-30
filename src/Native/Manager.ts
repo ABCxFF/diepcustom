@@ -96,7 +96,7 @@ export default class EntityManager {
         } else if (entity instanceof CameraEntity) removeFast(this.cameras, this.cameras.indexOf(id));
         else removeFast(this.otherEntities, this.otherEntities.indexOf(id));
 
-        // TODO(speed):
+        // TODO(speed)[not super important]:
         // possibly use removeFast instead of leaving these wholes in the entity array
         this.inner[id] = null;
     }

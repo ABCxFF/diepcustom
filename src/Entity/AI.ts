@@ -117,6 +117,7 @@ export class AI {
         const rootPos = this.owner.rootParent.position.values;
         const team = this.owner.relations.values.team;
 
+        // TODO(speed): find a way to speed up
         if (Entity.exists(this.target)) {
 
             // If the AI already has a valid target within view distance, it's not necessary to find a new one

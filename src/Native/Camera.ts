@@ -301,7 +301,7 @@ export default class Camera extends CameraEntity {
             if (!group) throw new Error("Expected entity " + entity + " to have " + groups[i])
             fields.push(...group.fields);
         }
-        // TODO(speed):
+        // TODO(speed)[ABC]:
         // For field ordering, create Fields.pushToOrderedArray(arr, field),
         // that (through kinda binary sort) adds it to the arr in order, and then use that for
         // findUpdate()

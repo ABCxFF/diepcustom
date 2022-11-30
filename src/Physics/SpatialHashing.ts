@@ -19,6 +19,8 @@
 import ObjectEntity from "../Entity/Object";
 import CollisionManager from "./CollisionManager";
 
+// TODO(speed): speed up spatial hashing somehow someway
+
 export default class SpatialHashing implements CollisionManager {
     public cellSize: number;
     public hashMap = new Map<number, ObjectEntity[]>();
