@@ -45,7 +45,7 @@ export default class LivingEntity extends ObjectEntity {
     /** Last tick that damage style flag was changed. */
     protected lastDamageAnimationTick = -1;
     /** Damage reduction (mathematical health increase). */
-    protected damageReduction = 1;
+    public damageReduction = 1;
 
     /** Extends ObjectEntity.destroy() - diminishes health as well. */
     public destroy(animate=true) {
