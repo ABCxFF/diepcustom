@@ -245,7 +245,6 @@ export class AI {
         } else {
             this.state = AIState.hasTarget;
             this.inputs.flags |= InputFlags.leftclick;
-            this.passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
             this.aimAt(target);
         }
     }
