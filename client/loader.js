@@ -159,7 +159,7 @@ Module.loadGamemodeButtons = () => {
         { offset: 12, type: "cstr", value: server.name }, 
         { offset: 24, type: "i32", value: 0 }
     ])));
-    $(MOD_CONFIG.memory.gamemodDisabledText).utf8 = 'This game mode is disabled';
+    $(MOD_CONFIG.memory.gamemodeDisabledText).utf8 = 'This game mode is disabled';
     // placeholders to prevent single/no gamemode bugs
     if (!Module.servers.find(e => Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES.includes(e.gamemode))) {
         vec.push(...[[
