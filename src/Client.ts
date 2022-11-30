@@ -129,6 +129,10 @@ export default class Client {
 
     /** Whether or not the player has used in game dev cheats before (such as level up or godmode). */
     private devCheatsUsed = 0;
+    /** Wether or not the player is in godmode. */
+    public isInvulnerable: boolean = false;
+    /** Used to restore the damage reduction value on the tankbody after godmode is toggled off. */
+    private damageReductionCache: number = 1;
 
     /** Returns a new writer stream connected to the socket. */
     public write() {
@@ -301,19 +305,29 @@ export default class Client {
 
                 // No AI
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
-
+                
                 if ((flags & InputFlags.godmode)) {
-                    if (this.accessLevel >= config.AccessLevel.BetaAccess) {
+                    if (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) {
+                        // only allow devs to go into godmode when players > 1
+                        if (this.accessLevel === config.AccessLevel.FullAccess || (this.accessLevel < config.AccessLevel.FullAccess && this.game.clients.size === 1)) {
+                            player.name.nametag |= NametagFlags.cheats;
+                            this.devCheatsUsed = 1;
+                            this.isInvulnerable = !this.isInvulnerable;
+                            // cache old damage reduction to restore it later when godmode is toggled on again
+                            if (this.isInvulnerable) {
+                                this.damageReductionCache = player.damageReduction;
+                                player.damageReduction = 0;
+                            } else {
+                                player.damageReduction = this.damageReductionCache;
+                            }
+                            
+                            this.notify(`God mode: ${this.isInvulnerable ? "on" : "off"}`, 0, 1000, 'godmode');
+                        }
+                    } else if (this.accessLevel >= config.AccessLevel.BetaAccess) {
                         player.name.nametag |= NametagFlags.cheats;
                         this.devCheatsUsed = 1;
-
                         player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
-                    } else if (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) {
-                        // TODO:
-                        // Make it real invincibility
-                        if (!player.spawnProtectionEnded) player.spawnProtectionEnded = true;
-                        else player.style.styleFlags ^= StyleFlags.invincibility;
-                    }
+                    } 
                 }
 
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
