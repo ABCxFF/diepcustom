@@ -128,7 +128,7 @@ export default class Defender extends AbstractBoss {
 
        this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
-            this.position.angle += this.ai.passiveRotation * Math.PI / 2;
+            this.position.angle += this.ai.passiveRotation * Math.PI * Math.SQRT1_2;
         }
     }
 }
