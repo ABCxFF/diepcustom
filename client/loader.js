@@ -159,17 +159,19 @@ Module.loadGamemodeButtons = () => {
         { offset: 12, type: "cstr", value: server.name }, 
         { offset: 24, type: "i32", value: 0 }
     ])));
+    $(MOD_CONFIG.memory.gamemodDisabledText).utf8 = 'This game mode is disabled';
     // placeholders to prevent single/no gamemode bugs
-    const placeholderId = Module.servers.find(e => e.gamemode === 'ffa') ? 'survival' : 'ffa'
-    for(let i = 0; i < 2 - Module.servers.length; ++i) {
+    if (!Module.servers.find(e => Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES.includes(e.gamemode))) {
         vec.push(...[[
-            { offset: 0, type: "cstr", value: placeholderId }, 
-            { offset: 12, type: "cstr", value: "Placeholder" }, 
+            { offset: 0, type: "cstr", value: "survival" }, 
+            { offset: 12, type: "cstr", value: "" }, 
             { offset: 24, type: "i32", value: 1 }
         ]]);
     }
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // not understood
 };
+
+Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES = ['ffa', 'survival', 'teams', '4teams', 'dom', 'maze', 'tag'];
 
 // Refreshes UI Components
 Module.loadChangelog = (changelog) => {
