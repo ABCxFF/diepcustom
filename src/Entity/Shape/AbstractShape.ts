@@ -79,20 +79,23 @@ export default class AbstractShape extends LivingEntity {
     }
 
     public tick(tick: number) {
+        const y = this.position.values.y;
+        const x = this.position.values.x;
+
         // goes down too much
         if (this.isTurning === 0) {
-            if (this.position.values.x > this.game.arena.arena.values.rightX - 400
-                || this.position.values.x < this.game.arena.arena.values.leftX + 400
-                || this.position.values.y < this.game.arena.arena.values.topY + 400
-                || this.position.values.y > this.game.arena.arena.values.bottomY - 400) {
-                this.turnTo(Math.PI + Math.atan2(this.position.values.y, this.position.values.x));
-            } else if (this.position.values.x > this.game.arena.arena.values.rightX - 500) {
+            if (x > this.game.arena.arena.values.rightX - 400
+                || x < this.game.arena.arena.values.leftX + 400
+                || y < this.game.arena.arena.values.topY + 400
+                || y > this.game.arena.arena.values.bottomY - 400) {
+                this.turnTo(Math.PI + Math.atan2(y, x));
+            } else if (x > this.game.arena.arena.values.rightX - 500) {
                 this.turnTo(Math.sign(this.orbitRate) * Math.PI / 2);
-            } else if (this.position.values.x < this.game.arena.arena.values.leftX + 500) {
+            } else if (x < this.game.arena.arena.values.leftX + 500) {
                 this.turnTo(-1 * Math.sign(this.orbitRate) * Math.PI / 2);
-            } else if (this.position.values.y < this.game.arena.arena.values.topY + 500) {
+            } else if (y < this.game.arena.arena.values.topY + 500) {
                 this.turnTo(this.orbitRate > 0 ? 0 : Math.PI);
-            } else if (this.position.values.y > this.game.arena.arena.values.bottomY - 500) {
+            } else if (y > this.game.arena.arena.values.bottomY - 500) {
                 this.turnTo(this.orbitRate > 0 ? Math.PI : 0);
             }
         }
