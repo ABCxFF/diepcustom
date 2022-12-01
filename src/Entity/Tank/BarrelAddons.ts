@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, ObjectFlags } from "../../Const/Enums";
+import { Colors, PhysicsFlags } from "../../Const/Enums";
 import { barrelAddonId } from "../../Const/TankDefinitions";
 import GameServer from "../../Game";
 import ObjectEntity from "../Object";
@@ -57,7 +57,7 @@ export class TrapLauncher extends ObjectEntity {
         this.barrelEntity = barrel;
         this.setParent(barrel);
         this.relations.values.team = barrel;
-        this.physics.values.objectFlags = ObjectFlags.isTrapezoid | ObjectFlags.unknown1;
+        this.physics.values.objectFlags = PhysicsFlags.isTrapezoid | PhysicsFlags._unknown;
         this.style.values.color = Colors.Barrel;
 
         this.physics.values.sides = 2;

@@ -903,7 +903,7 @@ export class NameGroup {
     }
 }
 
-export type CameraField = "GUIunknown" | "camera" | "player" | "FOV" | "level" | "tank" | "levelbarProgress" | "levelbarMax" | "statsAvailable" | "statNames" | "statLevels" | "statLimits" | "cameraX" | "cameraY" | "scorebar" | "respawnLevel" | "killedBy" | "spawnTick" | "deathTick" | "tankOverride" | "movementSpeed";
+export type CameraField = "unusedClientId" | "camera" | "player" | "FOV" | "level" | "tank" | "levelbarProgress" | "levelbarMax" | "statsAvailable" | "statNames" | "statLevels" | "statLimits" | "cameraX" | "cameraY" | "scorebar" | "respawnLevel" | "killedBy" | "spawnTick" | "deathTick" | "tankOverride" | "movementSpeed";
 
 export class CameraTable<ValueType> {
     state: Uint8Array;
@@ -1029,7 +1029,7 @@ export class CameraGroup {
     fields: CameraField[];
     state: Record<CameraField, number>;
     values: {
-        GUIunknown: number,
+        unusedClientId: number,
         camera: number,
         player: Entity | null,
         FOV: number,
@@ -1057,9 +1057,9 @@ export class CameraGroup {
 
         this.entity = entity;
 
-        this.fields = ["GUIunknown", "camera", "player", "FOV", "level", "tank", "levelbarProgress", "levelbarMax", "statsAvailable", "statNames", "statLevels", "statLimits", "cameraX", "cameraY", "scorebar", "respawnLevel", "killedBy", "spawnTick", "deathTick", "tankOverride", "movementSpeed"]
+        this.fields = ["unusedClientId", "camera", "player", "FOV", "level", "tank", "levelbarProgress", "levelbarMax", "statsAvailable", "statNames", "statLevels", "statLimits", "cameraX", "cameraY", "scorebar", "respawnLevel", "killedBy", "spawnTick", "deathTick", "tankOverride", "movementSpeed"]
         this.state = {
-            GUIunknown: 0,
+            unusedClientId: 0,
             camera: 0,
             player: 0,
             FOV: 0,
@@ -1083,7 +1083,7 @@ export class CameraGroup {
         }
 
         this.values = {
-            GUIunknown: 2,
+            unusedClientId: 2,
             camera: 1,
             player: null,
             FOV: 0.35,
@@ -1110,7 +1110,7 @@ export class CameraGroup {
     findUpdate() {
         const out: CameraField[] = [];
 
-        if (this.state.GUIunknown) out.push("GUIunknown");
+        if (this.state.unusedClientId) out.push("unusedClientId");
         if (this.state.camera) out.push("camera");
         if (this.state.player) out.push("player");
         if (this.state.FOV) out.push("FOV");
@@ -1136,7 +1136,7 @@ export class CameraGroup {
     }
 
     wipe() {
-        this.state.GUIunknown = 0;
+        this.state.unusedClientId = 0;
         this.state.camera = 0;
         this.state.player = 0;
         this.state.FOV = 0;
@@ -1159,15 +1159,15 @@ export class CameraGroup {
         this.state.movementSpeed = 0;
     }
 
-    get GUIunknown() {
-        return this.values.GUIunknown;
+    get unusedClientId() {
+        return this.values.unusedClientId;
     }
-    set GUIunknown(GUIunknown) {
-        if (GUIunknown == this.values.GUIunknown) return;
+    set unusedClientId(unusedClientId) {
+        if (unusedClientId == this.values.unusedClientId) return;
         
-        this.state.GUIunknown |= 1;
+        this.state.unusedClientId |= 1;
         this.entity.state |= 1;
-        this.values.GUIunknown = GUIunknown;
+        this.values.unusedClientId = unusedClientId;
     }
 
     get camera() {
@@ -1499,7 +1499,7 @@ export class StyleGroup {
         this.values = {
             styleFlags: 1,
             color: Colors.Border,
-            borderThickness: 480,
+            borderThickness: 7.5,
             opacity: 1,
             zIndex: 0
         }

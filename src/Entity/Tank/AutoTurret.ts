@@ -20,7 +20,7 @@ import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
 
 import { BarrelBase } from "./TankBody";
-import { Colors, InputFlags, MotionFlags, NametagFlags, ObjectFlags, Stat, StyleFlags } from "../../Const/Enums";
+import { Colors, InputFlags, PositionFlags, NameFlags, PhysicsFlags, Stat, StyleFlags } from "../../Const/Enums";
 import { BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
@@ -97,15 +97,15 @@ export default class AutoTurret extends ObjectEntity {
         this.physics.values.size = this.baseSize * this.sizeFactor;
 
         this.style.values.color = Colors.Barrel;
-        this.style.values.styleFlags |= StyleFlags.aboveParent;
+        this.style.values.styleFlags |= StyleFlags.showsAboveParent;
 
-        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.position.values.motion |= PositionFlags.absoluteRotation;
 
         this.name.values.name = "Mounted Turret";
-        this.name.values.nametag |= NametagFlags.hidden;
+        this.name.values.nametag |= NameFlags.hiddenName;
 
         this.turret = new Barrel(this, turretDefinition);
-        this.turret.physics.values.objectFlags |= ObjectFlags.unknown1;
+        this.turret.physics.values.objectFlags |= PhysicsFlags._unknown;
     }
     
     /**

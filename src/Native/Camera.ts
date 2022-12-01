@@ -21,7 +21,7 @@ import ObjectEntity from "../Entity/Object";
 
 import { Entity, EntityStateFlags, fieldGroupProps } from "./Entity";
 import { CameraGroup, RelationsGroup } from "./FieldGroups";
-import { CameraFlags, ClientBound, Colors, levelToScore, levelToScoreTable, ObjectFlags, Stat } from "../Const/Enums";
+import { CameraFlags, ClientBound, Colors, levelToScore, levelToScoreTable, PhysicsFlags, Stat } from "../Const/Enums";
 import { getTankById } from "../Const/TankDefinitions";
 import { removeFast } from "../util";
 
@@ -68,7 +68,7 @@ export class CameraEntity extends Entity {
     public tick(tick: number) {
         if (Entity.exists(this.camera.values.player)) {
             const focus = this.camera.values.player;
-            if (!(this.camera.values.camera & CameraFlags.useCameraCoords) && focus instanceof ObjectEntity) {
+            if (!(this.camera.values.camera & CameraFlags.usesCameraCoords) && focus instanceof ObjectEntity) {
                 this.camera.cameraX = focus.rootParent.position.values.x;
                 this.camera.cameraY = focus.rootParent.position.values.y;
             }
@@ -95,7 +95,7 @@ export class CameraEntity extends Entity {
                 this.camera.movementSpeed = player.definition.speed * 2.55 * Math.pow(1.07, this.camera.values.statLevels.values[Stat.MovementSpeed]) / Math.pow(1.015, this.camera.values.level - 1)
             }
         } else {
-            this.camera.camera |= CameraFlags.useCameraCoords;
+            this.camera.camera |= CameraFlags.usesCameraCoords;
         }
     }
 }
@@ -195,8 +195,7 @@ export default class Camera extends CameraEntity {
         for (let id = 0; id <= this.game.entities.lastId; ++id) {
             const entity = this.game.entities.inner[id];
             
-            // TODO(speed)
-            if (entity instanceof ObjectEntity && !entitiesInRange.includes(entity) && (entity.physics.values.objectFlags & ObjectFlags.minimap)) entitiesInRange.push(entity);
+            if (entity instanceof ObjectEntity && !entitiesInRange.includes(entity) && (entity.physics.values.objectFlags & PhysicsFlags.showsOnMap)) entitiesInRange.push(entity);
         }
 
         if (Entity.exists(this.camera.values.player) && this.camera.values.player instanceof ObjectEntity) entitiesInRange.push(this.camera.values.player);
@@ -402,7 +401,7 @@ export default class Camera extends CameraEntity {
                 const pos = this.spectatee.rootParent.position.values;
                 this.camera.cameraX = pos.x;
                 this.camera.cameraY = pos.y;
-                this.camera.camera |= CameraFlags.useCameraCoords;
+                this.camera.camera |= CameraFlags.usesCameraCoords;
             }
         }
 

@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import LivingEntity from "../Live";
 import AbstractShape from "./AbstractShape";
 
-import { Colors, MotionFlags } from "../../Const/Enums";
+import { Colors, PositionFlags } from "../../Const/Enums";
 import { AI, AIState } from "../AI";
 
 /**
@@ -40,7 +40,7 @@ export default class Crasher extends AbstractShape {
 
         this.name.values.name = "Crasher";
 
-        this.position.values.motion |= MotionFlags.canMoveThroughWalls;
+        this.position.values.motion |= PositionFlags.canMoveThroughWalls;
         this.health.values.health = this.health.values.maxHealth = large ? 30 : 10;
         this.physics.values.size = (large ? 55 : 35) * Math.SQRT1_2;
         this.physics.values.sides = 3;
@@ -57,6 +57,7 @@ export default class Crasher extends AbstractShape {
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
         this.ai.aimSpeed = (this.ai.movementSpeed = this.targettingSpeed);
+        // this.ai._findTargetInterval = tps;
     }
 
     tick(tick: number) {

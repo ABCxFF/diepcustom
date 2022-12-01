@@ -27,7 +27,7 @@ import Minion from "./Projectile/Minion";
 import ObjectEntity from "../Object";
 import { BarrelBase } from "./TankBody";
 
-import { Colors, MotionFlags, ObjectFlags, ShootingFlags, Stat, Tank } from "../../Const/Enums";
+import { Colors, PositionFlags, PhysicsFlags, BarrelFlags, Stat, Tank } from "../../Const/Enums";
 import { BarrelGroup } from "../../Native/FieldGroups";
 import { BarrelDefinition, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
@@ -120,7 +120,7 @@ export default class Barrel extends ObjectEntity {
         // Begin Loading Definition
         this.style.values.color = Colors.Barrel;
         this.physics.values.sides = 2;
-        if (barrelDefinition.isTrapezoid) this.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
+        if (barrelDefinition.isTrapezoid) this.physics.values.objectFlags |= PhysicsFlags.isTrapezoid;
 
         this.setParent(owner);
         this.relations.values.owner = owner;
@@ -148,7 +148,7 @@ export default class Barrel extends ObjectEntity {
 
     /** Shoots a bullet from the barrel. */
     public shoot() {
-        this.barrel.shooting ^= ShootingFlags.shoot;
+        this.barrel.shooting ^= BarrelFlags.hasShot;
 
         // No this is not correct
         const scatterAngle = (Math.PI / 180) * this.definition.bullet.scatterRate * (Math.random() - .5) * 10;
@@ -175,7 +175,7 @@ export default class Barrel extends ObjectEntity {
             case 'bullet': {
                 const bullet = new Bullet(this, this.tank, tankDefinition, angle);
 
-                if (tankDefinition && (tankDefinition.id === Tank.ArenaCloser || tankDefinition.id === DevTank.Squirrel)) bullet.position.motion |= MotionFlags.canMoveThroughWalls;
+                if (tankDefinition && (tankDefinition.id === Tank.ArenaCloser || tankDefinition.id === DevTank.Squirrel)) bullet.position.motion |= PositionFlags.canMoveThroughWalls;
                 break;
             }
             case 'trap':

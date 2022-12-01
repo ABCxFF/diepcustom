@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
+import { PhysicsFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AI, AIState } from "../../AI";
@@ -53,15 +53,15 @@ export default class Drone extends Bullet {
         this.ai.targetFilter = (targetPos) => (targetPos.x - this.tank.position.values.x) ** 2 + (targetPos.y - this.tank.position.values.y) ** 2 <= this.ai.viewRange ** 2; // (1000 ** 2) 1000 radius
         this.canControlDrones = typeof this.barrelEntity.definition.canControlDrones === 'boolean' && this.barrelEntity.definition.canControlDrones;
         this.physics.values.sides = bulletDefinition.sides ?? 3;
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
-        this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
+        if (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= PhysicsFlags.noOwnTeamCollision;
+        this.physics.values.objectFlags |= PhysicsFlags.onlySameOwnerCollision;
+        this.style.values.styleFlags &= ~StyleFlags.hasNoDmgIndicator;
 
         if (barrel.definition.bullet.lifeLength !== -1) {
             this.lifeLength = 88 * barrel.definition.bullet.lifeLength;
         } else {
             this.lifeLength = Infinity;
-            if (this.physics.values.objectFlags & ObjectFlags.canEscapeArena) this.physics.values.objectFlags ^= ObjectFlags.canEscapeArena;
+            if (this.physics.values.objectFlags & PhysicsFlags.canEscapeArena) this.physics.values.objectFlags ^= PhysicsFlags.canEscapeArena;
         }
         this.deathAccelFactor = 1;
 

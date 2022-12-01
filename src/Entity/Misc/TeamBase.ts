@@ -18,7 +18,7 @@
 
 import GameServer from "../../Game";
 
-import { HealthbarFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
+import { HealthFlags, PhysicsFlags, StyleFlags } from "../../Const/Enums";
 import { TeamGroupEntity } from "./TeamEntity";
 import LivingEntity from "../Live";
 /**
@@ -37,7 +37,7 @@ export default class TeamBase extends LivingEntity {
         this.physics.values.width = width;
         this.physics.values.size = height;
         this.physics.values.sides = 2;
-        this.physics.values.objectFlags |= ObjectFlags.minimap | ObjectFlags.noOwnTeamCollision | ObjectFlags.base;
+        this.physics.values.objectFlags |= PhysicsFlags.showsOnMap | PhysicsFlags.noOwnTeamCollision | PhysicsFlags.isBase;
         this.physics.values.pushFactor = 2;
         this.damagePerTick = 5;
 
@@ -52,9 +52,9 @@ export default class TeamBase extends LivingEntity {
         this.style.values.opacity = 0.1;
         this.style.values.borderThickness = 0;
         this.style.values.color = team.team.teamColor;
-        this.style.values.styleFlags |= StyleFlags.minimap2 | StyleFlags.noDmgIndicator;
+        this.style.values.styleFlags |= StyleFlags._minimap | StyleFlags.hasNoDmgIndicator;
 
-        this.health.healthbar |= HealthbarFlags.hidden
+        this.health.healthbar |= HealthFlags.hiddenHealthbar
         this.health.health = this.health.values.maxHealth = 0xABCFF;
     }
 

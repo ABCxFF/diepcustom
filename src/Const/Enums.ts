@@ -214,81 +214,81 @@ export enum InputFlags {
 }
 
 /**
- * The flag names for the `GUI` field of the arena field group.
+ * The flag names for the arena field group.
  */
-export enum GUIFlags {
-    noJoining       = 1 << 0,
-    showLeaderArrow = 1 << 1,
-    hideScorebar    = 1 << 2,
-    gameReadyStart  = 1 << 3,
-    canUseCheats    = 1 << 4
+export enum ArenaFlags {
+    noJoining        = 1 << 0,
+    showsLeaderArrow = 1 << 1,
+    hiddenScores     = 1 << 2,
+    gameReadyStart   = 1 << 3,
+    canUseCheats     = 1 << 4
 }
 /**
- * The flag names for the `mothership` field of the team field group.
+ * The flag names for the team field group.
  */
-export enum MothershipFlags {
+export enum TeamFlags {
     hasMothership = 1 << 0
 }
 /**
- * The flag names for the `camera` field of the camera field group.
+ * The flag names for the camera field group.
  */
 export enum CameraFlags {
-    useCameraCoords     = 1 << 0,
-    showDeathStats      = 1 << 1,
-    gameWaitingStart    = 1 << 2
+    usesCameraCoords      = 1 << 0,
+    showingDeathStats     = 1 << 1,
+    gameWaitingStart      = 1 << 2
 }
 /**
- * The flag names for the `styleFlags` field of the syle field group.
+ * The flag names for the tsyle field group.
  */
 export enum StyleFlags {
-    visible         = 1 << 0,
-    damage          = 1 << 1,
-    invincibility   = 1 << 2,
-    minimap2        = 1 << 3,
-    star            = 1 << 4,
-    trap            = 1 << 5,
-    aboveParent     = 1 << 6,
-    noDmgIndicator  = 1 << 7
+    isVisible          = 1 << 0,
+    hasBeenDamaged     = 1 << 1,
+    isFlashing         = 1 << 2,
+    _minimap           = 1 << 3,
+    isStar             = 1 << 4,
+    isTrap             = 1 << 5,
+    showsAboveParent   = 1 << 6,
+    hasNoDmgIndicator  = 1 << 7
 }
 /**
- * The flag names for the `motion` field of the position field group.
+ * The flag names for the position field group.
  */
-export enum MotionFlags {
+export enum PositionFlags {
     absoluteRotation    = 1 << 0,
     canMoveThroughWalls = 1 << 1
 }
 /**
- * The flag names for the `objectFlags` field of the physics field group.
+ * The flag names for the physics field group.
  */
-export enum ObjectFlags {
+export enum PhysicsFlags {
     isTrapezoid             = 1 << 0,
-    minimap                 = 1 << 1,
-    unknown1                = 1 << 2,
+    showsOnMap              = 1 << 1,
+    _unknown                = 1 << 2,
     noOwnTeamCollision      = 1 << 3,
-    wall                    = 1 << 4,
+    isSolidWall             = 1 << 4,
     onlySameOwnerCollision  = 1 << 5,
-    base                    = 1 << 6,
-    unknown4                = 1 << 7,
+    isBase                  = 1 << 6,
+    _unknown1               = 1 << 7,
     canEscapeArena          = 1 << 8
 }
 /**
- * The flag names for the `shooting` field of the barrel field group.
+ * The flag names for the barrel field group.
  */
-export enum ShootingFlags {
-    shoot = 1 << 0
+export enum BarrelFlags {
+    hasShot = 1 << 0
 }
 /**
- * The flag names for the `healthbar` field of the health field group.
+ * The flag names for the health field group.
  */
-export enum HealthbarFlags {
-    hidden = 1 << 0
+export enum HealthFlags {
+    hiddenHealthbar = 1 << 0
 }
 /**
- * The flag names for the `nametag` field of the name field group.
+ * The flag names for the name field group.
  */
-export enum NametagFlags {
-    hidden = 1 << 0,
-    cheats = 1 << 1
+export enum NameFlags {
+    hiddenName = 1 << 0,
+    highlightedName = 1 << 1
 }
 
 /**

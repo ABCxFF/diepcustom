@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
 
-import { ClientBound, Colors, MotionFlags } from "../../Const/Enums";
+import { ClientBound, Colors, PositionFlags } from "../../Const/Enums";
 import { VectorAbstract } from "../../Physics/Vector";
 import { AI, AIState, Inputs } from "../AI";
 import { NameGroup } from "../../Native/FieldGroups";
@@ -125,7 +125,7 @@ export default class AbstractBoss extends LivingEntity {
         this.relations.values.team = this.cameraEntity;
 
         this.physics.values.absorbtionFactor = 0.05;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.position.values.motion |= PositionFlags.absoluteRotation;
         this.scoreReward = 30000 * this.game.arena.shapeScoreRewardMultiplier;
         this.damagePerTick = 60;
 

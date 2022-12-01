@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Drone from "./Drone";
 
-import { InputFlags, ObjectFlags } from "../../../Const/Enums";
+import { InputFlags, PhysicsFlags } from "../../../Const/Enums";
 import { BarrelDefinition, TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AIState, Inputs } from "../../AI";
@@ -82,10 +82,10 @@ export default class Minion extends Drone implements BarrelBase {
         this.physics.values.sides = bulletDefinition.sides ?? 1;
         this.physics.values.size *= 1.2;
         
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        if (this.physics.values.objectFlags & ObjectFlags.canEscapeArena) this.physics.values.objectFlags ^= ObjectFlags.canEscapeArena;
+        if (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= PhysicsFlags.noOwnTeamCollision;
+        if (this.physics.values.objectFlags & PhysicsFlags.canEscapeArena) this.physics.values.objectFlags ^= PhysicsFlags.canEscapeArena;
 
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
+        this.physics.values.objectFlags |= PhysicsFlags.onlySameOwnerCollision;
 
         this.sizeFactor = this.physics.values.size / 50;
         this.cameraEntity = tank.cameraEntity;

@@ -17,7 +17,7 @@
 */
 
 import Client from "../Client";
-import { Colors, GUIFlags } from "../Const/Enums";
+import { Colors, ArenaFlags } from "../Const/Enums";
 import Dominator from "../Entity/Misc/Dominator";
 import TeamBase from "../Entity/Misc/TeamBase";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
@@ -47,7 +47,7 @@ export default class DominationArena extends ArenaEntity {
 
         this.updateBounds(arenaSize * 2, arenaSize * 2)
 
-        this.arena.values.GUI |= GUIFlags.hideScorebar;
+        this.arena.values.GUI |= ArenaFlags.hiddenScores;
 
         this.blueTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamBlue), -arenaSize + baseSize / 2,  -arenaSize + baseSize / 2, baseSize, baseSize);
         this.redTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamRed), arenaSize - baseSize / 2, arenaSize - baseSize / 2, baseSize, baseSize);

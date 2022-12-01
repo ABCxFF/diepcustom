@@ -18,7 +18,7 @@
 
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
-import { Colors, Tank, Stat, ColorsHexCode, ClientBound, MothershipFlags } from "../../Const/Enums";
+import { Colors, Tank, Stat, ColorsHexCode, ClientBound, TeamFlags } from "../../Const/Enums";
 import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
@@ -95,7 +95,7 @@ export default class Mothership extends TankBody {
 
     public delete(): void {
         // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
-        if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~MothershipFlags.hasMothership;
+        if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~TeamFlags.hasMothership;
         this.ai.inputs.deleted = true;
         super.delete();
     }

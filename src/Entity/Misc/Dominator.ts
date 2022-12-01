@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, NametagFlags, Tank } from "../../Const/Enums";
+import { Colors, NameFlags, Tank } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
@@ -71,7 +71,7 @@ export default class Dominator extends TankBody {
         const def = (this.definition = Object.assign({}, this.definition));
         def.speed = camera.camera.values.movementSpeed = 0;
         this.name.values.name = "Dominator";
-        this.name.values.nametag |= NametagFlags.hidden;
+        this.name.values.nametag |= NameFlags.hiddenName;
         this.physics.values.absorbtionFactor = 0;
         
         this.position.values.x = base.position.values.x;

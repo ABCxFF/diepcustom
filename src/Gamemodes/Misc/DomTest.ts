@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 
 import ShapeManager from "../../Entity/Shape/Manager";
-import { NametagFlags, Tank } from "../../Const/Enums";
+import { NameFlags, Tank } from "../../Const/Enums";
 import Dominator from "../../Entity/Misc/Dominator";
 import TeamBase from "../../Entity/Misc/TeamBase";
 import { SandboxShapeManager } from "../Sandbox";
@@ -57,7 +57,7 @@ export default class SpikeboxArena extends ArenaEntity {
         // spike.style.color = Colors.TeamBlue;
 
         const spike = new Dominator(this, new TeamBase(game, this, 0, 0, 750, 750, false), Tank.Spike);
-        spike.name.nametag &= ~NametagFlags.hidden
+        spike.name.nametag &= ~NameFlags.hiddenName
     }
 
     public tick(tick: number) {

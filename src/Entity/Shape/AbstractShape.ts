@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import LivingEntity from "../Live";
 
-import { Colors, MotionFlags, NametagFlags } from "../../Const/Enums";
+import { Colors, PositionFlags, NameFlags } from "../../Const/Enums";
 import { NameGroup } from "../../Native/FieldGroups";
 import { AI } from "../AI";
 import { normalizeAngle, PI2 } from "../../util";
@@ -69,8 +69,8 @@ export default class AbstractShape extends LivingEntity {
         this.relations.values.team = game.arena;
 
         // shape names are by default hidden
-        this.name.values.nametag = NametagFlags.hidden;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.name.values.nametag = NameFlags.hiddenName;
+        this.position.values.motion |= PositionFlags.absoluteRotation;
         this.orbitAngle = this.position.values.angle = (Math.random() * PI2);
     }
 

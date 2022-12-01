@@ -26,7 +26,7 @@ import LivingEntity from "../Live";
 import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
 
-import { Colors, StyleFlags, StatCount, Tank, CameraFlags, Stat, InputFlags, ObjectFlags, MotionFlags } from "../../Const/Enums";
+import { Colors, StyleFlags, StatCount, Tank, CameraFlags, Stat, InputFlags, PhysicsFlags, PositionFlags } from "../../Const/Enums";
 import { Entity } from "../../Native/Entity";
 import { NameGroup, ScoreGroup } from "../../Native/FieldGroups";
 import { Addon, AddonById } from "./Addons";
@@ -87,11 +87,11 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         this.relations.values.owner = camera;
 
         this.cameraEntity.camera.spawnTick = game.tick;
-        this.cameraEntity.camera.camera |= CameraFlags.showDeathStats;
+        this.cameraEntity.camera.camera |= CameraFlags.showingDeathStats;
 
         // spawn protection
-        this.style.values.styleFlags |= StyleFlags.invincibility;
-        if (this.game.playersOnMap) this.physics.values.objectFlags |= ObjectFlags.minimap;
+        this.style.values.styleFlags |= StyleFlags.isFlashing;
+        if (this.game.playersOnMap) this.physics.values.objectFlags |= PhysicsFlags.showsOnMap;
 
         this.damagePerTick = 20;
         this.setTank(Tank.Basic);
@@ -142,8 +142,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         // Size ratios
         this.baseSize = tank.sides === 4 ? Math.SQRT2 * 32.5 : tank.sides === 16 ? Math.SQRT2 * 25 : 50;
         this.physics.absorbtionFactor = tank.absorbtionFactor;
-        if (tank.absorbtionFactor === 0) this.position.motion |= MotionFlags.canMoveThroughWalls;
-        else if (this.position.motion & MotionFlags.canMoveThroughWalls) this.position.motion ^= MotionFlags.canMoveThroughWalls
+        if (tank.absorbtionFactor === 0) this.position.motion |= PositionFlags.canMoveThroughWalls;
+        else if (this.position.motion & PositionFlags.canMoveThroughWalls) this.position.motion ^= PositionFlags.canMoveThroughWalls
 
         camera.camera.tank = this._currentTank = id;
         if (tank.upgradeMessage && camera instanceof Camera) camera.client.notify(tank.upgradeMessage);
@@ -240,19 +240,19 @@ export default class TankBody extends LivingEntity implements BarrelBase {
             this.lastDamageTick = tick;
             this.health.health -= 2 + this.health.values.maxHealth / 500;
 
-            if (this.style.values.styleFlags & StyleFlags.invincibility) this.style.styleFlags ^= StyleFlags.invincibility;
+            if (this.style.values.styleFlags & StyleFlags.isFlashing) this.style.styleFlags ^= StyleFlags.isFlashing;
             return;
             // return this.destroy();
         }
 
         if (this.definition.flags.zoomAbility && (this.inputs.flags & InputFlags.rightclick)) {
-            if (!(this.cameraEntity.camera.values.camera & CameraFlags.useCameraCoords)) {
+            if (!(this.cameraEntity.camera.values.camera & CameraFlags.usesCameraCoords)) {
                 const angle = Math.atan2(this.inputs.mouse.y - this.position.values.y, this.inputs.mouse.x - this.position.values.x)
                 this.cameraEntity.camera.cameraX = Math.cos(angle) * 1000 + this.position.values.x;
                 this.cameraEntity.camera.cameraY = Math.sin(angle) * 1000 + this.position.values.y;
-                this.cameraEntity.camera.camera |= CameraFlags.useCameraCoords;
+                this.cameraEntity.camera.camera |= CameraFlags.usesCameraCoords;
             }
-        } else if (this.cameraEntity.camera.values.camera & CameraFlags.useCameraCoords) this.cameraEntity.camera.camera ^= CameraFlags.useCameraCoords;
+        } else if (this.cameraEntity.camera.values.camera & CameraFlags.usesCameraCoords) this.cameraEntity.camera.camera ^= CameraFlags.usesCameraCoords;
 
         if (this.definition.flags.invisibility) {
 
@@ -289,8 +289,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         this.score.score = this.cameraEntity.camera.values.scorebar;
 
-        if (!this.spawnProtectionEnded && (this.style.values.styleFlags & StyleFlags.invincibility) && (this.game.tick >= this.cameraEntity.camera.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
-            this.style.styleFlags ^= StyleFlags.invincibility;
+        if (!this.spawnProtectionEnded && (this.style.values.styleFlags & StyleFlags.isFlashing) && (this.game.tick >= this.cameraEntity.camera.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
+            this.style.styleFlags ^= StyleFlags.isFlashing;
             this.spawnProtectionEnded = true;
         }
 

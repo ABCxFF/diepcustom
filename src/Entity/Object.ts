@@ -23,7 +23,7 @@ import Vector from "../Physics/Vector";
 
 import { PhysicsGroup, PositionGroup, RelationsGroup, StyleGroup } from "../Native/FieldGroups";
 import { Entity } from "../Native/Entity";
-import { MotionFlags, ObjectFlags } from "../Const/Enums";
+import { PositionFlags, PhysicsFlags } from "../Const/Enums";
 
 /**
  * The animator for how entities delete (the opacity and size fade out).
@@ -187,7 +187,7 @@ export default class ObjectEntity extends Entity {
         this.accel.set(new Vector(0, 0));
 
         // Keep things in the arena
-        if (!(this.physics.values.objectFlags & ObjectFlags.canEscapeArena)) {
+        if (!(this.physics.values.objectFlags & PhysicsFlags.canEscapeArena)) {
             const arena = this.game.arena;
             xPos: {
                 if (this.position.values.x < arena.arena.values.leftX - arena.ARENA_PADDING) this.position.x = arena.arena.values.leftX - arena.ARENA_PADDING;
@@ -216,15 +216,15 @@ export default class ObjectEntity extends Entity {
         if (diffX === 0 && diffY === 0) kbAngle = Math.random() * util.PI2;
         else kbAngle = Math.atan2(diffY, diffX);
 
-        if ((entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base) && !(this.position.values.motion & MotionFlags.canMoveThroughWalls))  {
+        if ((entity.physics.values.objectFlags & PhysicsFlags.isSolidWall || entity.physics.values.objectFlags & PhysicsFlags.isBase) && !(this.position.values.motion & PositionFlags.canMoveThroughWalls))  {
             this.accel.magnitude *= 0.3;
             // this.velocity.magnitude *= 0.3;
             kbMagnitude /= 0.3;
         }
         if (entity.physics.values.sides === 2) {
-            if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
+            if (this.position.values.motion & PositionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
-            } else if ((!(entity.physics.values.objectFlags & ObjectFlags.base) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
+            } else if ((!(entity.physics.values.objectFlags & PhysicsFlags.isBase) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
                 // this is a bit off still. k
                 this.velocity.setPosition(this.position.values);
                 this.setVelocity(0, 0);
@@ -271,16 +271,16 @@ export default class ObjectEntity extends Entity {
             if (entity === this) continue;
             if (entity.deletionAnimation) continue;
             if (entity.relations.values.team === this.relations.values.team) {
-                if ((entity.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) ||
-                    (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision)) continue;
+                if ((entity.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) ||
+                    (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision)) continue;
 
                 if (entity.relations.values.owner !== this.relations.values.owner) {
-                    if ((entity.physics.values.objectFlags & ObjectFlags.onlySameOwnerCollision) ||
-                        (this.physics.values.objectFlags & ObjectFlags.onlySameOwnerCollision)) continue;
+                    if ((entity.physics.values.objectFlags & PhysicsFlags.onlySameOwnerCollision) ||
+                        (this.physics.values.objectFlags & PhysicsFlags.onlySameOwnerCollision)) continue;
                 }
             }
             
-            if (this.relations.values.team === this.game.arena && (entity.physics.values.objectFlags & ObjectFlags.base)) continue;
+            if (this.relations.values.team === this.game.arena && (entity.physics.values.objectFlags & PhysicsFlags.isBase)) continue;
 
             if (entity.physics.values.sides === 0) continue;
             if (entity.physics.values.sides === 2 && this.physics.values.sides === 2) {
@@ -323,7 +323,7 @@ export default class ObjectEntity extends Entity {
         let entity: ObjectEntity = this;
         while (entity.relations.values.parent instanceof ObjectEntity) {
             
-            if (!(entity.relations.values.parent.position.values.motion & MotionFlags.absoluteRotation)) pos.angle += entity.position.values.angle;
+            if (!(entity.relations.values.parent.position.values.motion & PositionFlags.absoluteRotation)) pos.angle += entity.position.values.angle;
             entity = entity.relations.values.parent;
             pos.x += entity.position.values.x;
             pos.y += entity.position.values.y;

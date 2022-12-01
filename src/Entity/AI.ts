@@ -22,7 +22,7 @@ import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
 import TankBody from "./Tank/TankBody";
 
-import { InputFlags, ObjectFlags } from "../Const/Enums";
+import { InputFlags, PhysicsFlags } from "../Const/Enums";
 import { Entity } from "../Native/Entity";
 
 // Beware
@@ -146,7 +146,7 @@ export class AI {
 
             if (!(entity instanceof LivingEntity) ) continue; // Check if the target is living
 
-            if (entity.physics.values.objectFlags & ObjectFlags.base) continue; // Check if the target is a base
+            if (entity.physics.values.objectFlags & PhysicsFlags.isBase) continue; // Check if the target is a base
 
             if (!(entity.relations.values.owner === null || !(entity.relations.values.owner instanceof ObjectEntity))) continue; // Don't target entities who have an object owner
             

@@ -23,7 +23,7 @@ import ShapeManager from "../../Entity/Shape/Manager";
 import { Inputs } from "../../Entity/AI";
 import { CameraEntity } from "../../Native/Camera";
 import TankBody from "../../Entity/Tank/TankBody";
-import { Colors, ObjectFlags, StyleFlags, Tank } from "../../Const/Enums";
+import { Colors, PhysicsFlags, StyleFlags, Tank } from "../../Const/Enums";
 import { SandboxShapeManager } from "../Sandbox";
 
 /**
@@ -42,8 +42,8 @@ export default class SpikeboxArena extends ArenaEntity {
 
         spike.cameraEntity.camera.player = spike;
         spike.setTank(Tank.Spike);
-        spike.style.styleFlags &= ~StyleFlags.invincibility;
-        spike.physics.objectFlags |= ObjectFlags.base;
+        spike.style.styleFlags &= ~StyleFlags.isFlashing;
+        spike.physics.objectFlags |= PhysicsFlags.isBase;
         /* @ts-ignore */
         spike.damageReduction = 0;
         Object.defineProperty(spike, "damagePerTick", {

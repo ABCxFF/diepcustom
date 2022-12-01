@@ -25,7 +25,7 @@ import Camera from "./Camera";
 import { VectorAbstract } from "../Physics/Vector";
 import { ArenaGroup, TeamGroup } from "./FieldGroups";
 import { Entity } from "./Entity";
-import { Colors, GUIFlags, Tank } from "../Const/Enums";
+import { Colors, ArenaFlags, Tank } from "../Const/Enums";
 import { PI2, saveToLog } from "../util";
 import { TeamGroupEntity } from "../Entity/Misc/TeamEntity";
 import Client from "../Client";
@@ -85,7 +85,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		this.arena.values.leftX = -this.width / 2;
 		this.arena.values.rightX = this.width / 2;
 
-		this.arena.values.GUI = GUIFlags.gameReadyStart;
+		this.arena.values.GUI = ArenaFlags.gameReadyStart;
 		this.team.values.teamColor = Colors.Neutral;
 	}
 
@@ -123,7 +123,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	protected updateScoreboard(scoreboardPlayers: TankBody[]) {
 
 
-		const scoreboardCount = this.arena.scoreboardAmount = (this.arena.values.GUI & GUIFlags.hideScorebar) ? 0 : Math.min(scoreboardPlayers.length, 10);
+		const scoreboardCount = this.arena.scoreboardAmount = (this.arena.values.GUI & ArenaFlags.hiddenScores) ? 0 : Math.min(scoreboardPlayers.length, 10);
 
 		if (scoreboardCount) {
 			scoreboardPlayers.sort((p1, p2) => p2.score.values.score - p1.score.values.score);
@@ -131,7 +131,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			const leader = scoreboardPlayers[0];
 			this.arena.leaderX = leader.position.values.x;
 			this.arena.leaderY = leader.position.values.y;
-			this.arena.GUI |= GUIFlags.showLeaderArrow;
+			this.arena.GUI |= ArenaFlags.showsLeaderArrow;
 			let i;
 			for (i = 0; i < scoreboardCount; ++i) {
 				const player = scoreboardPlayers[i];
@@ -148,7 +148,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 				/** @ts-ignore */ // _currentTank only since ts ignore
 				this.arena.values.scoreboardTanks[i] = player._currentTank;
 			}
-		} else if (this.arena.values.GUI & GUIFlags.showLeaderArrow) this.arena.GUI ^= GUIFlags.showLeaderArrow;
+		} else if (this.arena.values.GUI & ArenaFlags.showsLeaderArrow) this.arena.GUI ^= ArenaFlags.showsLeaderArrow;
 	}
 
 	/**
@@ -183,7 +183,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		}
 
 		this.arenaState = ArenaState.CLOSING;
-		this.arena.GUI |= GUIFlags.noJoining;
+		this.arena.GUI |= ArenaFlags.noJoining;
 
 		setTimeout(() => {
 

@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
+import { PhysicsFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { BarrelBase } from "../TankBody";
 import { DevTank } from "../../../Const/DevTankDefinitions";
@@ -40,10 +40,10 @@ export default class Trap extends Bullet {
         this.baseSpeed = (barrel.bulletAccel / 2) + 30 - Math.random() * barrel.definition.bullet.scatterRate;
         this.baseAccel = 0;
         this.physics.values.sides = bulletDefinition.sides ?? 3;
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
-        this.style.values.styleFlags |= StyleFlags.trap | StyleFlags.star;
-        this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
+        if (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= PhysicsFlags.noOwnTeamCollision;
+        this.physics.values.objectFlags |= PhysicsFlags.onlySameOwnerCollision;
+        this.style.values.styleFlags |= StyleFlags.isTrap | StyleFlags.isStar;
+        this.style.values.styleFlags &= ~StyleFlags.hasNoDmgIndicator;
 
         this.collisionEnd = this.lifeLength >> 3;
         this.lifeLength = (600 * barrel.definition.bullet.lifeLength) >> 3;
@@ -57,8 +57,8 @@ export default class Trap extends Bullet {
         super.tick(tick);
 
         if (tick - this.spawnTick === this.collisionEnd) {
-            if (this.physics.values.objectFlags & ObjectFlags.onlySameOwnerCollision) this.physics.objectFlags ^= ObjectFlags.onlySameOwnerCollision;
-            this.physics.values.objectFlags |= ObjectFlags.noOwnTeamCollision;
+            if (this.physics.values.objectFlags & PhysicsFlags.onlySameOwnerCollision) this.physics.objectFlags ^= PhysicsFlags.onlySameOwnerCollision;
+            this.physics.values.objectFlags |= PhysicsFlags.noOwnTeamCollision;
         }
     }
 }

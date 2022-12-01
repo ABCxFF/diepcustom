@@ -115,8 +115,8 @@ export default class Writer {
         this.at += data.length;
         return this;
     }
-    public radians(radians: number) {
-        return this.vi(radians * 64)
+    public float64Precision(float: number) {
+        return this.vi(float * 64)
     }
     public degrees(degrees: number) {
         degrees *= Math.PI / 180

@@ -23,7 +23,7 @@ import ShapeManager from "../../Entity/Shape/Manager";
 import { Inputs } from "../../Entity/AI";
 import { CameraEntity } from "../../Native/Camera";
 import TankBody from "../../Entity/Tank/TankBody";
-import { Colors, ObjectFlags, StyleFlags, Tank } from "../../Const/Enums";
+import { Colors, PhysicsFlags, StyleFlags, Tank } from "../../Const/Enums";
 import { SandboxShapeManager } from "../Sandbox";
 import Client from "../../Client";
 
@@ -47,8 +47,8 @@ export default class FactoryTestArena extends ArenaEntity {
         nimdac.cameraEntity.camera.player = nimdac;
         nimdac.setTank(Tank.Factory);
         nimdac.barrels[0].droneCount = 6;
-        nimdac.style.styleFlags &= ~StyleFlags.invincibility;
-        nimdac.physics.objectFlags |= ObjectFlags.base;
+        nimdac.style.styleFlags &= ~StyleFlags.isFlashing;
+        nimdac.physics.objectFlags |= PhysicsFlags.isBase;
         /* @ts-ignore */
         nimdac.damageReduction = 0;
         /* @ts-ignore */

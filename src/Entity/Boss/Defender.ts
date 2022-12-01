@@ -21,7 +21,7 @@ import Barrel from "../Tank/Barrel";
 import AutoTurret, { AutoTurretDefinition } from "../Tank/AutoTurret";
 import AbstractBoss from "./AbstractBoss";
 
-import { Colors, Tank, MotionFlags } from "../../Const/Enums";
+import { Colors, Tank, PositionFlags } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
@@ -111,7 +111,7 @@ export default class Defender extends AbstractBoss {
             base.position.values.y = this.physics.values.size * Math.sin(angle) * 0.6;
             base.position.values.x = this.physics.values.size * Math.cos(angle) * 0.6;
 
-            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+            base.physics.values.objectFlags |= PositionFlags.absoluteRotation;
 
             const tickBase = base.tick;
             base.tick = (tick: number) => {

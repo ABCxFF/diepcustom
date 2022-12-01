@@ -19,7 +19,7 @@
 import LivingEntity from "../../Live";
 import Barrel from "../Barrel";
 
-import { HealthbarFlags, MotionFlags, ObjectFlags, Stat, StyleFlags } from "../../../Const/Enums";
+import { HealthFlags, PositionFlags, PhysicsFlags, Stat, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { BarrelBase } from "../TankBody";
 import { EntityStateFlags } from "../../../Native/Entity";
@@ -73,12 +73,12 @@ export default class Bullet extends LivingEntity {
         this.relations.values.owner = tank;
 
         this.physics.values.sides = bulletDefinition.sides ?? 1;
-        this.physics.values.objectFlags |= ObjectFlags.noOwnTeamCollision | ObjectFlags.canEscapeArena;
-        if (tank.position.values.motion & MotionFlags.canMoveThroughWalls) this.position.values.motion |= MotionFlags.canMoveThroughWalls
+        this.physics.values.objectFlags |= PhysicsFlags.noOwnTeamCollision | PhysicsFlags.canEscapeArena;
+        if (tank.position.values.motion & PositionFlags.canMoveThroughWalls) this.position.values.motion |= PositionFlags.canMoveThroughWalls
         this.physics.values.size = (barrel.physics.values.width / 2) * bulletDefinition.sizeRatio;
         this.style.values.color = bulletDefinition.color || tank.rootParent.style.values.color;
-        this.style.values.styleFlags |= StyleFlags.noDmgIndicator;
-        this.health.values.healthbar = HealthbarFlags.hidden;
+        this.style.values.styleFlags |= StyleFlags.hasNoDmgIndicator;
+        this.health.values.healthbar = HealthFlags.hiddenHealthbar;
 
         const bulletDamage = statLevels ? statLevels[Stat.BulletDamage] : 0;
         const bulletPenetration = statLevels ? statLevels[Stat.BulletPenetration] : 0;

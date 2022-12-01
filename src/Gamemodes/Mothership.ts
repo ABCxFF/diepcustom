@@ -14,7 +14,7 @@
 */
 
 import Client from "../Client";
-import { Colors, GUIFlags, MothershipFlags } from "../Const/Enums";
+import { Colors, ArenaFlags, TeamFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
@@ -46,7 +46,7 @@ export default class MothershipArena extends ArenaEntity {
         super(game);
         this.shapeScoreRewardMultiplier = 3.0;
 
-        this.arena.GUI |= GUIFlags.hideScorebar;
+        this.arena.values.GUI |= ArenaFlags.hiddenScores;
 
         // little fun thing to support multiple teams - spread colors around map
         let randAngle = Math.random() * PI2;
@@ -98,7 +98,7 @@ export default class MothershipArena extends ArenaEntity {
             if (isTeamATeam) {
                 team.team.mothershipX = mothership.position.values.x;
                 team.team.mothershipY = mothership.position.values.y;
-                team.team.mothership |= MothershipFlags.hasMothership;
+                team.team.mothership |= TeamFlags.hasMothership;
             }
             /** @ts-ignore */
             if (mothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[i] = Colors.ScoreboardBar;

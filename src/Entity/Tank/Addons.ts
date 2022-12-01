@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import ObjectEntity from "../Object";
 import AutoTurret from "./AutoTurret";
 
-import { Colors, MotionFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
+import { Colors, PositionFlags, PhysicsFlags, StyleFlags } from "../../Const/Enums";
 import { BarrelBase } from "./TankBody";
 import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
@@ -72,7 +72,7 @@ export class Addon {
 
         const ROT_OFFSET = 0.8;
 
-        if (rotator.style.values.styleFlags & StyleFlags.visible) rotator.style.values.styleFlags ^= StyleFlags.visible;
+        if (rotator.style.values.styleFlags & StyleFlags.isVisible) rotator.style.values.styleFlags ^= StyleFlags.isVisible;
 
         for (let i = 0; i < count; ++i) {
             const base = new AutoTurret(rotator, AutoTurretMiniDefinition);
@@ -92,8 +92,8 @@ export class Addon {
             base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
             base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
 
-            if (base.style.values.styleFlags & StyleFlags.aboveParent) base.style.values.styleFlags ^= StyleFlags.aboveParent;
-            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+            if (base.style.values.styleFlags & StyleFlags.showsAboveParent) base.style.values.styleFlags ^= StyleFlags.showsAboveParent;
+            base.physics.values.objectFlags |= PositionFlags.absoluteRotation;
 
             const tickBase = base.tick;
             base.tick = (tick: number) => {
@@ -170,7 +170,7 @@ export class GuardObject extends ObjectEntity implements BarrelBase {
         this.relations.values.team = owner.relations.values.team;
 
         this.style.values.color = Colors.Border;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.position.values.motion |= PositionFlags.absoluteRotation;
         this.position.values.angle = offsetAngle;
         this.physics.values.sides = sides;
         this.reloadTime = owner.reloadTime;
@@ -257,7 +257,7 @@ class LauncherAddon extends Addon {
         launcher.position.values.x = launcher.physics.values.size / 2;
 
         launcher.style.values.color = Colors.Barrel;
-        launcher.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
+        launcher.physics.values.objectFlags |= PhysicsFlags.isTrapezoid;
         launcher.physics.values.sides = 2;
 
         launcher.tick = () => {
@@ -324,7 +324,7 @@ class PronouncedAddon extends Addon {
         pronounce.position.values.angle = Math.PI;
 
         pronounce.style.values.color = Colors.Barrel;
-        pronounce.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
+        pronounce.physics.values.objectFlags |= PhysicsFlags.isTrapezoid;
         pronounce.physics.values.sides = 2;
 
         pronounce.tick = () => {
@@ -357,7 +357,7 @@ class PronouncedDomAddon extends Addon {
         pronounce.position.values.angle = Math.PI;
         
         pronounce.style.values.color = Colors.Barrel;
-        pronounce.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
+        pronounce.physics.values.objectFlags |= PhysicsFlags.isTrapezoid;
         pronounce.physics.values.sides = 2;
 
         pronounce.tick = () => {

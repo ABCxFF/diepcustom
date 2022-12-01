@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Drone from "./Drone";
 
-import { Colors, ObjectFlags, Tank } from "../../../Const/Enums";
+import { Colors, PhysicsFlags, Tank } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { AI } from "../../AI";
 import { BarrelBase } from "../TankBody";
@@ -43,8 +43,8 @@ export default class NecromancerSquare extends Drone {
 
         // if (shape.isShiny) this.health.values.maxHealth = this.health.values.health *= 10
         this.style.values.color = tank.relations.values.team?.team?.values.teamColor || Colors.NecromancerSquare;
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
+        if (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= PhysicsFlags.noOwnTeamCollision;
+        this.physics.values.objectFlags |= PhysicsFlags.onlySameOwnerCollision;
 
         // TODO(ABC):
         // No hardcoded - unless it is hardcoded in diep (all signs show that it might be so far)
@@ -52,7 +52,7 @@ export default class NecromancerSquare extends Drone {
             this.lifeLength = 88;
         } else {
             this.lifeLength = Infinity;
-            if (this.physics.values.objectFlags & ObjectFlags.canEscapeArena) this.physics.values.objectFlags ^= ObjectFlags.canEscapeArena;
+            if (this.physics.values.objectFlags & PhysicsFlags.canEscapeArena) this.physics.values.objectFlags ^= PhysicsFlags.canEscapeArena;
         }
         this.deathAccelFactor = 1;
 

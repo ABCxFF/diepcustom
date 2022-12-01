@@ -36,7 +36,7 @@ import TankBody from "./Entity/Tank/TankBody";
 
 import Vector, { VectorAbstract } from "./Physics/Vector";
 import { Entity, EntityStateFlags } from "./Native/Entity";
-import { CameraFlags, ClientBound, GUIFlags, InputFlags, NametagFlags, ServerBound, Stat, StatCount, StyleFlags, Tank } from "./Const/Enums";
+import { CameraFlags, ClientBound, ArenaFlags, InputFlags, NameFlags, ServerBound, Stat, StatCount, StyleFlags, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
@@ -313,10 +313,10 @@ export default class Client {
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
                 
                 if ((flags & InputFlags.godmode)) {
-                    if (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) {
+                    if (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats) {
                         // only allow devs to go into godmode when players > 1
                         if (this.accessLevel === config.AccessLevel.FullAccess || (this.accessLevel < config.AccessLevel.FullAccess && this.game.clients.size === 1)) {
-                            player.name.nametag |= NametagFlags.cheats;
+                            player.name.nametag |= NameFlags.highlightedName;
                             this.devCheatsUsed = 1;
                             this.isInvulnerable = !this.isInvulnerable;
                             // cache old damage reduction to restore it later when godmode is toggled on again
@@ -330,7 +330,7 @@ export default class Client {
                             this.notify(`God mode: ${this.isInvulnerable ? "on" : "off"}`, 0, 1000, 'godmode');
                         }
                     } else if (this.accessLevel >= config.AccessLevel.BetaAccess) {
-                        player.name.nametag |= NametagFlags.cheats;
+                        player.name.nametag |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
                     } 
@@ -343,8 +343,8 @@ export default class Client {
                     player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
-                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats)) {
-                        player.name.nametag |= NametagFlags.cheats;
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats)) {
+                        player.name.nametag |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
                         let tank = player.currentTank;
@@ -370,16 +370,16 @@ export default class Client {
                 }
                 if (flags & InputFlags.levelup) {
                     // If full access, or if the game allows cheating and lvl is < 45, or if the player is a BT access level and lvl is < 45
-                    if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.camera.values.level < 45 && ((this.game.arena.arena.values.GUI & GUIFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
-                        player.name.nametag |= NametagFlags.cheats;
+                    if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.camera.values.level < 45 && ((this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
+                        player.name.nametag |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
                         camera.setLevel(camera.camera.values.level + 1);
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
-                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & GUIFlags.canUseCheats)) {
-                        player.name.nametag |= NametagFlags.cheats;
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats)) {
+                        player.name.nametag |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
                         this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
@@ -409,7 +409,7 @@ export default class Client {
                 camera.setLevel(camera.camera.values.respawnLevel);
 
                 tank.name.values.name = name;
-                if (this.devCheatsUsed) tank.name.values.nametag |= NametagFlags.cheats;
+                if (this.devCheatsUsed) tank.name.values.nametag |= NameFlags.highlightedName;
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
@@ -460,7 +460,7 @@ export default class Client {
                 return this.ban();
             case ServerBound.ToRespawn:
                 // Doesn't matter if the player is alive or not in real diep.
-                camera.camera.camera &= ~CameraFlags.showDeathStats;
+                camera.camera.camera &= ~CameraFlags.showingDeathStats;
                 // if (this.game.arena.arenaState !== ArenaState.OPEN) return this.terminate();
                 return;
             case ServerBound.TakeTank: {
@@ -635,7 +635,7 @@ export default class Client {
             this.camera.camera.player = null;
             this.camera.camera.respawnLevel = 0;
             this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
-            this.camera.camera.camera &= ~CameraFlags.showDeathStats;
+            this.camera.camera.camera &= ~CameraFlags.showingDeathStats;
         }
         if (tick >= this.lastPingTick + 300) {
             return this.terminate();
