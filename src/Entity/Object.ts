@@ -263,6 +263,8 @@ export default class ObjectEntity extends Entity {
         if (this.hash === 0) return [];
         if (this.physics.values.sides === 0) return [];
 
+        // TODO(speed):
+        // and the for loop
         const entities = this.game.entities.collisionManager.retrieveEntitiesByEntity(this);
         for (let i = 0; i < entities.length; ++i) {
             const entity = entities[i];

@@ -67,6 +67,8 @@ class WSWriterStream extends Writer {
     }
 
     protected set at(v) {
+        // TODO(speed):
+        // Either rethink this, recode this, redo this, or undo this
         if (v + 5 >= Writer.OUTPUT_BUFFER.length) {
             this.ws.send(Writer.OUTPUT_BUFFER.subarray(0, v), {fin: false});
             this._at = 0;
@@ -154,6 +156,10 @@ export default class Client {
         });
         ws.on("error", console.log.bind(void 0, "ws error"));
         ws.on("message", (buffer: ArrayBufferLike) => {
+            // TODO(speed):
+            // Can someone confirm that buffer is not an arraybuffer, and instead if is a buffer
+            // In which case this is unnecessary
+            // maybe change ws.binaryType = "buffer"
             const data = new Uint8Array(buffer);
 
             if (data[0] === 0x00 && data.byteLength === 1) return this.terminate(); // We do not host ping servers.

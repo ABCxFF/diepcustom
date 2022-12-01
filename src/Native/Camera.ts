@@ -169,6 +169,7 @@ export default class Camera extends CameraEntity {
         const width = (1920 / fov) / 1.5;
         const height = (1080 / fov) / 1.5;
 
+        // TODO(speed)
         const entitiesNearRange = this.game.entities.collisionManager.retrieve(this.camera.values.cameraX, this.camera.values.cameraY, width, height);
         const entitiesInRange: ObjectEntity[] = [];
 
@@ -194,6 +195,7 @@ export default class Camera extends CameraEntity {
         for (let id = 0; id <= this.game.entities.lastId; ++id) {
             const entity = this.game.entities.inner[id];
             
+            // TODO(speed)
             if (entity instanceof ObjectEntity && !entitiesInRange.includes(entity) && (entity.physics.values.objectFlags & ObjectFlags.minimap)) entitiesInRange.push(entity);
         }
 
@@ -202,6 +204,7 @@ export default class Camera extends CameraEntity {
         for (let i = 0; i < this.view.length; ++i) {
             const entity = this.view[i]
             if (entity instanceof ObjectEntity) {
+                // TODO(speed)
                 // Orphan children must be destroyed
                 if (!entitiesInRange.includes(entity.rootParent)) {
                     deletes.push({id: entity.id, hash: entity.preservedHash});
@@ -228,6 +231,7 @@ export default class Camera extends CameraEntity {
 
         const entities = this.game.entities;
         for (const id of this.game.entities.otherEntities) {
+            // TODO(speed)
             if (this.view.findIndex(r => r.id === id) === -1) {
                 const entity = entities.inner[id];
 
