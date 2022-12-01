@@ -103,7 +103,8 @@ export const commandDefinitions = {
     },
     admin_godmode: {
         id: CommandID.adminGodmode,
-        description: "Toggles godmode",
+        usage: "[?activate]",
+        description: "Toggles godmode, if given an activate argument (on / off) sets it instead",
         permissionLevel: AccessLevel.FullAccess
     },
     admin_summon: {
@@ -203,13 +204,26 @@ export const commandCallbacks = {
             return;
         }
     },
-    admin_godmode: (client: Client) => {
-        if(client.camera?.camera.player?.style?.styleFlags) {
-            if(client.camera.camera.player.style.styleFlags & StyleFlags.invincibility) {
-                client.camera.camera.player.style.styleFlags ^= StyleFlags.invincibility;
-            } else {
-                client.camera.camera.player.style.styleFlags |= StyleFlags.invincibility;
-            }
+    admin_godmode: (client: Client, activeArg?: string) => {
+        const player = client.camera?.camera.player;
+        if (!Entity.exists(player) || !(player instanceof TankBody)) return;
+
+        switch (activeArg) {
+            case "on":
+                client.isInvulnerable = true;
+                break;
+            case "off":
+                client.isInvulnerable = false;
+                break;
+            default:
+                client.isInvulnerable = !client.isInvulnerable;
+        }
+
+        if (client.isInvulnerable) {
+            client.damageReductionCache = player.damageReduction;
+            player.damageReduction = 0;
+        } else {
+            player.damageReduction = client.damageReductionCache;
         }
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
