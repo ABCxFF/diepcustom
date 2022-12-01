@@ -1,0 +1,16 @@
+// /**
+//  * Format of storing fields in the field list (`List`).
+//  */
+// export type FieldDef = {
+//     name: string,
+//     encType: "vu" | "stringNT" | "entid" | "float" | "vi" | "float64Precision",
+//     orderIndex: number,
+//     amount?: number,
+// }
+
+// export type FieldGroupDef = [
+//    name: string,
+//    fields: FieldDef[]
+// ]
+
+// const RAW_FIELD_GROUPS = JSON.parse(^{__FIELD_GROUPS__});
