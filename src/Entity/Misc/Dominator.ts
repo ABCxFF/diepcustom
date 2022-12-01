@@ -66,7 +66,8 @@ export default class Dominator extends TankBody {
         this.ai.inputs = inputs;
         this.ai.movementSpeed = 0;
         this.ai.viewRange = 2000;
-        this.ai._ticksPerAIUpdate = 1;
+        this.ai.predict = true;
+        this.ai._ticksPerAIUpdate = 0;
 
         this.setTank(tankId);
         const def = (this.definition = Object.assign({}, this.definition));
