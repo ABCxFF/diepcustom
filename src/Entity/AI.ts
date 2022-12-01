@@ -29,8 +29,6 @@ import { tps } from "../config";
 // Beware
 // The logic in this file is somewhat messed up
 
-const TICKS_PER_AI_UPDATE = 2 * tps;
-
 /**
  * Used for simplifying the current state of the AI.
  * - `idle`: When the AI is idle
@@ -104,8 +102,6 @@ export class AI {
 
     /** Stores the creation of the AI, used to optimize ticking */
     private _creationTick: number;
-    /** Stores the amount of ticks per AI update (for caching) */
-    public _ticksPerAIUpdate: number = TICKS_PER_AI_UPDATE;
 
     public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;
@@ -140,10 +136,7 @@ export class AI {
                 
             }
 
-        }
-
-        if (((tick - this._creationTick) % this._ticksPerAIUpdate) !== 1 && this._ticksPerAIUpdate !== 0) return;
-        
+        }     
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
         const root = this.owner.rootParent === this.owner && this.owner.relations.values.owner instanceof ObjectEntity ? this.owner.relations.values.owner : this.owner.rootParent;
