@@ -131,7 +131,7 @@ export default class AbstractBoss extends LivingEntity {
 
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
-        this.ai._ticksPerAIUpdate = 0;
+        this.ai._findTargetInterval = 0;
         this.inputs = this.ai.inputs;
 
         // default eh
