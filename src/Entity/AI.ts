@@ -96,6 +96,8 @@ export class AI {
     public movementSpeed = 1;
     /** The speed at which the ai can reach the target. */
     public aimSpeed = 1;
+    /** If the AI should predict enemy's movements, and aim accordingly. */
+    public predict: boolean = false;
 
     /** Target filter letting owner classes filter what can't be a target by position - false = not valid target */
     public targetFilter: (possibleTargetPos: VectorAbstract) => boolean;
@@ -140,7 +142,7 @@ export class AI {
 
         }
 
-        if (((tick - this._creationTick) % this._ticksPerAIUpdate) !== 1) return;
+        if (((tick - this._creationTick) % this._ticksPerAIUpdate) !== 1 && this._ticksPerAIUpdate !== 0) return;
         
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
@@ -208,7 +210,7 @@ export class AI {
             this.inputs.movement.magnitude = 1;
             return;
         }
-
+        if (this.predict) {
         const delta = {
             x: pos.x - ownerPos.x,
             y: pos.y - ownerPos.y
@@ -229,12 +231,19 @@ export class AI {
         if (entPerpComponent < movementSpeed * -0.9) entPerpComponent = movementSpeed * -0.9;
 
         const directComponent = Math.sqrt(movementSpeed ** 2 - entPerpComponent ** 2);
-        const offset = (entPerpComponent / directComponent * dist) / 32;
+        const offset = (entPerpComponent / directComponent * dist) / 2;
 
         this.inputs.mouse.set({
             x: pos.x + offset * unitDistancePerp.x,
             y: pos.y + offset * unitDistancePerp.y
         });
+            
+                     } else {
+        this.inputs.mouse.set({
+            x: pos.x,
+            y: pos.y
+        });
+}
 
         this.inputs.movement.magnitude = 1;
         this.inputs.movement.angle = Math.atan2(this.inputs.mouse.y - ownerPos.y, this.inputs.mouse.x - ownerPos.x);
