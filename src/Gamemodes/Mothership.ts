@@ -23,10 +23,6 @@ import ArenaEntity, { ArenaState } from "../Native/Arena";
 import { Entity } from "../Native/Entity";
 import { PI2 } from "../util";
 
-
-// TODO
-// Replace RED and BLUE with TeamNames[etc], so we can apply to Dom and tag easily, also would make sorting of motherships easier (dynamic)
-
 const arenaSize = 11150;
 const TEAM_COLORS = [Colors.TeamBlue, Colors.TeamRed];
 
@@ -34,7 +30,7 @@ const TEAM_COLORS = [Colors.TeamBlue, Colors.TeamRed];
  * Mothership Gamemode Arena
  */
 export default class MothershipArena extends ArenaEntity {
-    /** Team entity */
+    /** All team entities in game */
     public teams: TeamEntity[] = [];
     /** Motherships in game */
     public motherships: Mothership[] = [];
@@ -46,14 +42,13 @@ export default class MothershipArena extends ArenaEntity {
         super(game);
         this.shapeScoreRewardMultiplier = 3.0;
 
-        this.arena.GUI |= GUIFlags.hideScorebar;
+        this.arena.values.GUI |= GUIFlags.hideScorebar;
 
         // little fun thing to support multiple teams - spread colors around map
         let randAngle = Math.random() * PI2;
         for (const teamColor of TEAM_COLORS) {
             const team = new TeamEntity(this.game, teamColor);
             this.teams.push(team);
-
             const mot = new Mothership(this.game);
             this.motherships.push(mot);
     
@@ -69,6 +64,17 @@ export default class MothershipArena extends ArenaEntity {
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
+        if (!this.motherships.length && !this.playerTeamMotMap.has(client)) {
+            const team = this.teams[~~(Math.random()*this.teams.length)];
+            const { x, y } = this.findSpawnLocation();
+
+            tank.position.values.x = x;
+            tank.position.values.y = y;
+            tank.relations.values.team = team;
+            tank.style.values.color = team.team.teamColor;
+            return;
+        }
+
         const mothership = this.playerTeamMotMap.get(client) || this.motherships[~~(Math.random() * this.motherships.length)];
         this.playerTeamMotMap.set(client, mothership);
 
@@ -90,8 +96,8 @@ export default class MothershipArena extends ArenaEntity {
     }
     public updateScoreboard(scoreboardPlayers: TankBody[]) {
         this.motherships.sort((m1, m2) => m2.health.values.health - m1.health.values.health);
-
-        for (let i = 0; i < this.motherships.length; ++i) {
+        const length = Math.min(10, this.motherships.length);
+        for (let i = 0; i < length; ++i) {
             const mothership = this.motherships[i];
             const team = mothership.relations.values.team;
             const isTeamATeam = team instanceof TeamEntity;
@@ -115,7 +121,7 @@ export default class MothershipArena extends ArenaEntity {
             this.arena.values.scoreboardSuffixes[i] = " HP";
         }
        
-        this.arena.scoreboardAmount = this.motherships.length;
+        this.arena.scoreboardAmount = length;
     }
     public tick(tick: number) {
         // backwards to preserve
@@ -124,13 +130,15 @@ export default class MothershipArena extends ArenaEntity {
             if (!Entity.exists(mot)) {
                 const pop = this.motherships.pop();
                 if (pop && i < this.motherships.length) this.motherships[i] = pop;
+            }
+        }
 
-                if (this.arenaState === ArenaState.OPEN) {
-                    this.arenaState = ArenaState.OVER;
-                    setTimeout(() => {
-                        this.close();
-                    }, 10000);
-                }
+        if (this.motherships.length <= 1) {
+            if (this.arenaState === ArenaState.OPEN) {
+                this.arenaState = ArenaState.OVER;
+                setTimeout(() => {
+                    this.close();
+                }, 5000);
             }
         }
 

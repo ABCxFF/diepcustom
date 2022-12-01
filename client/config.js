@@ -244,6 +244,7 @@ const MOD_CONFIG = {
         "findCommand": 496
     },
     "memory": {
+        "gamemodeDisabledText": 16420,
         "gamemodeButtons": 113480,
         "changelog": 167328,
         "changelogLoaded": 168632,

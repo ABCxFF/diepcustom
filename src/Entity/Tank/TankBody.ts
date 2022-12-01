@@ -21,7 +21,7 @@ import * as util from "../../util";
 import Square from "../Shape/Square";
 import NecromancerSquare from "./Projectile/NecromancerSquare";
 import GameServer from "../../Game";
-import Camera, { CameraEntity } from "../../Native/Camera";
+import ClientCamera, { CameraEntity } from "../../Native/Camera";
 import LivingEntity from "../Live";
 import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
@@ -146,7 +146,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         else if (this.position.motion & MotionFlags.canMoveThroughWalls) this.position.motion ^= MotionFlags.canMoveThroughWalls
 
         camera.camera.tank = this._currentTank = id;
-        if (tank.upgradeMessage && camera instanceof Camera) camera.client.notify(tank.upgradeMessage);
+        if (tank.upgradeMessage && camera instanceof ClientCamera) camera.client.notify(tank.upgradeMessage);
 
         // Build addons, then tanks, then addons.
         const preAddon = tank.preAddon;
@@ -174,7 +174,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         this.score.score = this.cameraEntity.camera.scorebar += entity.scoreReward;
 
         if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.camera.values.level, 45) - entity.cameraEntity.camera.values.level <= 20 || entity instanceof AbstractBoss) {
-            if (this.cameraEntity instanceof Camera) this.cameraEntity.client.notify("You've killed " + (entity.name.values.name || "an unnamed tank"));
+            if (this.cameraEntity instanceof ClientCamera) this.cameraEntity.client.notify("You've killed " + (entity.name.values.name || "an unnamed tank"));
         }
 
         // TODO(ABC):
@@ -201,7 +201,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     /** See LivingEntity.onDeath */
    public onDeath(killer: LivingEntity) {
-        if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
+        if (!(this.cameraEntity instanceof ClientCamera)) return this.cameraEntity.delete();
         if (!(this.cameraEntity.camera.player === this)) return;
         this.cameraEntity.spectatee = killer;
         this.cameraEntity.camera.FOV = 0.4;

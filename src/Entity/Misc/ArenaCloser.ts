@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import TankBody from "../Tank/TankBody";
 
-import { Colors, HealthbarFlags, MotionFlags, Stat, Tank } from "../../Const/Enums";
+import { Colors, HealthbarFlags, MotionFlags, ObjectFlags, Stat, Tank } from "../../Const/Enums";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
 
@@ -53,7 +53,6 @@ export default class ArenaCloser extends TankBody {
         this.ai.inputs = inputs;
         this.ai.viewRange = Infinity;
 
-        this.health.values.healthbar |= HealthbarFlags.hidden;
 
         this.setTank(Tank.ArenaCloser);
 
@@ -69,7 +68,8 @@ export default class ArenaCloser extends TankBody {
         this.name.values.name = "Arena Closer";
         this.physics.values.absorbtionFactor = 0;
         this.style.values.color = Colors.Neutral;
-        this.position.values.motion |= MotionFlags.canMoveThroughWalls
+        this.position.values.motion |= MotionFlags.canMoveThroughWalls;
+        this.physics.values.objectFlags |= ObjectFlags.canEscapeArena;
         camera.camera.values.player = this;
 
         for (let i = Stat.MovementSpeed; i < Stat.BodyDamage; ++i) camera.camera.values.statLevels.values[i] = 7;
