@@ -80,14 +80,12 @@ export default class SpatialHashing implements CollisionManager {
     }
 
     retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
-        const physics = entity.physics;
-        const position = entity.position;
-
-        return this.retrieve(
-            position.x,
-            position.y,
-            entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size,
-            entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size);
+        const { sides, size, width } = entity.physics.values;
+        const { x, y } = entity.position;
+        const isLine = sides === 2;
+        const w = isLine ? size / 2 : size;
+        const h = isLine ? width / 2 : size;
+        return this.retrieve(x, y, w, h);
     }
 
     reset() {
