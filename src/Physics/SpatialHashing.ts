@@ -41,8 +41,8 @@ export default class SpatialHashing implements CollisionManager {
         const endY = ((position.y + radiH) >> this.cellSize);
 
         // Iterating over the y axis first is more cache friendly.
-        for (let y = startY; y <= endY; y++) {
-            for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; ++y) {
+            for (let x = startX; x <= endX; ++x) {
                 const key = x | (y << 10);
                 if (!this.hashMap.has(key)) this.hashMap.set(key, []);
                 /** @ts-ignore the key is guaranteed to be set */
@@ -59,17 +59,19 @@ export default class SpatialHashing implements CollisionManager {
         const endX = ((x + width) >> this.cellSize);
         const endY = ((y + height) >> this.cellSize);
 
-        for (let y = startY; y <= endY; y++)
-            for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; ++y) {
+            for (let x = startX; x <= endX; ++x) {
                 const key = x | (y << 10);
                 const cell = this.hashMap.get(key);
                 if (cell == null) continue;
-                for (let i = 0; i < cell.length; i++)
+                for (let i = 0; i < cell.length; ++i) {
                     if (cell[i].physics.queryId != this.queryId) {
                         cell[i].physics.queryId = this.queryId;
                         if (cell[i].hash !== 0) result.push(cell[i]);
                     }
+                }
             }
+        }
 
         // Force uint32 to prevent the queryId from going too high for javascript to handle.
         this.queryId = (this.queryId + 1) >>> 0;
