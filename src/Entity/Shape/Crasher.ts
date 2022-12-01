@@ -22,6 +22,7 @@ import AbstractShape from "./AbstractShape";
 
 import { Colors, PositionFlags } from "../../Const/Enums";
 import { AI, AIState } from "../AI";
+import { tps } from "../../config";
 
 /**
  * Crasher entity class.
@@ -57,7 +58,7 @@ export default class Crasher extends AbstractShape {
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
         this.ai.aimSpeed = (this.ai.movementSpeed = this.targettingSpeed);
-        // this.ai._findTargetInterval = tps;
+        this.ai._findTargetInterval = tps;
     }
 
     tick(tick: number) {

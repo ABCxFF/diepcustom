@@ -83,6 +83,7 @@ export default class AutoTurret extends ObjectEntity {
 
         this.cameraEntity = owner.cameraEntity;
         this.ai = new AI(this);
+        this.ai.doAimPrediction = true;
         this.inputs = this.ai.inputs;
 
         this.owner = owner;

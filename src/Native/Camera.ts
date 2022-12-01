@@ -54,7 +54,7 @@ export class CameraEntity extends Entity {
         }
 
         // Update stats available
-        const statIncrease = Camera.calculateStatCount(level) - Camera.calculateStatCount(previousLevel);
+        const statIncrease = ClientCamera.calculateStatCount(level) - ClientCamera.calculateStatCount(previousLevel);
         this.camera.statsAvailable += statIncrease;
 
         this.setFieldFactor(getTankById(this.camera.values.tank)?.fieldFactor || 1);
@@ -104,7 +104,7 @@ export class CameraEntity extends Entity {
  * This is the entity that controls stats and other gui data.
  * It is also the class that compiles entity data and sends it to the client.
  */
-export default class Camera extends CameraEntity {
+export default class ClientCamera extends CameraEntity {
     /** Client interface. */
     public client: Client;
     /** All entities in the view of the camera. Represented by id. */

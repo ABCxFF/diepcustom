@@ -26,7 +26,7 @@ import Reader from "./Coder/Reader";
 import Writer from "./Coder/Writer";
 
 import GameServer from "./Game";
-import Camera from "./Native/Camera";
+import ClientCamera from "./Native/Camera";
 import { ArenaState } from "./Native/Arena";
 import ObjectEntity from "./Entity/Object";
 
@@ -119,7 +119,7 @@ export default class Client {
     /** Inner websocket connection. */
     public ws: WebSocket;
     /** Client's camera entity. */
-    public camera: Camera | null = null;
+    public camera: ClientCamera | null = null;
 
     /** The client's discord id if available. */
     public discordId: string | null = null;
@@ -166,15 +166,8 @@ export default class Client {
             const header = data[0];
             if (header === ServerBound.Ping) {
                 this.lastPingTick = this.game.tick;
-                if (config.mode === "production") {
-                    // this.write().u8(ClientBound.Ping).send();
-                    this.ws.send(PING_PACKET);
-                } else {
-                    // setTimeout(() => {
-                        // this.write().u8(ClientBound.Ping).send();
-                    this.ws.send(PING_PACKET);
-                    // }, 20)
-                }
+
+                this.ws.send(PING_PACKET);
             } else if (header >= ServerBound.Init && header <= ServerBound.TakeTank) {
                 if (this.incomingCache[header].length) {
                     if (header === ServerBound.Input) {
@@ -262,7 +255,7 @@ export default class Client {
             this.write().u8(ClientBound.Accept).vi(this.accessLevel).send();
             this.write().u8(ClientBound.ServerInfo).stringNT(this.game.gamemode).stringNT(config.host).send();
             this.write().u8(ClientBound.PlayerCount).vu(GameServer.globalPlayerCount).send();
-            this.camera = new Camera(this.game, this);
+            this.camera = new ClientCamera(this.game, this);
             return;
         }
 
@@ -631,7 +624,7 @@ export default class Client {
             this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
             this.camera.camera.camera &= ~CameraFlags.showingDeathStats;
         }
-        if (tick >= this.lastPingTick + 300) {
+        if (tick >= this.lastPingTick + 60 * config.tps) {
             return this.terminate();
         }
     }

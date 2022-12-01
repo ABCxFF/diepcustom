@@ -194,7 +194,10 @@ const HOSTED_ENDPOINTS: string[] = [];
             if (!(!HOSTED_ENDPOINTS.includes(endpoint)) && this.gamemode !== endpoint) return;
 
             util.log("Incoming client");
-            if (this.arena.state !== ArenaState.OPEN) return util.log("Arena is not open: Ignoring client");
+            if (this.arena.state !== ArenaState.OPEN) {
+                util.log("Arena is not open: Closing client");
+                return  ws.terminate();
+            }
 
             const ipPossible = request.headers['x-forwarded-for'] || request.socket.remoteAddress || "";
             const ipList = Array.isArray(ipPossible) ? ipPossible : ipPossible.split(',').map(c => c.trim());

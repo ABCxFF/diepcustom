@@ -20,7 +20,7 @@ import GameServer from "../Game";
 import ShapeManager from "../Entity/Shape/Manager";
 import TankBody from "../Entity/Tank/TankBody";
 import ArenaCloser from "../Entity/Misc/ArenaCloser";
-import Camera from "./Camera";
+import ClientCamera from "./Camera";
 
 import { VectorAbstract } from "../Physics/Vector";
 import { ArenaGroup, TeamGroup } from "./FieldGroups";
@@ -224,7 +224,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		for (let id = 0; id <= this.game.entities.lastId; ++id) {
 			const entity = this.game.entities.inner[id];
 			
-			if (Entity.exists(entity) && entity instanceof TankBody && entity.cameraEntity instanceof Camera && entity.cameraEntity.camera.values.player === entity) players.push(entity);
+			if (Entity.exists(entity) && entity instanceof TankBody && entity.cameraEntity instanceof ClientCamera && entity.cameraEntity.camera.values.player === entity) players.push(entity);
 		}
 
 		// Sorts them too DONT FORGET

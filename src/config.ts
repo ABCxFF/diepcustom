@@ -29,7 +29,7 @@ export const mspt: number = 40;
 export const tps: number = 1000 / mspt;
 
 /** Max connections per ip. -1 = no limit */
-export const connectionsPerIp: number = 2;
+export const connectionsPerIp: number = -1;
 
 /** Max incoming packet size (HARD LIMIT), not the max read / write size */
 export const wssMaxMessageSize: number = 4096; // 4 kb
@@ -101,6 +101,3 @@ export const defaultAccessLevel: AccessLevel = AccessLevel.BetaAccess;
 export const devTokens: Record<string, AccessLevel> = {
     "*": defaultAccessLevel
 }
-
-/** Should always be set to the url (UNNECESSARY UNLESS DISCORD INTEGRATION) */
-export const origin: string = process.env.ORIGIN_URL || "http://localhost:8080";
