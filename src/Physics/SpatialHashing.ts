@@ -31,20 +31,24 @@ export default class SpatialHashing implements CollisionManager {
     }
 
     insertEntity(entity: ObjectEntity) {
-        const physics = entity.physics;
-        const position = entity.position;
-        const radiW = (physics.sides === 2 ? physics.size / 2 : physics.size);
-        const radiH = (physics.sides === 2 ? physics.width / 2 : physics.size);
-        const startX = ((position.x - radiW) >> this.cellSize);
-        const startY = ((position.y - radiH) >> this.cellSize);
-        const endX = ((position.x + radiW) >> this.cellSize);
-        const endY = ((position.y + radiH) >> this.cellSize);
+        const { sides, size, width } = entity.physics.values;
+        const { x, y } = entity.position.values;
+        const isLine = sides === 2;
+        const radiW = isLine ? size / 2 : size;
+        const radiH = isLine ? width / 2 : size;
+        
+        const topX = (x - radiW) >> this.cellSize;
+        const topY = (y - radiH) >> this.cellSize;
+        const bottomX = (x + radiW) >> this.cellSize;
+        const bottomY = (y + radiH) >> this.cellSize;
 
         // Iterating over the y axis first is more cache friendly.
-        for (let y = startY; y <= endY; ++y) {
-            for (let x = startX; x <= endX; ++x) {
-                const key = x | (y << 10);
-                if (!this.hashMap.has(key)) this.hashMap.set(key, []);
+        for(let y = topY; y <= bottomY; ++y) {
+            for(let x = topX; x <= bottomX; ++x) {
+                const key: number = x | (y << 10);
+                if(!this.hashMap.has(key)) {
+                    this.hashMap.set(key, []);
+                }
                 /** @ts-ignore the key is guaranteed to be set */
                 this.hashMap.get(key).push(entity);
             }
