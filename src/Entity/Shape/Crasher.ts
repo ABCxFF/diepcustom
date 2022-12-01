@@ -63,22 +63,22 @@ export default class Crasher extends AbstractShape {
         this.ai.aimSpeed = 0;
         this.ai.movementSpeed = this.targettingSpeed;
         
-        if (this.ai.state === AIState.idle) super.tick(tick);
-        else {
+        if (this.ai.state === AIState.idle) {
+            this.doIdleRotate = true;
+        } else {
+            this.doIdleRotate = false;
             this.position.angle = Math.atan2(this.ai.inputs.mouse.y - this.position.values.y, this.ai.inputs.mouse.x - this.position.values.x);
             this.accel.add({
                 x: this.ai.inputs.movement.x * this.targettingSpeed,
                 y: this.ai.inputs.movement.y * this.targettingSpeed
             });
-            
-            // TODO(ABC):
-            // Better way?
-            LivingEntity.prototype.tick.call(this, tick);
         }
 
         this.ai.inputs.movement.set({
             x: 0,
             y: 0
         })
+
+        super.tick(tick);
     }
 }
