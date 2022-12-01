@@ -47,6 +47,8 @@ export default class AbstractShape extends LivingEntity {
     /** If the shape is shiny or not */
     public isShiny: boolean = false;
 
+    /** Wether or not to do idle movements */
+    protected doIdleRotate: boolean = true;
     /** The current direction of the shape's orbit. */
     protected orbitAngle: number;
     /** The decided orbit rate, based on the constructor's BASE_ORBIT. *//* @ts-ignore */
@@ -79,6 +81,10 @@ export default class AbstractShape extends LivingEntity {
     }
 
     public tick(tick: number) {
+        if (!this.doIdleRotate) {
+            return super.tick(tick);
+        }
+        
         const y = this.position.values.y;
         const x = this.position.values.x;
 
