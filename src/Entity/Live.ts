@@ -60,8 +60,8 @@ export default class LivingEntity extends ObjectEntity {
     protected static applyDamage(entity1: LivingEntity, entity2: LivingEntity) {
         if (entity1.health.values.health <= 0 || entity2.health.values.health <= 0) return;
         if (entity1.damagedEntities.includes(entity2) || entity2.damagedEntities.includes(entity1)) return;
-        if ((entity1.style.values.styleFlags & StyleFlags.isFlashing) && (entity2.style.values.styleFlags & StyleFlags.isFlashing)) return;
-        if (entity1.damagePerTick == 0 && entity1.physics.values.pushFactor == 0 || entity2.damagePerTick == 0 && entity2.physics.values.pushFactor == 0) return;
+        if (entity1.damageReduction === 0 && entity2.damageReduction === 0) return;
+        if (entity1.damagePerTick === 0 && entity1.physics.values.pushFactor === 0 || entity2.damagePerTick === 0 && entity2.physics.values.pushFactor === 0) return;
 
         const game = entity1.game;
 
@@ -82,8 +82,6 @@ export default class LivingEntity extends ObjectEntity {
             dF2 *= 1 - ratio;
         }
 
-        if (entity1.style.values.styleFlags & StyleFlags.isFlashing) dF2 = 0;
-        if (entity2.style.values.styleFlags & StyleFlags.isFlashing) dF1 = 0;
 
         // Plays the animation damage for entity 2
         if (entity2.lastDamageAnimationTick !== game.tick && !(entity2.style.values.styleFlags & StyleFlags.hasNoDmgIndicator)) {

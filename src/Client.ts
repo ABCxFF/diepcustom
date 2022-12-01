@@ -315,19 +315,13 @@ export default class Client {
                 if ((flags & InputFlags.godmode)) {
                     if (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats) {
                         // only allow devs to go into godmode when players > 1
-                        if (this.accessLevel === config.AccessLevel.FullAccess || (this.accessLevel < config.AccessLevel.FullAccess && this.game.clients.size === 1)) {
+                        if (this.accessLevel === config.AccessLevel.FullAccess || (this.game.clients.size === 1 && this.game.arena.state === ArenaState.OPEN)) {
                             player.name.nametag |= NameFlags.highlightedName;
                             this.devCheatsUsed = 1;
-                            this.isInvulnerable = !this.isInvulnerable;
-                            // cache old damage reduction to restore it later when godmode is toggled on again
-                            if (this.isInvulnerable) {
-                                this.damageReductionCache = player.damageReduction;
-                                player.damageReduction = 0;
-                            } else {
-                                player.damageReduction = this.damageReductionCache;
-                            }
+
+                            player.setInvulnerability(!player.isInvulnerable);
                             
-                            this.notify(`God mode: ${this.isInvulnerable ? "on" : "off"}`, 0, 1000, 'godmode');
+                            this.notify(`God mode: ${player.isInvulnerable ? "ON" : "OFF"}`, 0x000000, 1000, 'godmode');
                         }
                     } else if (this.accessLevel >= config.AccessLevel.BetaAccess) {
                         player.name.nametag |= NameFlags.highlightedName;
@@ -340,7 +334,7 @@ export default class Client {
                     player.position.x = this.inputs.mouse.x;
                     player.position.y = this.inputs.mouse.y;
                     player.setVelocity(0, 0);
-                    player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
+                    player.entityState |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
                     if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats)) {
@@ -392,7 +386,7 @@ export default class Client {
             case ServerBound.Spawn: {
                 util.log("Client wants to spawn");
 
-                if (Entity.exists(camera.camera.values.player) || (this.game.arena.arenaState >= ArenaState.CLOSING)) return;
+                if (Entity.exists(camera.camera.values.player) || (this.game.arena.state >= ArenaState.CLOSING)) return;
 
                 camera.camera.values.statsAvailable = 0;
                 camera.camera.values.level = 1;
@@ -412,7 +406,7 @@ export default class Client {
                 if (this.devCheatsUsed) tank.name.values.nametag |= NameFlags.highlightedName;
 
                 // Force-send a creation to the client - Only if it is not new
-                camera.state = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
+                camera.entityState = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
                 return;
@@ -534,7 +528,7 @@ export default class Client {
         ai.state = AIState.possessed;
 
         // Silly workaround to change color of player when needed
-        if (this.camera?.camera.values.player instanceof ObjectEntity) this.camera.camera.values.player.state |= this.camera.camera.values.player.style.state.color = 1;
+        if (this.camera?.camera.values.player instanceof ObjectEntity) this.camera.camera.values.player.entityState |= this.camera.camera.values.player.style.state.color = 1;
 
         this.camera.camera.tankOverride = ai.owner.name?.values.name || "";
         

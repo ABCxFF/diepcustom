@@ -213,10 +213,10 @@ export default class Camera extends CameraEntity {
             // If the entity is gone, notify the client, if its updated, notify the client
             if (entity.hash === 0) {
                 deletes.push({ id: entity.id, hash: entity.preservedHash });
-            } else if (entity.state & EntityStateFlags.needsCreate) {
-                if (entity.state & EntityStateFlags.needsDelete) deletes.push({hash: entity.hash, id: entity.id, noDelete: true});
+            } else if (entity.entityState & EntityStateFlags.needsCreate) {
+                if (entity.entityState & EntityStateFlags.needsDelete) deletes.push({hash: entity.hash, id: entity.id, noDelete: true});
                 creations.push(entity);
-            } else if (entity.state & EntityStateFlags.needsUpdate) {
+            } else if (entity.entityState & EntityStateFlags.needsUpdate) {
                 updates.push(entity);
             }
         }

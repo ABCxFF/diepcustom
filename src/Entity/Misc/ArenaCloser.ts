@@ -63,11 +63,9 @@ export default class ArenaCloser extends TankBody {
         // Fix all the stats
         def.speed = 1;
 
-        this.damageReduction = 0;
         this.damagePerTick = 200;
 
         this.name.values.name = "Arena Closer";
-        this.physics.values.absorbtionFactor = 0;
         this.style.values.color = Colors.Neutral;
         this.position.values.motion |= PositionFlags.canMoveThroughWalls;
         this.physics.values.objectFlags |= PhysicsFlags.canEscapeArena;
@@ -76,6 +74,7 @@ export default class ArenaCloser extends TankBody {
         for (let i = Stat.MovementSpeed; i < Stat.BodyDamage; ++i) camera.camera.values.statLevels.values[i] = 7;
 
         this.ai.aimSpeed = this.barrels[0].bulletAccel * 1.6;
+        this.setInvulnerability(true);
     }
 
     public tick(tick: number) {

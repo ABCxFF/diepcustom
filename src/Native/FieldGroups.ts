@@ -84,7 +84,7 @@ export class RelationsGroup {
         if (parent == this.values.parent) return;
         
         this.state.parent |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.parent = parent;
     }
 
@@ -95,7 +95,7 @@ export class RelationsGroup {
         if (owner == this.values.owner) return;
         
         this.state.owner |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.owner = owner;
     }
 
@@ -106,7 +106,7 @@ export class RelationsGroup {
         if (team == this.values.team) return;
         
         this.state.team |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.team = team;
     }
 }
@@ -166,7 +166,7 @@ export class BarrelGroup {
         if (shooting == this.values.shooting) return;
         
         this.state.shooting |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.shooting = shooting;
     }
 
@@ -177,7 +177,7 @@ export class BarrelGroup {
         if (reloadTime == this.values.reloadTime) return;
         
         this.state.reloadTime |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.reloadTime = reloadTime;
     }
 
@@ -188,7 +188,7 @@ export class BarrelGroup {
         if (trapezoidalDir == this.values.trapezoidalDir) return;
         
         this.state.trapezoidalDir |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.trapezoidalDir = trapezoidalDir;
     }
 }
@@ -266,7 +266,7 @@ export class PhysicsGroup {
         if (objectFlags == this.values.objectFlags) return;
         
         this.state.objectFlags |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.objectFlags = objectFlags;
     }
 
@@ -277,7 +277,7 @@ export class PhysicsGroup {
         if (sides == this.values.sides) return;
         
         this.state.sides |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.sides = sides;
     }
 
@@ -288,7 +288,7 @@ export class PhysicsGroup {
         if (size == this.values.size) return;
         
         this.state.size |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.size = size;
     }
 
@@ -299,7 +299,7 @@ export class PhysicsGroup {
         if (width == this.values.width) return;
         
         this.state.width |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.width = width;
     }
 
@@ -310,7 +310,7 @@ export class PhysicsGroup {
         if (absorbtionFactor == this.values.absorbtionFactor) return;
         
         this.state.absorbtionFactor |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.absorbtionFactor = absorbtionFactor;
     }
 
@@ -321,7 +321,7 @@ export class PhysicsGroup {
         if (pushFactor == this.values.pushFactor) return;
         
         this.state.pushFactor |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.pushFactor = pushFactor;
     }
 }
@@ -381,7 +381,7 @@ export class HealthGroup {
         if (healthbar == this.values.healthbar) return;
         
         this.state.healthbar |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.healthbar = healthbar;
     }
 
@@ -392,7 +392,7 @@ export class HealthGroup {
         if (health == this.values.health) return;
         
         this.state.health |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.health = health;
     }
 
@@ -403,7 +403,7 @@ export class HealthGroup {
         if (maxHealth == this.values.maxHealth) return;
         
         this.state.maxHealth |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.maxHealth = maxHealth;
     }
 }
@@ -453,7 +453,7 @@ export class UnusedGroup {
         if (unknown == this.values.unknown) return;
         
         this.state.unknown |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.unknown = unknown;
     }
 }
@@ -483,7 +483,7 @@ export class ScoreboardTable<ValueType> {
         this.values[0] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [1]() {
         return this.values[1];
@@ -495,7 +495,7 @@ export class ScoreboardTable<ValueType> {
         this.values[1] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [2]() {
         return this.values[2];
@@ -507,7 +507,7 @@ export class ScoreboardTable<ValueType> {
         this.values[2] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [3]() {
         return this.values[3];
@@ -519,7 +519,7 @@ export class ScoreboardTable<ValueType> {
         this.values[3] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [4]() {
         return this.values[4];
@@ -531,7 +531,7 @@ export class ScoreboardTable<ValueType> {
         this.values[4] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [5]() {
         return this.values[5];
@@ -543,7 +543,7 @@ export class ScoreboardTable<ValueType> {
         this.values[5] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [6]() {
         return this.values[6];
@@ -555,7 +555,7 @@ export class ScoreboardTable<ValueType> {
         this.values[6] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [7]() {
         return this.values[7];
@@ -567,7 +567,7 @@ export class ScoreboardTable<ValueType> {
         this.values[7] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [8]() {
         return this.values[8];
@@ -579,7 +579,7 @@ export class ScoreboardTable<ValueType> {
         this.values[8] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [9]() {
         return this.values[9];
@@ -591,7 +591,7 @@ export class ScoreboardTable<ValueType> {
         this.values[9] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     
 
@@ -716,7 +716,7 @@ export class ArenaGroup {
         if (GUI == this.values.GUI) return;
         
         this.state.GUI |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.GUI = GUI;
     }
 
@@ -727,7 +727,7 @@ export class ArenaGroup {
         if (leftX == this.values.leftX) return;
         
         this.state.leftX |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.leftX = leftX;
     }
 
@@ -738,7 +738,7 @@ export class ArenaGroup {
         if (topY == this.values.topY) return;
         
         this.state.topY |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.topY = topY;
     }
 
@@ -749,7 +749,7 @@ export class ArenaGroup {
         if (rightX == this.values.rightX) return;
         
         this.state.rightX |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.rightX = rightX;
     }
 
@@ -760,7 +760,7 @@ export class ArenaGroup {
         if (bottomY == this.values.bottomY) return;
         
         this.state.bottomY |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.bottomY = bottomY;
     }
 
@@ -771,7 +771,7 @@ export class ArenaGroup {
         if (scoreboardAmount == this.values.scoreboardAmount) return;
         
         this.state.scoreboardAmount |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.scoreboardAmount = scoreboardAmount;
     }
 
@@ -799,7 +799,7 @@ export class ArenaGroup {
         if (leaderX == this.values.leaderX) return;
         
         this.state.leaderX |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.leaderX = leaderX;
     }
 
@@ -810,7 +810,7 @@ export class ArenaGroup {
         if (leaderY == this.values.leaderY) return;
         
         this.state.leaderY |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.leaderY = leaderY;
     }
 
@@ -821,7 +821,7 @@ export class ArenaGroup {
         if (playersNeeded == this.values.playersNeeded) return;
         
         this.state.playersNeeded |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.playersNeeded = playersNeeded;
     }
 
@@ -832,7 +832,7 @@ export class ArenaGroup {
         if (ticksUntilStart == this.values.ticksUntilStart) return;
         
         this.state.ticksUntilStart |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.ticksUntilStart = ticksUntilStart;
     }
 }
@@ -887,7 +887,7 @@ export class NameGroup {
         if (nametag == this.values.nametag) return;
         
         this.state.nametag |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.nametag = nametag;
     }
 
@@ -898,7 +898,7 @@ export class NameGroup {
         if (name == this.values.name) return;
         
         this.state.name |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.name = name;
     }
 }
@@ -928,7 +928,7 @@ export class CameraTable<ValueType> {
         this.values[0] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [1]() {
         return this.values[1];
@@ -940,7 +940,7 @@ export class CameraTable<ValueType> {
         this.values[1] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [2]() {
         return this.values[2];
@@ -952,7 +952,7 @@ export class CameraTable<ValueType> {
         this.values[2] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [3]() {
         return this.values[3];
@@ -964,7 +964,7 @@ export class CameraTable<ValueType> {
         this.values[3] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [4]() {
         return this.values[4];
@@ -976,7 +976,7 @@ export class CameraTable<ValueType> {
         this.values[4] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [5]() {
         return this.values[5];
@@ -988,7 +988,7 @@ export class CameraTable<ValueType> {
         this.values[5] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [6]() {
         return this.values[6];
@@ -1000,7 +1000,7 @@ export class CameraTable<ValueType> {
         this.values[6] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     get [7]() {
         return this.values[7];
@@ -1012,7 +1012,7 @@ export class CameraTable<ValueType> {
         this.values[7] = value;
 
         this.owner.state[this.fieldName] |= 1;
-        this.owner.entity.state |= 1;
+        this.owner.entity.entityState |= 1;
     }
     
     findUpdate(): number[] {
@@ -1166,7 +1166,7 @@ export class CameraGroup {
         if (unusedClientId == this.values.unusedClientId) return;
         
         this.state.unusedClientId |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.unusedClientId = unusedClientId;
     }
 
@@ -1177,7 +1177,7 @@ export class CameraGroup {
         if (camera == this.values.camera) return;
         
         this.state.camera |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.camera = camera;
     }
 
@@ -1188,7 +1188,7 @@ export class CameraGroup {
         if (player == this.values.player) return;
         
         this.state.player |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.player = player;
     }
 
@@ -1199,7 +1199,7 @@ export class CameraGroup {
         if (FOV == this.values.FOV) return;
         
         this.state.FOV |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.FOV = FOV;
     }
 
@@ -1210,7 +1210,7 @@ export class CameraGroup {
         if (level == this.values.level) return;
         
         this.state.level |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.level = level;
     }
 
@@ -1221,7 +1221,7 @@ export class CameraGroup {
         if (tank == this.values.tank) return;
         
         this.state.tank |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.tank = tank;
     }
 
@@ -1232,7 +1232,7 @@ export class CameraGroup {
         if (levelbarProgress == this.values.levelbarProgress) return;
         
         this.state.levelbarProgress |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.levelbarProgress = levelbarProgress;
     }
 
@@ -1243,7 +1243,7 @@ export class CameraGroup {
         if (levelbarMax == this.values.levelbarMax) return;
         
         this.state.levelbarMax |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.levelbarMax = levelbarMax;
     }
 
@@ -1254,7 +1254,7 @@ export class CameraGroup {
         if (statsAvailable == this.values.statsAvailable) return;
         
         this.state.statsAvailable |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.statsAvailable = statsAvailable;
     }
 
@@ -1276,7 +1276,7 @@ export class CameraGroup {
         if (cameraX == this.values.cameraX) return;
         
         this.state.cameraX |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.cameraX = cameraX;
     }
 
@@ -1287,7 +1287,7 @@ export class CameraGroup {
         if (cameraY == this.values.cameraY) return;
         
         this.state.cameraY |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.cameraY = cameraY;
     }
 
@@ -1298,7 +1298,7 @@ export class CameraGroup {
         if (scorebar == this.values.scorebar) return;
         
         this.state.scorebar |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.scorebar = scorebar;
     }
 
@@ -1309,7 +1309,7 @@ export class CameraGroup {
         if (respawnLevel == this.values.respawnLevel) return;
         
         this.state.respawnLevel |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.respawnLevel = respawnLevel;
     }
 
@@ -1320,7 +1320,7 @@ export class CameraGroup {
         if (killedBy == this.values.killedBy) return;
         
         this.state.killedBy |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.killedBy = killedBy;
     }
 
@@ -1331,7 +1331,7 @@ export class CameraGroup {
         if (spawnTick == this.values.spawnTick) return;
         
         this.state.spawnTick |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.spawnTick = spawnTick;
     }
 
@@ -1342,7 +1342,7 @@ export class CameraGroup {
         if (deathTick == this.values.deathTick) return;
         
         this.state.deathTick |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.deathTick = deathTick;
     }
 
@@ -1353,7 +1353,7 @@ export class CameraGroup {
         if (tankOverride == this.values.tankOverride) return;
         
         this.state.tankOverride |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.tankOverride = tankOverride;
     }
 
@@ -1364,7 +1364,7 @@ export class CameraGroup {
         if (movementSpeed == this.values.movementSpeed) return;
         
         this.state.movementSpeed |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.movementSpeed = movementSpeed;
     }
 }
@@ -1429,7 +1429,7 @@ export class PositionGroup {
         if (x == this.values.x) return;
         
         this.state.x |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.x = x;
     }
 
@@ -1440,7 +1440,7 @@ export class PositionGroup {
         if (y == this.values.y) return;
         
         this.state.y |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.y = y;
     }
 
@@ -1451,7 +1451,7 @@ export class PositionGroup {
         if (angle == this.values.angle) return;
         
         this.state.angle |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.angle = angle;
     }
 
@@ -1462,7 +1462,7 @@ export class PositionGroup {
         if (motion == this.values.motion) return;
         
         this.state.motion |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.motion = motion;
     }
 }
@@ -1532,7 +1532,7 @@ export class StyleGroup {
         if (styleFlags == this.values.styleFlags) return;
         
         this.state.styleFlags |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.styleFlags = styleFlags;
     }
 
@@ -1543,7 +1543,7 @@ export class StyleGroup {
         if (color == this.values.color) return;
         
         this.state.color |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.color = color;
     }
 
@@ -1554,7 +1554,7 @@ export class StyleGroup {
         if (borderThickness == this.values.borderThickness) return;
         
         this.state.borderThickness |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.borderThickness = borderThickness;
     }
 
@@ -1565,7 +1565,7 @@ export class StyleGroup {
         if (opacity == this.values.opacity) return;
         
         this.state.opacity |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.opacity = opacity;
     }
 
@@ -1576,7 +1576,7 @@ export class StyleGroup {
         if (zIndex == this.values.zIndex) return;
         
         this.state.zIndex |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.zIndex = zIndex;
     }
 }
@@ -1625,7 +1625,7 @@ export class ScoreGroup {
         if (score == this.values.score) return;
         
         this.state.score |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.score = score;
     }
 }
@@ -1690,7 +1690,7 @@ export class TeamGroup {
         if (teamColor == this.values.teamColor) return;
         
         this.state.teamColor |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.teamColor = teamColor;
     }
 
@@ -1701,7 +1701,7 @@ export class TeamGroup {
         if (mothershipX == this.values.mothershipX) return;
         
         this.state.mothershipX |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.mothershipX = mothershipX;
     }
 
@@ -1712,7 +1712,7 @@ export class TeamGroup {
         if (mothershipY == this.values.mothershipY) return;
         
         this.state.mothershipY |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.mothershipY = mothershipY;
     }
 
@@ -1723,7 +1723,7 @@ export class TeamGroup {
         if (mothership == this.values.mothership) return;
         
         this.state.mothership |= 1;
-        this.entity.state |= 1;
+        this.entity.entityState |= 1;
         this.values.mothership = mothership;
     }
 }

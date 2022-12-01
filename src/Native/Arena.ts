@@ -37,7 +37,7 @@ import FallenBooster from "../Entity/Boss/FallenBooster";
 import Defender from "../Entity/Boss/Defender";
 import { bossSpawningInterval } from "../config";
 
-export enum ArenaState {
+export const enum ArenaState {
 	/** Alive, open */
 	OPEN = 0,
 	/** Game ended - someone won */
@@ -62,7 +62,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	/** Cached height of the arena. Not sent to the client directly. */
 	public height: number;
 	/** Whether or not the arena allows new players to spawn. */
-	public arenaState: number = ArenaState.OPEN;
+	public state: number = ArenaState.OPEN;
 
 	public shapeScoreRewardMultiplier: number = 1;
 
@@ -182,7 +182,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			client.notify("Arena closed: No players can join", 0xFF0000, -1);
 		}
 
-		this.arenaState = ArenaState.CLOSING;
+		this.state = ArenaState.CLOSING;
 		this.arena.GUI |= ArenaFlags.noJoining;
 
 		setTimeout(() => {
@@ -217,7 +217,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			this.spawnBoss();
 		}
 
-        if (this.arenaState === ArenaState.CLOSED) return;
+        if (this.state === ArenaState.CLOSED) return;
 
 		const players: TankBody[] = [];
 		
@@ -231,8 +231,8 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 		this.updateScoreboard(players);
 
 
-		if (players.length === 0 && this.arenaState === ArenaState.CLOSING) {
-			this.arenaState = ArenaState.CLOSED;
+		if (players.length === 0 && this.state === ArenaState.CLOSING) {
+			this.state = ArenaState.CLOSED;
 
 			setTimeout(() => {
 				this.game.end();

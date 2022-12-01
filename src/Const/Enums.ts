@@ -19,7 +19,7 @@
 /**
  * The IDs for all the team colors, by name.
  */
-export enum Colors {
+export const enum Colors {
     Border,
     Barrel,
     Tank,
@@ -70,7 +70,7 @@ export const ColorsHexCode: Record<Colors, number> = {
 /**
  * The IDs for all the tanks, by name.
  */
-export enum Tank {
+export const enum Tank {
     Basic         = 0,
     Twin          = 1,
     Triplet       = 2,
@@ -129,7 +129,7 @@ export enum Tank {
 /**
  * The IDs for all the stats, by name.
  */
-export enum Stat {
+export const enum Stat {
     MovementSpeed = 0,
     Reload = 1,
     BulletDamage = 2,
@@ -148,7 +148,7 @@ export const StatCount = 8;
  * IDs for the groupings of fields in diep protocol.
  * For more details read [entities.md](https://github.com/ABCxFF/diepindepth/blob/main/entities.md).
  */
-export enum FieldGroups {
+export const enum FieldGroups {
     Relations   = 0,
     Barrel      = 2,
     Physics     = 3,
@@ -165,7 +165,7 @@ export enum FieldGroups {
 /**
  * Packet headers for the [serverbound packets](https://github.com/ABCxFF/diepindepth/blob/main/protocol/serverbound.md).
  */
-export enum ServerBound {
+export const enum ServerBound {
     Init            = 0x0,
     Input           = 0x1,
     Spawn           = 0x2,
@@ -180,7 +180,7 @@ export enum ServerBound {
 /**
  * Packet headers for the [clientbound packets](https://github.com/ABCxFF/diepindepth/blob/main/protocol/clientbound.md).
  */
-export enum ClientBound {
+export const enum ClientBound {
     Update          = 0x0,
     OutdatedClient  = 0x1,
     Compressed      = 0x2,
@@ -198,7 +198,7 @@ export enum ClientBound {
 /**
  * Flags sent within the [input packet](https://github.com/ABCxFF/diepindepth/blob/main/protocol/serverbound.md#0x01-input-packet).
  */
-export enum InputFlags {
+export const enum InputFlags {
     leftclick   = 1 << 0,
     up          = 1 << 1,
     left        = 1 << 2,
@@ -216,7 +216,7 @@ export enum InputFlags {
 /**
  * The flag names for the arena field group.
  */
-export enum ArenaFlags {
+export const enum ArenaFlags {
     noJoining        = 1 << 0,
     showsLeaderArrow = 1 << 1,
     hiddenScores     = 1 << 2,
@@ -226,13 +226,13 @@ export enum ArenaFlags {
 /**
  * The flag names for the team field group.
  */
-export enum TeamFlags {
+export const enum TeamFlags {
     hasMothership = 1 << 0
 }
 /**
  * The flag names for the camera field group.
  */
-export enum CameraFlags {
+export const enum CameraFlags {
     usesCameraCoords      = 1 << 0,
     showingDeathStats     = 1 << 1,
     gameWaitingStart      = 1 << 2
@@ -240,7 +240,7 @@ export enum CameraFlags {
 /**
  * The flag names for the tsyle field group.
  */
-export enum StyleFlags {
+export const enum StyleFlags {
     isVisible          = 1 << 0,
     hasBeenDamaged     = 1 << 1,
     isFlashing         = 1 << 2,
@@ -253,14 +253,14 @@ export enum StyleFlags {
 /**
  * The flag names for the position field group.
  */
-export enum PositionFlags {
+export const enum PositionFlags {
     absoluteRotation    = 1 << 0,
     canMoveThroughWalls = 1 << 1
 }
 /**
  * The flag names for the physics field group.
  */
-export enum PhysicsFlags {
+export const enum PhysicsFlags {
     isTrapezoid             = 1 << 0,
     showsOnMap              = 1 << 1,
     _unknown                = 1 << 2,
@@ -274,19 +274,19 @@ export enum PhysicsFlags {
 /**
  * The flag names for the barrel field group.
  */
-export enum BarrelFlags {
+export const enum BarrelFlags {
     hasShot = 1 << 0
 }
 /**
  * The flag names for the health field group.
  */
-export enum HealthFlags {
+export const enum HealthFlags {
     hiddenHealthbar = 1 << 0
 }
 /**
  * The flag names for the name field group.
  */
-export enum NameFlags {
+export const enum NameFlags {
     hiddenName = 1 << 0,
     highlightedName = 1 << 1
 }

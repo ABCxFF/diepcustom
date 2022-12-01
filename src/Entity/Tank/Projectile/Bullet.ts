@@ -119,6 +119,6 @@ export default class Bullet extends LivingEntity {
         if (tick - this.spawnTick >= this.lifeLength) this.destroy(true);
         // TODO(ABC):
         // This code will be reimplemented in the update that allows for easy camera entity switches
-        if ((this.relations.values.team?.state || 0) & EntityStateFlags.needsDelete) this.relations.values.team = null
+        if ((this.relations.values.team?.entityState || 0) & EntityStateFlags.needsDelete) this.relations.values.team = null
     }
 }

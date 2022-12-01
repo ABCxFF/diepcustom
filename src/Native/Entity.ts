@@ -28,7 +28,7 @@ export const fieldGroupProps: Record<FieldGroupID, fieldGroupProp> = ["relations
  * IDs for the groupings of fields in diep protocol.
  * For more details read [entities.md](https://github.com/ABCxFF/diepindepth/blob/main/entities.md).
  */
-export enum FieldGroupID {
+export const enum FieldGroupID {
     relations   = 0,
     barrel      = 2,
     physics     = 3,
@@ -47,7 +47,7 @@ export enum FieldGroupID {
  * The flags used for Entity.state property. Signals to the
  * manager and the camera what needs to be sent to the client.
  */
-export enum EntityStateFlags {
+export const enum EntityStateFlags {
     needsUpdate = 1 << 0,
     needsCreate = 1 << 1,
     needsDelete = 1 << 2
@@ -69,7 +69,7 @@ export class Entity {
      * - `0b01`: Has updated
      * - `0b10`: Needs creation (unused)
      */
-    public state = 0;
+    public entityState = 0;
     /**
      * List of all field groups (by id) that the entity has.
      */
@@ -176,7 +176,7 @@ export class Entity {
         if (this.score) this.score.wipe();
         if (this.team) this.team.wipe();
 
-        this.state = 0;
+        this.entityState = 0;
     }
 
     /** Deletes the entity from the entity manager system. */

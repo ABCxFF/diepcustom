@@ -33,7 +33,7 @@ import { Entity } from "../Native/Entity";
  * - `idle`: When the AI is idle
  * - `target`: When the AI has found a target
  */
-export enum AIState {
+export const enum AIState {
     idle = 0,
     hasTarget = 1,
     possessed = 3

@@ -125,8 +125,8 @@ export default class MothershipArena extends ArenaEntity {
                 const pop = this.motherships.pop();
                 if (pop && i < this.motherships.length) this.motherships[i] = pop;
 
-                if (this.arenaState === ArenaState.OPEN) {
-                    this.arenaState = ArenaState.OVER;
+                if (this.state === ArenaState.OPEN) {
+                    this.state = ArenaState.OVER;
                     setTimeout(() => {
                         this.close();
                     }, 10000);

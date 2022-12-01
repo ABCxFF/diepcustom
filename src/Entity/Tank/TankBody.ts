@@ -34,6 +34,7 @@ import { getTankById, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
 import { Inputs } from "../AI";
 import AbstractBoss from "../Boss/AbstractBoss";
+import { ArenaState } from "../../Native/Arena";
 
 /**
  * Abstract type of entity which barrels can connect to.
@@ -71,8 +72,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     public reloadTime = 15;
     /** The current tank definition / tank id. */
     private _currentTank: Tank | DevTank = Tank.Basic;
-    /** Whether or not the spawn invulnerability happened already. */
-    public spawnProtectionEnded = false;
+    /** Sets tanks to be invulnerable - example, godmode, or AC */
+    public isInvulnerable: boolean = false;
 
     public constructor(game: GameServer, camera: CameraEntity, inputs: Inputs) {
         super(game);
@@ -91,6 +92,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         // spawn protection
         this.style.values.styleFlags |= StyleFlags.isFlashing;
+        this.damageReduction = 0;
         if (this.game.playersOnMap) this.physics.values.objectFlags |= PhysicsFlags.showsOnMap;
 
         this.damagePerTick = 20;
@@ -141,7 +143,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         // Size ratios
         this.baseSize = tank.sides === 4 ? Math.SQRT2 * 32.5 : tank.sides === 16 ? Math.SQRT2 * 25 : 50;
-        this.physics.absorbtionFactor = tank.absorbtionFactor;
+        this.physics.absorbtionFactor = this.isInvulnerable ? 0 : tank.absorbtionFactor;
         if (tank.absorbtionFactor === 0) this.position.motion |= PositionFlags.canMoveThroughWalls;
         else if (this.position.motion & PositionFlags.canMoveThroughWalls) this.position.motion ^= PositionFlags.canMoveThroughWalls
 
@@ -199,6 +201,23 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         }
     }
 
+    /** See TankBody.isInvulnerable */
+    public setInvulnerability(invulnerable: boolean) {
+        if (this.style.styleFlags & StyleFlags.isFlashing) this.style.styleFlags ^= StyleFlags.isFlashing;
+
+        if (this.isInvulnerable === invulnerable) return;
+      
+        if (invulnerable) {
+            this.damageReduction = 0.0;
+            this.physics.absorbtionFactor = 0.0;
+        } else {
+            this.damageReduction = 1.0;
+            this.physics.absorbtionFactor = this.definition.absorbtionFactor;
+        }
+      
+        this.isInvulnerable = invulnerable;
+    }
+
     /** See LivingEntity.onDeath */
    public onDeath(killer: LivingEntity) {
         if (!(this.cameraEntity instanceof Camera)) return this.cameraEntity.delete();
@@ -225,8 +244,15 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     }
 
     public tick(tick: number) {
+
         this.position.angle = Math.atan2(this.inputs.mouse.y - this.position.values.y, this.inputs.mouse.x - this.position.values.x);
 
+        if (this.isInvulnerable) {
+            if (this.game.clients.size !== 1 || this.game.arena.state !== ArenaState.OPEN) {
+                // not for ACs
+                if (this.cameraEntity instanceof Camera) this.setInvulnerability(false);
+            }
+        }
         if (!this.deletionAnimation && !this.inputs.deleted) this.physics.size = this.baseSize * this.cameraEntity.sizeFactor;
         else this.regenPerTick = 0;
 
@@ -240,7 +266,11 @@ export default class TankBody extends LivingEntity implements BarrelBase {
             this.lastDamageTick = tick;
             this.health.health -= 2 + this.health.values.maxHealth / 500;
 
-            if (this.style.values.styleFlags & StyleFlags.isFlashing) this.style.styleFlags ^= StyleFlags.isFlashing;
+            if (this.isInvulnerable) this.setInvulnerability(false);
+            if (this.style.values.styleFlags & StyleFlags.isFlashing) {
+                this.style.styleFlags ^= StyleFlags.isFlashing;
+                this.damageReduction = 1.0;
+            }
             return;
             // return this.destroy();
         }
@@ -289,9 +319,10 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         this.score.score = this.cameraEntity.camera.values.scorebar;
 
-        if (!this.spawnProtectionEnded && (this.style.values.styleFlags & StyleFlags.isFlashing) && (this.game.tick >= this.cameraEntity.camera.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
+        if ((this.style.values.styleFlags & StyleFlags.isFlashing) && (this.game.tick >= this.cameraEntity.camera.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
             this.style.styleFlags ^= StyleFlags.isFlashing;
-            this.spawnProtectionEnded = true;
+            // Dont worry about invulnerability here - not gonna be invulnerable while flashing ever (see setInvulnerability)
+            this.damageReduction = 1.0;
         }
 
         this.accel.add({

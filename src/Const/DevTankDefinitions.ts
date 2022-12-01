@@ -22,7 +22,7 @@ import { TankDefinition } from "./TankDefinitions";
 /**
  * The IDs for all the dev tanks, by name.
  */
-export enum DevTank {
+export const enum DevTank {
     Developer = -1,
     UsainBolt = -2,
     BigBoi = -3,

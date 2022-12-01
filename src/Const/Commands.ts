@@ -25,7 +25,7 @@ import { saveToVLog } from "../util";
 import { Stat, StatCount, StyleFlags } from "./Enums";
 import { getTankByName } from "./TankDefinitions"
 
-export enum CommandID {
+export const enum CommandID {
     gameSetTank = "game_set_tank",
     gameSetLevel = "game_set_level",
     gameSetScore = "game_set_score",
@@ -184,7 +184,7 @@ export const commandCallbacks = {
         player.position.x = x;
         player.position.y = y;
         player.setVelocity(0, 0);
-        player.state |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
+        player.entityState |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
     },
     game_claim: (client: Client, entityArg: string) => {
         const TEntity = new Map([
@@ -210,20 +210,14 @@ export const commandCallbacks = {
 
         switch (activeArg) {
             case "on":
-                client.isInvulnerable = true;
+                player.setInvulnerability(true);
                 break;
             case "off":
-                client.isInvulnerable = false;
+                player.setInvulnerability(false);
                 break;
             default:
-                client.isInvulnerable = !client.isInvulnerable;
-        }
-
-        if (client.isInvulnerable) {
-            client.damageReductionCache = player.damageReduction;
-            player.damageReduction = 0;
-        } else {
-            player.damageReduction = client.damageReductionCache;
+                player.setInvulnerability(!player.isInvulnerable);
+                break;
         }
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
