@@ -101,7 +101,7 @@ export default class ObjectEntity extends Entity {
     public accel = new Vector();
 
     /** For internal spatial hash grid */
-    public _queryId: number = -1;
+    private _queryId: number = -1;
 
     /** Cache of all ObjectEntitys who are colliding with `this` one at the current tick */
     private cachedCollisions: ObjectEntity[] = [];

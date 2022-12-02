@@ -25,7 +25,7 @@ import ClientCamera from "./Camera";
 import { VectorAbstract } from "../Physics/Vector";
 import { ArenaGroup, TeamGroup } from "./FieldGroups";
 import { Entity } from "./Entity";
-import { Color, ArenaFlags, Tank } from "../Const/Enums";
+import { Color, ArenaFlags, Tank, ValidScoreboardIndex } from "../Const/Enums";
 import { PI2, saveToLog } from "../util";
 import { TeamGroupEntity } from "../Entity/Misc/TeamEntity";
 import Client from "../Client";
@@ -136,17 +136,12 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			for (i = 0; i < scoreboardCount; ++i) {
 				const player = scoreboardPlayers[i];
 				
-				/** @ts-ignore */
-				if (player.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i] = Color.ScoreboardBar;
-				/** @ts-ignore */
-				else this.arenaData.values.scoreboardColors[i] = player.styleData.values.color;
-				/** @ts-ignore */
-				this.arenaData.values.scoreboardNames[i] = player.nameData.values.name;
-				
-				/** @ts-ignore */
-				this.arenaData.values.scoreboardScores[i] = player.scoreData.values.score;
-				/** @ts-ignore */ // _currentTank only since ts ignore
-				this.arenaData.values.scoreboardTanks[i] = player._currentTank;
+				if (player.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = Color.ScoreboardBar;
+				else this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = player.styleData.values.color;
+				this.arenaData.values.scoreboardNames[i as ValidScoreboardIndex] = player.nameData.values.name;
+				this.arenaData.values.scoreboardScores[i as ValidScoreboardIndex] = player.scoreData.values.score;
+				// _currentTank only since ts ignore
+				this.arenaData.values.scoreboardTanks[i as ValidScoreboardIndex] = player['_currentTank'];
 			}
 		} else if (this.arenaData.values.flags & ArenaFlags.showsLeaderArrow) this.arenaData.flags ^= ArenaFlags.showsLeaderArrow;
 	}

@@ -17,7 +17,7 @@
 */
 
 import Client from "../Client";
-import { Color, ArenaFlags, TeamFlags } from "../Const/Enums";
+import { Color, ArenaFlags, TeamFlags, ValidScoreboardIndex } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
@@ -109,19 +109,13 @@ export default class MothershipArena extends ArenaEntity {
                 team.teamData.mothershipY = mothership.positionData.values.y;
                 team.teamData.flags |= TeamFlags.hasMothership;
             }
-            /** @ts-ignore */
-            if (mothership.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i] = Color.ScoreboardBar;
-            /** @ts-ignore */
-            else this.arenaData.values.scoreboardColors[i] = mothership.styleData.values.color;
-            /** @ts-ignore */
-            this.arenaData.values.scoreboardNames[i] = isTeamATeam ? team.teamName : `Mothership ${i+1}`;
-            // TODO: Change
-            /** @ts-ignore */
-            this.arenaData.values.scoreboardTanks[i] = -1;
-            /** @ts-ignore */
-            this.arenaData.values.scoreboardScores[i] = mothership.healthData.values.health;
-            /** @ts-ignore */
-            this.arenaData.values.scoreboardSuffixes[i] = " HP";
+            if (mothership.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = Color.ScoreboardBar;
+            else this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = mothership.styleData.values.color;
+            this.arenaData.values.scoreboardNames[i as ValidScoreboardIndex] = isTeamATeam ? team.teamName : `Mothership ${i+1}`;
+            // TODO: Change id
+            this.arenaData.values.scoreboardTanks[i as ValidScoreboardIndex] = -1;
+            this.arenaData.values.scoreboardScores[i as ValidScoreboardIndex] = mothership.healthData.values.health;
+            this.arenaData.values.scoreboardSuffixes[i as ValidScoreboardIndex] = " HP";
         }
        
         this.arenaData.scoreboardAmount = length;

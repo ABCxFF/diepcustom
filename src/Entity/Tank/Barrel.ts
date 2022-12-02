@@ -25,7 +25,7 @@ import Rocket from "./Projectile/Rocket";
 import Skimmer from "./Projectile/Skimmer";
 import Minion from "./Projectile/Minion";
 import ObjectEntity from "../Object";
-import { BarrelBase } from "./TankBody";
+import TankBody, { BarrelBase } from "./TankBody";
 
 import { Color, PositionFlags, PhysicsFlags, BarrelFlags, Stat, Tank } from "../../Const/Enums";
 import { BarrelGroup } from "../../Native/FieldGroups";
@@ -161,8 +161,8 @@ export default class Barrel extends ObjectEntity {
         this.rootParent.addAcceleration(angle + Math.PI, this.definition.recoil * 2);
 
         let tankDefinition: TankDefinition | null = null;
-        /** @ts-ignore */
-        if (typeof this.rootParent.definition === 'object') tankDefinition = this.rootParent.definition;
+
+        if (this.rootParent instanceof TankBody) tankDefinition = this.rootParent.definition;
 
 
         switch (this.definition.bullet.type) {

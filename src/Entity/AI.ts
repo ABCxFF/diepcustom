@@ -103,7 +103,7 @@ export class AI {
     /** Stores the creation of the AI, used to optimize ticking */
     private _creationTick: number;
 
-    public _findTargetInterval: number = 2;
+    private _findTargetInterval: number = 2;
 
     public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;

@@ -71,8 +71,7 @@ export default class NecromancerSquare extends Drone {
         sunchip.positionData.values.y = shape.positionData.values.y;
         sunchip.positionData.values.angle = shape.positionData.values.angle;
         
-        /** @ts-ignore */
-        const shapeDamagePerTick: number = shape.damagePerTick;
+        const shapeDamagePerTick: number = shape['damagePerTick'];
 
         sunchip.damagePerTick *= shapeDamagePerTick / 8;
         sunchip.healthData.values.maxHealth = (sunchip.healthData.values.health *= (shapeDamagePerTick / 8));

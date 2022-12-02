@@ -69,8 +69,8 @@ export default class SpatialHashing implements CollisionManager {
                 const cell = this.hashMap.get(key);
                 if (cell == null) continue;
                 for (let i = 0; i < cell.length; ++i) {
-                    if (cell[i]._queryId != this.queryId) {
-                        cell[i]._queryId = this.queryId;
+                    if (cell[i]['_queryId'] != this.queryId) {
+                        cell[i]['_queryId'] = this.queryId;
                         if (cell[i].hash !== 0) result.push(cell[i]);
                     }
                 }
