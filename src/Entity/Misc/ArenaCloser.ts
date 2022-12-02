@@ -53,8 +53,6 @@ export default class ArenaCloser extends TankBody {
         this.ai.inputs = inputs;
         this.ai.viewRange = Infinity;
 
-        this.healthData.values.flags |= HealthFlags.hiddenHealthbar;
-
         this.setTank(Tank.ArenaCloser);
 
         const def = (this.definition = Object.assign({}, this.definition));
