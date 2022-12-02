@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, NameFlags, Tank } from "../../Const/Enums";
+import { Color, NameFlags, Tank } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
@@ -56,11 +56,11 @@ export default class Dominator extends TankBody {
 
         super(arena.game, camera, inputs);
 
-        this.relations.values.team = arena;
-        this.physics.values.size = Dominator.SIZE;
+        this.relationsData.values.team = arena;
+        this.physicsData.values.size = Dominator.SIZE;
         // TODO(ABC):
         // Add setTeam method for this
-        this.style.values.color = Colors.Neutral;
+        this.styleData.values.color = Color.Neutral;
 
         this.ai = new AI(this, true);
         this.ai.inputs = inputs;
@@ -70,37 +70,37 @@ export default class Dominator extends TankBody {
 
         this.setTank(tankId);
         const def = (this.definition = Object.assign({}, this.definition));
-        def.speed = camera.camera.values.movementSpeed = 0;
-        this.name.values.name = "Dominator";
-        this.name.values.nametag |= NameFlags.hiddenName;
-        this.physics.values.absorbtionFactor = 0;
+        def.speed = camera.cameraData.values.movementSpeed = 0;
+        this.nameData.values.name = "Dominator";
+        this.nameData.values.flags |= NameFlags.hiddenName;
+        this.physicsData.values.absorbtionFactor = 0;
         
-        this.position.values.x = base.position.values.x;
-        this.position.values.y = base.position.values.y;
+        this.positionData.values.x = base.positionData.values.x;
+        this.positionData.values.y = base.positionData.values.y;
         
         this.scoreReward = 0;
-        camera.camera.values.player = this;
+        camera.cameraData.values.player = this;
 
         this.base = base;
     }
 
     public onDeath(killer: LivingEntity) {
-        if (this.relations.values.team === this.game.arena && killer instanceof TankBody) {
-            this.relations.team = killer.relations.values.team || this.game.arena;
-            this.style.color = this.relations.team.team?.teamColor || killer.style.values.color;
+        if (this.relationsData.values.team === this.game.arena && killer instanceof TankBody) {
+            this.relationsData.team = killer.relationsData.values.team || this.game.arena;
+            this.styleData.color = this.relationsData.team.teamData?.teamColor || killer.styleData.values.color;
         } else {
-            this.relations.team = this.game.arena
-            this.style.color = this.game.arena.team.teamColor;
+            this.relationsData.team = this.game.arena
+            this.styleData.color = this.game.arena.teamData.teamColor;
         }
 
-        this.base.style.color = this.style.values.color;
-        this.base.relations.team = this.relations.values.team;;
+        this.base.styleData.color = this.styleData.values.color;
+        this.base.relationsData.team = this.relationsData.values.team;;
 
-        this.health.health = this.health.values.maxHealth;
+        this.healthData.health = this.healthData.values.maxHealth;
 
         for (let i = 1; i <= this.game.entities.lastId; ++i) {
             const entity = this.game.entities.inner[i];
-            if (entity instanceof Bullet && entity.relations.values.owner === this) entity.destroy();
+            if (entity instanceof Bullet && entity.relationsData.values.owner === this) entity.destroy();
         }
 
         if (this.ai.state === AIState.possessed) {
@@ -116,11 +116,11 @@ export default class Dominator extends TankBody {
         this.inputs = this.ai.inputs;
 
         if (this.ai.state === AIState.idle) {
-            const angle = this.position.values.angle + this.ai.passiveRotation;
-            const mag = Math.sqrt((this.inputs.mouse.x - this.position.values.x) ** 2 + (this.inputs.mouse.y - this.position.values.y) ** 2);
+            const angle = this.positionData.values.angle + this.ai.passiveRotation;
+            const mag = Math.sqrt((this.inputs.mouse.x - this.positionData.values.x) ** 2 + (this.inputs.mouse.y - this.positionData.values.y) ** 2);
             this.inputs.mouse.set({
-                x: this.position.values.x + Math.cos(angle) * mag,
-                y: this.position.values.y + Math.sin(angle) * mag
+                x: this.positionData.values.x + Math.cos(angle) * mag,
+                y: this.positionData.values.y + Math.sin(angle) * mag
             });
         }
 

@@ -24,7 +24,7 @@ import TankBody from "../../Entity/Tank/TankBody";
 import AbstractShape from "../../Entity/Shape/AbstractShape";
 import Client from "../../Client";
 import { TeamEntity } from "../../Entity/Misc/TeamEntity";
-import { Colors } from "../../Const/Enums";
+import { Color } from "../../Const/Enums";
 import { SandboxShapeManager } from "../Sandbox";
 
 /**
@@ -33,9 +33,9 @@ import { SandboxShapeManager } from "../Sandbox";
 class JungleShapeManager extends SandboxShapeManager {
     protected spawnShape(): AbstractShape {
         const shape = super.spawnShape();
-        shape.physics.values.size *= 2.6;
-        shape.health.values.health = (shape.health.values.maxHealth *= 4.3);
-        shape.physics.values.absorbtionFactor /= 6;
+        shape.physicsData.values.size *= 2.6;
+        shape.healthData.values.health = (shape.healthData.values.maxHealth *= 4.3);
+        shape.physicsData.values.absorbtionFactor /= 6;
         shape.scoreReward *= 19
 
         return shape;
@@ -54,7 +54,7 @@ export default class JungleArena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
 
-        this.playerTeam = new TeamEntity(game, Colors.TeamBlue);
+        this.playerTeam = new TeamEntity(game, Color.TeamBlue);
 
 		this.updateBounds(2500, 2500);
     }
@@ -62,9 +62,9 @@ export default class JungleArena extends ArenaEntity {
     public spawnPlayer(tank: TankBody, client: Client): void {
         super.spawnPlayer(tank, client);
 
-        tank.relations.values.team = this.playerTeam;
-        tank.style.values.color = this.playerTeam.team.values.teamColor;
-        if (client.camera) client.camera.relations.team = tank.relations.values.team;
+        tank.relationsData.values.team = this.playerTeam;
+        tank.styleData.values.color = this.playerTeam.teamData.values.teamColor;
+        if (client.camera) client.camera.relationsData.team = tank.relationsData.values.team;
     }
 
     public tick(tick: number) {

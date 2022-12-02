@@ -31,8 +31,8 @@ export default class SpatialHashing implements CollisionManager {
     }
 
     insertEntity(entity: ObjectEntity) {
-        const { sides, size, width } = entity.physics.values;
-        const { x, y } = entity.position.values;
+        const { sides, size, width } = entity.physicsData.values;
+        const { x, y } = entity.positionData.values;
         const isLine = sides === 2;
         const radiW = isLine ? size / 2 : size;
         const radiH = isLine ? width / 2 : size;
@@ -69,8 +69,8 @@ export default class SpatialHashing implements CollisionManager {
                 const cell = this.hashMap.get(key);
                 if (cell == null) continue;
                 for (let i = 0; i < cell.length; ++i) {
-                    if (cell[i].physics.queryId != this.queryId) {
-                        cell[i].physics.queryId = this.queryId;
+                    if (cell[i]._queryId != this.queryId) {
+                        cell[i]._queryId = this.queryId;
                         if (cell[i].hash !== 0) result.push(cell[i]);
                     }
                 }
@@ -84,8 +84,8 @@ export default class SpatialHashing implements CollisionManager {
     }
 
     retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
-        const { sides, size, width } = entity.physics.values;
-        const { x, y } = entity.position;
+        const { sides, size, width } = entity.physicsData.values;
+        const { x, y } = entity.positionData;
         const isLine = sides === 2;
         const w = isLine ? size / 2 : size;
         const h = isLine ? width / 2 : size;

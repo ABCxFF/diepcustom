@@ -18,7 +18,7 @@
 
 import { ClientInputs } from "../../Client";
 import { tps } from "../../config";
-import { Colors, Tank, Stat, ColorsHexCode, ClientBound, TeamFlags } from "../../Const/Enums";
+import { Color, Tank, Stat, ColorsHexCode, ClientBound, TeamFlags } from "../../Const/Enums";
 import GameServer from "../../Game";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
@@ -48,27 +48,27 @@ export default class Mothership extends TankBody {
 
         super(game, camera, inputs);
 
-        this.relations.values.team = game.arena;
+        this.relationsData.values.team = game.arena;
 
-        this.style.values.color = Colors.Neutral;
+        this.styleData.values.color = Color.Neutral;
 
         this.ai = new AI(this, true);
         this.ai.inputs = inputs;
         this.ai.viewRange = 2000;
         
-        this.position.values.x = 0;
-        this.position.values.y = 0;
+        this.positionData.values.x = 0;
+        this.positionData.values.y = 0;
         
         this.setTank(Tank.Mothership);
         
-        this.name.values.name = "Mothership"
+        this.nameData.values.name = "Mothership"
         
         this.scoreReward = 0;
         
-        camera.camera.values.player = this;
+        camera.cameraData.values.player = this;
 
-        for (let i = Stat.MovementSpeed; i < Stat.HealthRegen; ++i) camera.camera.values.statLevels.values[i] = 7;
-        camera.camera.values.statLevels.values[Stat.HealthRegen] = 1;
+        for (let i = Stat.MovementSpeed; i < Stat.HealthRegen; ++i) camera.cameraData.values.statLevels.values[i] = 7;
+        camera.cameraData.values.statLevels.values[Stat.HealthRegen] = 1;
 
         const def = (this.definition = Object.assign({}, this.definition));
         // 418 is what the normal health increase for stat/level would be, so we just subtract it and force it 7k
@@ -76,10 +76,10 @@ export default class Mothership extends TankBody {
     }
 
     public onDeath(killer: Live): void {
-        const team = this.relations.values.team;
+        const team = this.relationsData.values.team;
         const teamIsATeam = team instanceof TeamEntity;
 
-        const killerTeam = killer.relations.values.team;
+        const killerTeam = killer.relationsData.values.team;
         const killerTeamIsATeam = killerTeam instanceof TeamEntity;
 
         // UNCOMMENT TO ALLOW SOLO KILLS
@@ -87,15 +87,15 @@ export default class Mothership extends TankBody {
         this.game.broadcast()
             .u8(ClientBound.Notification)
             // If mothership has a team name, use it, otherwise just say has destroyed a mothership
-            .stringNT(`${killerTeamIsATeam ? killerTeam.teamName : (killer.name?.values.name || "an unnamed tank")} has destroyed ${teamIsATeam ? team.teamName + "'s" : "a"} Mothership!`)
-            .u32(killerTeamIsATeam ? ColorsHexCode[killerTeam.team.values.teamColor] : 0x000000)
+            .stringNT(`${killerTeamIsATeam ? killerTeam.teamName : (killer.nameData?.values.name || "an unnamed tank")} has destroyed ${teamIsATeam ? team.teamName + "'s" : "a"} Mothership!`)
+            .u32(killerTeamIsATeam ? ColorsHexCode[killerTeam.teamData.values.teamColor] : 0x000000)
             .float(-1)
             .stringNT("").send();   
     }
 
     public delete(): void {
         // No more mothership arrow - seems like in old diep this wasn't the case - we should probably keep though
-        if (this.relations.values.team?.team) this.relations.values.team.team.mothership &= ~TeamFlags.hasMothership;
+        if (this.relationsData.values.team?.teamData) this.relationsData.values.team.teamData.flags  &= ~TeamFlags.hasMothership;
         this.ai.inputs.deleted = true;
         super.delete();
     }
@@ -107,11 +107,11 @@ export default class Mothership extends TankBody {
         this.inputs = this.ai.inputs;
 
         if (this.ai.state === AIState.idle) {
-            const angle = this.position.values.angle + this.ai.passiveRotation;
-            const mag = Math.sqrt((this.inputs.mouse.x - this.position.values.x) ** 2 + (this.inputs.mouse.y - this.position.values.y) ** 2);
+            const angle = this.positionData.values.angle + this.ai.passiveRotation;
+            const mag = Math.sqrt((this.inputs.mouse.x - this.positionData.values.x) ** 2 + (this.inputs.mouse.y - this.positionData.values.y) ** 2);
             this.inputs.mouse.set({
-                x: this.position.values.x + Math.cos(angle) * mag,
-                y: this.position.values.y + Math.sin(angle) * mag
+                x: this.positionData.values.x + Math.cos(angle) * mag,
+                y: this.positionData.values.y + Math.sin(angle) * mag
             });
         } else if (this.ai.state === AIState.possessed && this.possessionStartTick === -1) {
             this.possessionStartTick = tick;
@@ -128,7 +128,7 @@ export default class Mothership extends TankBody {
                 if (tick - this.possessionStartTick >= POSSESSION_TIMER) {
                     this.inputs.deleted = true;
                 } else if (tick - this.possessionStartTick === Math.floor(POSSESSION_TIMER - 10 * tps)) {
-                    this.inputs.client.notify("You only have 10 seconds left in control of the Mothership", ColorsHexCode[this.style.values.color], 5_000, "");
+                    this.inputs.client.notify("You only have 10 seconds left in control of the Mothership", ColorsHexCode[this.styleData.values.color], 5_000, "");
                 }
             }
         }

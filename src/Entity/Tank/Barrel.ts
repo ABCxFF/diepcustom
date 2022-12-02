@@ -27,7 +27,7 @@ import Minion from "./Projectile/Minion";
 import ObjectEntity from "../Object";
 import { BarrelBase } from "./TankBody";
 
-import { Colors, PositionFlags, PhysicsFlags, BarrelFlags, Stat, Tank } from "../../Const/Enums";
+import { Color, PositionFlags, PhysicsFlags, BarrelFlags, Stat, Tank } from "../../Const/Enums";
 import { BarrelGroup } from "../../Native/FieldGroups";
 import { BarrelDefinition, TankDefinition } from "../../Const/TankDefinitions";
 import { DevTank } from "../../Const/DevTankDefinitions";
@@ -50,8 +50,8 @@ export class ShootCycle {
 
     public constructor(barrel: Barrel) {
         this.barrelEntity = barrel;
-        this.barrelEntity.barrel.reloadTime = this.barrelEntity.tank.reloadTime * this.barrelEntity.definition.reload;
-        this.reloadTime = this.pos = barrel.barrel.values.reloadTime;
+        this.barrelEntity.barrelData.reloadTime = this.barrelEntity.tank.reloadTime * this.barrelEntity.definition.reload;
+        this.reloadTime = this.pos = barrel.barrelData.values.reloadTime;
     }
 
     public tick() {
@@ -77,7 +77,7 @@ export class ShootCycle {
         }
 
         if (this.pos >= reloadTime * (1 + this.barrelEntity.definition.delay)) {
-            this.barrelEntity.barrel.reloadTime = reloadTime;
+            this.barrelEntity.barrelData.reloadTime = reloadTime;
             this.barrelEntity.shoot();
             this.pos %= reloadTime;
         } else {
@@ -109,7 +109,7 @@ export default class Barrel extends ObjectEntity {
     public addons: BarrelAddon[] = [];
 
     /** Always existant barrel field group, present on all barrels. */
-    public barrel: BarrelGroup = new BarrelGroup(this);
+    public barrelData: BarrelGroup = new BarrelGroup(this);
 
     public constructor(owner: BarrelBase, barrelDefinition: BarrelDefinition) {
         super(owner.game);
@@ -118,21 +118,21 @@ export default class Barrel extends ObjectEntity {
         this.definition = barrelDefinition;
 
         // Begin Loading Definition
-        this.style.values.color = Colors.Barrel;
-        this.physics.values.sides = 2;
-        if (barrelDefinition.isTrapezoid) this.physics.values.objectFlags |= PhysicsFlags.isTrapezoid;
+        this.styleData.values.color = Color.Barrel;
+        this.physicsData.values.sides = 2;
+        if (barrelDefinition.isTrapezoid) this.physicsData.values.flags |= PhysicsFlags.isTrapezoid;
 
         this.setParent(owner);
-        this.relations.values.owner = owner;
-        this.relations.values.team = owner.relations.values.team;
+        this.relationsData.values.owner = owner;
+        this.relationsData.values.team = owner.relationsData.values.team;
 
         const sizeFactor = this.tank.sizeFactor;
-        const size = this.physics.values.size = this.definition.size * sizeFactor;
+        const size = this.physicsData.values.size = this.definition.size * sizeFactor;
 
-        this.physics.values.width = this.definition.width * sizeFactor;
-        this.position.values.angle = this.definition.angle + (this.definition.trapezoidDirection);
-        this.position.values.x = Math.cos(this.definition.angle) * size / 2 - Math.sin(this.definition.angle) * this.definition.offset * sizeFactor;
-        this.position.values.y = Math.sin(this.definition.angle) * size / 2 + Math.cos(this.definition.angle) * this.definition.offset * sizeFactor;
+        this.physicsData.values.width = this.definition.width * sizeFactor;
+        this.positionData.values.angle = this.definition.angle + (this.definition.trapezoidDirection);
+        this.positionData.values.x = Math.cos(this.definition.angle) * size / 2 - Math.sin(this.definition.angle) * this.definition.offset * sizeFactor;
+        this.positionData.values.y = Math.sin(this.definition.angle) * size / 2 + Math.cos(this.definition.angle) * this.definition.offset * sizeFactor;
 
         // addons are below barrel, use StyleFlags.aboveParent to go above parent
         if (barrelDefinition.addon) {
@@ -140,23 +140,23 @@ export default class Barrel extends ObjectEntity {
             if (AddonConstructor) this.addons.push(new AddonConstructor(this));
         }
 
-        this.barrel.values.trapezoidalDir = barrelDefinition.trapezoidDirection;
+        this.barrelData.values.trapezoidDirection = barrelDefinition.trapezoidDirection;
         this.shootCycle = new ShootCycle(this);
 
-        this.bulletAccel = (20 + (owner.cameraEntity.camera?.values.statLevels.values[Stat.BulletSpeed] || 0) * 3) * barrelDefinition.bullet.speed;
+        this.bulletAccel = (20 + (owner.cameraEntity.cameraData?.values.statLevels.values[Stat.BulletSpeed] || 0) * 3) * barrelDefinition.bullet.speed;
     }
 
     /** Shoots a bullet from the barrel. */
     public shoot() {
-        this.barrel.shooting ^= BarrelFlags.hasShot;
+        this.barrelData.flags ^= BarrelFlags.hasShot;
 
         // No this is not correct
         const scatterAngle = (Math.PI / 180) * this.definition.bullet.scatterRate * (Math.random() - .5) * 10;
-        let angle = this.definition.angle + scatterAngle + this.tank.position.values.angle;
+        let angle = this.definition.angle + scatterAngle + this.tank.positionData.values.angle;
 
         // Map angles unto
         // let e: Entity | null | undefined = this;
-        // while (!((e?.position?.motion || 0) & MotionFlags.absoluteRotation) && (e = e.relations?.values.parent) instanceof ObjectEntity) angle += e.position.values.angle;
+        // while (!((e?.position?.flags || 0) & MotionFlags.absoluteRotation) && (e = e.relations?.values.parent) instanceof ObjectEntity) angle += e.position.values.angle;
 
         this.rootParent.addAcceleration(angle + Math.PI, this.definition.recoil * 2);
 
@@ -175,7 +175,7 @@ export default class Barrel extends ObjectEntity {
             case 'bullet': {
                 const bullet = new Bullet(this, this.tank, tankDefinition, angle);
 
-                if (tankDefinition && (tankDefinition.id === Tank.ArenaCloser || tankDefinition.id === DevTank.Squirrel)) bullet.position.motion |= PositionFlags.canMoveThroughWalls;
+                if (tankDefinition && (tankDefinition.id === Tank.ArenaCloser || tankDefinition.id === DevTank.Squirrel)) bullet.positionData.flags |= PositionFlags.canMoveThroughWalls;
                 break;
             }
             case 'trap':
@@ -217,21 +217,21 @@ export default class Barrel extends ObjectEntity {
     /** Resizes the barrel; when the tank gets bigger, the barrel must as well. */
     protected resize() {
         const sizeFactor = this.tank.sizeFactor;
-        const size = this.physics.size = this.definition.size * sizeFactor;
+        const size = this.physicsData.size = this.definition.size * sizeFactor;
 
-        this.physics.width = this.definition.width * sizeFactor;
-        this.position.angle = this.definition.angle + (this.definition.trapezoidDirection);
-        this.position.x = Math.cos(this.definition.angle) * size / 2 - Math.sin(this.definition.angle) * this.definition.offset * sizeFactor;
-        this.position.y = Math.sin(this.definition.angle) * size / 2 + Math.cos(this.definition.angle) * this.definition.offset * sizeFactor;
+        this.physicsData.width = this.definition.width * sizeFactor;
+        this.positionData.angle = this.definition.angle + (this.definition.trapezoidDirection);
+        this.positionData.x = Math.cos(this.definition.angle) * size / 2 - Math.sin(this.definition.angle) * this.definition.offset * sizeFactor;
+        this.positionData.y = Math.sin(this.definition.angle) * size / 2 + Math.cos(this.definition.angle) * this.definition.offset * sizeFactor;
 
         // Updates bullet accel too
-        this.bulletAccel = (20 + (this.tank.cameraEntity.camera?.values.statLevels.values[Stat.BulletSpeed] || 0) * 3) * this.definition.bullet.speed;
+        this.bulletAccel = (20 + (this.tank.cameraEntity.cameraData?.values.statLevels.values[Stat.BulletSpeed] || 0) * 3) * this.definition.bullet.speed;
     }
 
     public tick(tick: number) {
         this.resize();
 
-        this.relations.values.team = this.tank.relations.values.team;
+        this.relationsData.values.team = this.tank.relationsData.values.team;
 
         if (!this.tank.rootParent.deletionAnimation){
             this.attemptingShot = this.tank.inputs.attemptingShot();

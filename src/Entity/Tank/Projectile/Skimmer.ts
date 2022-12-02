@@ -81,7 +81,7 @@ export default class Skimmer extends Bullet implements BarrelBase {
 
         this.cameraEntity = tank.cameraEntity;
 
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
 
         const skimmerBarrels: Barrel[] = this.skimmerBarrels =[];
 
@@ -89,8 +89,8 @@ export default class Skimmer extends Bullet implements BarrelBase {
             // Keep the width constant
             protected resize() {
                 super.resize();
-                this.physics.values.width = this.definition.width
-                this.physics.state.width = 0;
+                this.physicsData.values.width = this.definition.width
+                // this.physicsData.state.width = 0;
             }
         }(this, {...SkimmerBarrelDefinition});
         const s2Definition = {...SkimmerBarrelDefinition};
@@ -99,12 +99,12 @@ export default class Skimmer extends Bullet implements BarrelBase {
             // Keep the width constant
             protected resize() {
                 super.resize();
-                this.physics.width = this.definition.width
+                this.physicsData.width = this.definition.width
             }
         }(this, s2Definition);
 
-        s1.style.values.color = this.style.values.color;
-        s2.style.values.color = this.style.values.color;
+        s1.styleData.values.color = this.styleData.values.color;
+        s2.styleData.values.color = this.styleData.values.color;
 
         skimmerBarrels.push(s1, s2);
 
@@ -113,9 +113,9 @@ export default class Skimmer extends Bullet implements BarrelBase {
     }
 
     public tick(tick: number) {
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
-        this.position.angle += this.rotationPerTick;
+        this.positionData.angle += this.rotationPerTick;
         super.tick(tick);
 
         if (this.deletionAnimation) return;

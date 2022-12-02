@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import AbstractShape from "./AbstractShape";
 
-import { Colors } from "../../Const/Enums";
+import { Color } from "../../Const/Enums";
 
 /**
  * Pentagon entity class.
@@ -35,15 +35,15 @@ export default class Pentagon extends AbstractShape {
     public constructor(game: GameServer, isAlpha=false, shiny=(Math.random() < 0.000001) && !isAlpha) {
         super(game);
         
-        this.name.values.name = isAlpha ? "Alpha Pentagon" : "Pentagon";
+        this.nameData.values.name = isAlpha ? "Alpha Pentagon" : "Pentagon";
 
-        this.health.values.health = this.health.values.maxHealth = (isAlpha ? 3000 : 100);
-        this.physics.values.size = (isAlpha ? 200 : 75) * Math.SQRT1_2;
-        this.physics.values.sides = 5;
-        this.style.values.color = shiny ? Colors.Shiny : Colors.EnemyPentagon;
+        this.healthData.values.health = this.healthData.values.maxHealth = (isAlpha ? 3000 : 100);
+        this.physicsData.values.size = (isAlpha ? 200 : 75) * Math.SQRT1_2;
+        this.physicsData.values.sides = 5;
+        this.styleData.values.color = shiny ? Color.Shiny : Color.EnemyPentagon;
 
-        this.physics.values.absorbtionFactor = isAlpha ? 0.05 : 0.5;
-        this.physics.values.pushFactor = 11;
+        this.physicsData.values.absorbtionFactor = isAlpha ? 0.05 : 0.5;
+        this.physicsData.values.pushFactor = 11;
 
         this.isAlpha = isAlpha;
         this.isShiny = shiny;
@@ -53,7 +53,7 @@ export default class Pentagon extends AbstractShape {
         
         if (shiny) {
             this.scoreReward *= 100;
-            this.health.values.health = this.health.values.maxHealth *= 10;
+            this.healthData.values.health = this.healthData.values.maxHealth *= 10;
         }
     }
 }

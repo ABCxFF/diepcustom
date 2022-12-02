@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import ObjectEntity from "../Object";
 
-import { PhysicsFlags, Colors } from "../../Const/Enums";
+import { PhysicsFlags, Color } from "../../Const/Enums";
 /**
  * Only used for maze walls and nothing else.
  */
@@ -27,17 +27,17 @@ export default class MazeWall extends ObjectEntity {
     constructor(game: GameServer, x: number, y: number, width: number, height: number) {
         super(game);
 
-        this.position.values.x = x;
-        this.position.values.y = y;
+        this.positionData.values.x = x;
+        this.positionData.values.y = y;
 
-        this.physics.values.width = width;
-        this.physics.values.size = height;
-        this.physics.values.sides = 2;
-        this.physics.values.objectFlags |= PhysicsFlags.isSolidWall | PhysicsFlags.showsOnMap;
-        this.physics.values.pushFactor = 2;
-        this.physics.values.absorbtionFactor = 0;
+        this.physicsData.values.width = width;
+        this.physicsData.values.size = height;
+        this.physicsData.values.sides = 2;
+        this.physicsData.values.flags |= PhysicsFlags.isSolidWall | PhysicsFlags.showsOnMap;
+        this.physicsData.values.pushFactor = 2;
+        this.physicsData.values.absorbtionFactor = 0;
 
-        this.style.values.borderThickness = 10;
-        this.style.values.color = Colors.Box;
+        this.styleData.values.borderWidth = 10;
+        this.styleData.values.color = Color.Box;
     }
 }

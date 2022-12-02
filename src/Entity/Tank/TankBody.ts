@@ -26,7 +26,7 @@ import LivingEntity from "../Live";
 import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
 
-import { Colors, StyleFlags, StatCount, Tank, CameraFlags, Stat, InputFlags, PhysicsFlags, PositionFlags } from "../../Const/Enums";
+import { Color, StyleFlags, StatCount, Tank, CameraFlags, Stat, InputFlags, PhysicsFlags, PositionFlags } from "../../Const/Enums";
 import { Entity } from "../../Native/Entity";
 import { NameGroup, ScoreGroup } from "../../Native/FieldGroups";
 import { Addon, AddonById } from "./Addons";
@@ -50,9 +50,9 @@ export type BarrelBase = ObjectEntity & { sizeFactor: number, cameraEntity: Enti
  */
 export default class TankBody extends LivingEntity implements BarrelBase {
     /** Always existant name field group, present on all tanks. */
-    public name: NameGroup = new NameGroup(this);
+    public nameData: NameGroup = new NameGroup(this);
     /** Always existant score field group, present on all tanks. */
-    public score: ScoreGroup = new ScoreGroup(this);
+    public scoreData: ScoreGroup = new ScoreGroup(this);
 
     /** The camera entity which stores stats and level data about the tank. */
     public cameraEntity: CameraEntity;
@@ -80,20 +80,20 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         this.cameraEntity = camera;
         this.inputs = inputs;
 
-        this.physics.values.size = 50;
-        this.physics.values.sides = 1;
-        this.style.values.color = Colors.Tank;
+        this.physicsData.values.size = 50;
+        this.physicsData.values.sides = 1;
+        this.styleData.values.color = Color.Tank;
 
-        this.relations.values.team = camera;
-        this.relations.values.owner = camera;
+        this.relationsData.values.team = camera;
+        this.relationsData.values.owner = camera;
 
-        this.cameraEntity.camera.spawnTick = game.tick;
-        this.cameraEntity.camera.camera |= CameraFlags.showingDeathStats;
+        this.cameraEntity.cameraData.spawnTick = game.tick;
+        this.cameraEntity.cameraData.flags |= CameraFlags.showingDeathStats;
 
         // spawn protection
-        this.style.values.styleFlags |= StyleFlags.isFlashing;
+        this.styleData.values.flags |= StyleFlags.isFlashing;
         this.damageReduction = 0;
-        if (this.game.playersOnMap) this.physics.values.objectFlags |= PhysicsFlags.showsOnMap;
+        if (this.game.playersOnMap) this.physicsData.values.flags |= PhysicsFlags.showsOnMap;
 
         this.damagePerTick = 20;
         this.setTank(Tank.Basic);
@@ -101,7 +101,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
     public get sizeFactor() {
-        return this.physics.values.size / this.baseSize;
+        return this.physicsData.values.size / this.baseSize;
     }
 
     /** The current tank type / tank id. */
@@ -128,26 +128,26 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         this.definition = tank;
         if (!Entity.exists(camera)) throw new Error("No camera");
 
-        this.physics.sides = tank.sides;
-        this.style.opacity = 1;
+        this.physicsData.sides = tank.sides;
+        this.styleData.opacity = 1;
 
         for (let i: Stat = 0; i < StatCount; ++i) {
             const {name, max} = tank.stats[i];
 
-            camera.camera.statLimits[i] = max;
-            camera.camera.statNames[i] = name;
-            if (camera.camera.statLevels[i] > max) {
-                camera.camera.statsAvailable += (camera.camera.statLevels[i] - (camera.camera.statLevels[i] = max));
+            camera.cameraData.statLimits[i] = max;
+            camera.cameraData.statNames[i] = name;
+            if (camera.cameraData.statLevels[i] > max) {
+                camera.cameraData.statsAvailable += (camera.cameraData.statLevels[i] - (camera.cameraData.statLevels[i] = max));
             }
         }
 
         // Size ratios
         this.baseSize = tank.sides === 4 ? Math.SQRT2 * 32.5 : tank.sides === 16 ? Math.SQRT2 * 25 : 50;
-        this.physics.absorbtionFactor = this.isInvulnerable ? 0 : tank.absorbtionFactor;
-        if (tank.absorbtionFactor === 0) this.position.motion |= PositionFlags.canMoveThroughWalls;
-        else if (this.position.motion & PositionFlags.canMoveThroughWalls) this.position.motion ^= PositionFlags.canMoveThroughWalls
+        this.physicsData.absorbtionFactor = this.isInvulnerable ? 0 : tank.absorbtionFactor;
+        if (tank.absorbtionFactor === 0) this.positionData.flags |= PositionFlags.canMoveThroughWalls;
+        else if (this.positionData.flags & PositionFlags.canMoveThroughWalls) this.positionData.flags ^= PositionFlags.canMoveThroughWalls
 
-        camera.camera.tank = this._currentTank = id;
+        camera.cameraData.tank = this._currentTank = id;
         if (tank.upgradeMessage && camera instanceof ClientCamera) camera.client.notify(tank.upgradeMessage);
 
         // Build addons, then tanks, then addons.
@@ -168,22 +168,22 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         }
 
         // Yeah, yeah why not
-        this.cameraEntity.camera.tankOverride = tank.name;
+        this.cameraEntity.cameraData.tankOverride = tank.name;
         camera.setFieldFactor(tank.fieldFactor);
     }
     /** See LivingEntity.onKill */
     public onKill(entity: LivingEntity) {
-        this.score.score = this.cameraEntity.camera.scorebar += entity.scoreReward;
+        this.scoreData.score = this.cameraEntity.cameraData.score += entity.scoreReward;
 
-        if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.camera.values.level, 45) - entity.cameraEntity.camera.values.level <= 20 || entity instanceof AbstractBoss) {
-            if (this.cameraEntity instanceof ClientCamera) this.cameraEntity.client.notify("You've killed " + (entity.name.values.name || "an unnamed tank"));
+        if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.cameraData.values.level, 45) - entity.cameraEntity.cameraData.values.level <= 20 || entity instanceof AbstractBoss) {
+            if (this.cameraEntity instanceof ClientCamera) this.cameraEntity.client.notify("You've killed " + (entity.nameData.values.name || "an unnamed tank"));
         }
 
         // TODO(ABC):
         // This is actually not how necromancers claim squares.
         if (entity instanceof Square && this.definition.flags.canClaimSquares && this.barrels.length) {
             // If can claim, pick a random barrel that has drones it can still shoot, then shoot
-            const MAX_DRONES_PER_BARREL = 11 + this.cameraEntity.camera.values.statLevels.values[Stat.Reload];
+            const MAX_DRONES_PER_BARREL = 11 + this.cameraEntity.cameraData.values.statLevels.values[Stat.Reload];
             const barrelsToShoot = this.barrels.filter((e) => e.definition.bullet.type === "necrodrone" && e.droneCount < MAX_DRONES_PER_BARREL);
 
             if (barrelsToShoot.length) {
@@ -193,7 +193,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
                 entity.destroy(true);
                 if (entity.deletionAnimation) {
                     entity.deletionAnimation.frame = 0;
-                    entity.style.opacity = 1;
+                    entity.styleData.opacity = 1;
                 }
 
                 const sunchip = NecromancerSquare.fromShape(barrelToShoot, this, this.definition, entity);
@@ -203,16 +203,16 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     /** See TankBody.isInvulnerable */
     public setInvulnerability(invulnerable: boolean) {
-        if (this.style.styleFlags & StyleFlags.isFlashing) this.style.styleFlags ^= StyleFlags.isFlashing;
+        if (this.styleData.flags & StyleFlags.isFlashing) this.styleData.flags ^= StyleFlags.isFlashing;
 
         if (this.isInvulnerable === invulnerable) return;
       
         if (invulnerable) {
             this.damageReduction = 0.0;
-            this.physics.absorbtionFactor = 0.0;
+            this.physicsData.absorbtionFactor = 0.0;
         } else {
             this.damageReduction = 1.0;
-            this.physics.absorbtionFactor = this.definition.absorbtionFactor;
+            this.physicsData.absorbtionFactor = this.definition.absorbtionFactor;
         }
       
         this.isInvulnerable = invulnerable;
@@ -221,19 +221,19 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     /** See LivingEntity.onDeath */
    public onDeath(killer: LivingEntity) {
         if (!(this.cameraEntity instanceof ClientCamera)) return this.cameraEntity.delete();
-        if (!(this.cameraEntity.camera.player === this)) return;
+        if (!(this.cameraEntity.cameraData.player === this)) return;
         this.cameraEntity.spectatee = killer;
-        this.cameraEntity.camera.FOV = 0.4;
-        this.cameraEntity.camera.killedBy = (killer.name && killer.name.values.name) || "";
+        this.cameraEntity.cameraData.FOV = 0.4;
+        this.cameraEntity.cameraData.killedBy = (killer.nameData && killer.nameData.values.name) || "";
     }
 
     /** Destroys the tank body. Extends LivivingEntity.destroy(animate); */
     public destroy(animate=true) {
         // Stats etc
         if (!animate && Entity.exists(this.cameraEntity)) {
-            if (this.cameraEntity.camera.player === this) {
-                this.cameraEntity.camera.deathTick = this.game.tick;
-                this.cameraEntity.camera.respawnLevel = Math.min(Math.max(this.cameraEntity.camera.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.camera.values.level) * 3.2796));
+            if (this.cameraEntity.cameraData.player === this) {
+                this.cameraEntity.cameraData.deathTick = this.game.tick;
+                this.cameraEntity.cameraData.respawnLevel = Math.min(Math.max(this.cameraEntity.cameraData.values.level - 1, 1), Math.floor(Math.sqrt(this.cameraEntity.cameraData.values.level) * 3.2796));
             }
 
             // Wipe this nonsense
@@ -245,7 +245,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
     public tick(tick: number) {
 
-        this.position.angle = Math.atan2(this.inputs.mouse.y - this.position.values.y, this.inputs.mouse.x - this.position.values.x);
+        this.positionData.angle = Math.atan2(this.inputs.mouse.y - this.positionData.values.y, this.inputs.mouse.x - this.positionData.values.x);
 
         if (this.isInvulnerable) {
             if (this.game.clients.size !== 1 || this.game.arena.state !== ArenaState.OPEN) {
@@ -253,7 +253,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
                 if (this.cameraEntity instanceof ClientCamera) this.setInvulnerability(false);
             }
         }
-        if (!this.deletionAnimation && !this.inputs.deleted) this.physics.size = this.baseSize * this.cameraEntity.sizeFactor;
+        if (!this.deletionAnimation && !this.inputs.deleted) this.physicsData.size = this.baseSize * this.cameraEntity.sizeFactor;
         else this.regenPerTick = 0;
 
         super.tick(tick);
@@ -262,13 +262,13 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         if (this.deletionAnimation) return;
 
         if (this.inputs.deleted) {
-            if (this.cameraEntity.camera.values.level <= 5) return this.destroy();
+            if (this.cameraEntity.cameraData.values.level <= 5) return this.destroy();
             this.lastDamageTick = tick;
-            this.health.health -= 2 + this.health.values.maxHealth / 500;
+            this.healthData.health -= 2 + this.healthData.values.maxHealth / 500;
 
             if (this.isInvulnerable) this.setInvulnerability(false);
-            if (this.style.values.styleFlags & StyleFlags.isFlashing) {
-                this.style.styleFlags ^= StyleFlags.isFlashing;
+            if (this.styleData.values.flags & StyleFlags.isFlashing) {
+                this.styleData.flags ^= StyleFlags.isFlashing;
                 this.damageReduction = 1.0;
             }
             return;
@@ -276,58 +276,58 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         }
 
         if (this.definition.flags.zoomAbility && (this.inputs.flags & InputFlags.rightclick)) {
-            if (!(this.cameraEntity.camera.values.camera & CameraFlags.usesCameraCoords)) {
-                const angle = Math.atan2(this.inputs.mouse.y - this.position.values.y, this.inputs.mouse.x - this.position.values.x)
-                this.cameraEntity.camera.cameraX = Math.cos(angle) * 1000 + this.position.values.x;
-                this.cameraEntity.camera.cameraY = Math.sin(angle) * 1000 + this.position.values.y;
-                this.cameraEntity.camera.camera |= CameraFlags.usesCameraCoords;
+            if (!(this.cameraEntity.cameraData.values.flags & CameraFlags.usesCameraCoords)) {
+                const angle = Math.atan2(this.inputs.mouse.y - this.positionData.values.y, this.inputs.mouse.x - this.positionData.values.x)
+                this.cameraEntity.cameraData.cameraX = Math.cos(angle) * 1000 + this.positionData.values.x;
+                this.cameraEntity.cameraData.cameraY = Math.sin(angle) * 1000 + this.positionData.values.y;
+                this.cameraEntity.cameraData.flags |= CameraFlags.usesCameraCoords;
             }
-        } else if (this.cameraEntity.camera.values.camera & CameraFlags.usesCameraCoords) this.cameraEntity.camera.camera ^= CameraFlags.usesCameraCoords;
+        } else if (this.cameraEntity.cameraData.values.flags & CameraFlags.usesCameraCoords) this.cameraEntity.cameraData.flags ^= CameraFlags.usesCameraCoords;
 
         if (this.definition.flags.invisibility) {
 
-            if (this.inputs.flags & InputFlags.leftclick) this.style.opacity += this.definition.visibilityRateShooting;
-            if (this.inputs.flags & (InputFlags.up | InputFlags.down | InputFlags.left | InputFlags.right) || this.inputs.movement.x || this.inputs.movement.y) this.style.opacity += this.definition.visibilityRateMoving;
+            if (this.inputs.flags & InputFlags.leftclick) this.styleData.opacity += this.definition.visibilityRateShooting;
+            if (this.inputs.flags & (InputFlags.up | InputFlags.down | InputFlags.left | InputFlags.right) || this.inputs.movement.x || this.inputs.movement.y) this.styleData.opacity += this.definition.visibilityRateMoving;
            
-            this.style.opacity -= this.definition.invisibilityRate;
+            this.styleData.opacity -= this.definition.invisibilityRate;
 
-            this.style.opacity = util.constrain(this.style.values.opacity, 0, 1);
+            this.styleData.opacity = util.constrain(this.styleData.values.opacity, 0, 1);
         }
 
 
         // Update stat related
         updateStats: {
             // Damage
-            this.damagePerTick = this.cameraEntity.camera.statLevels[Stat.BodyDamage] * 6 + 20;
+            this.damagePerTick = this.cameraEntity.cameraData.statLevels[Stat.BodyDamage] * 6 + 20;
             if (this._currentTank === Tank.Spike) this.damagePerTick *= 1.5;
 
             // Max Health
-            const maxHealthCache = this.health.values.maxHealth;
+            const maxHealthCache = this.healthData.values.maxHealth;
 
-            this.health.maxHealth = this.definition.maxHealth + 2 * (this.cameraEntity.camera.values.level - 1) + this.cameraEntity.camera.values.statLevels.values[Stat.MaxHealth] * 20;
-            if (this.health.values.health === maxHealthCache) this.health.health = this.health.maxHealth; // just in case
-            else if (this.health.values.maxHealth !== maxHealthCache) {
-                this.health.health *= this.health.values.maxHealth / maxHealthCache
+            this.healthData.maxHealth = this.definition.maxHealth + 2 * (this.cameraEntity.cameraData.values.level - 1) + this.cameraEntity.cameraData.values.statLevels.values[Stat.MaxHealth] * 20;
+            if (this.healthData.values.health === maxHealthCache) this.healthData.health = this.healthData.maxHealth; // just in case
+            else if (this.healthData.values.maxHealth !== maxHealthCache) {
+                this.healthData.health *= this.healthData.values.maxHealth / maxHealthCache
             }
 
             // Regen
-            this.regenPerTick = (this.health.values.maxHealth * 4 * this.cameraEntity.camera.values.statLevels.values[Stat.HealthRegen] + this.health.values.maxHealth) / 25000;
+            this.regenPerTick = (this.healthData.values.maxHealth * 4 * this.cameraEntity.cameraData.values.statLevels.values[Stat.HealthRegen] + this.healthData.values.maxHealth) / 25000;
 
             // Reload
-            this.reloadTime = 15 * Math.pow(0.914, this.cameraEntity.camera.values.statLevels.values[Stat.Reload]);
+            this.reloadTime = 15 * Math.pow(0.914, this.cameraEntity.cameraData.values.statLevels.values[Stat.Reload]);
         }
 
-        this.score.score = this.cameraEntity.camera.values.scorebar;
+        this.scoreData.score = this.cameraEntity.cameraData.values.score;
 
-        if ((this.style.values.styleFlags & StyleFlags.isFlashing) && (this.game.tick >= this.cameraEntity.camera.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
-            this.style.styleFlags ^= StyleFlags.isFlashing;
+        if ((this.styleData.values.flags & StyleFlags.isFlashing) && (this.game.tick >= this.cameraEntity.cameraData.values.spawnTick + 374 || this.inputs.attemptingShot() || this.inputs.movement.magnitude > 0)) {
+            this.styleData.flags ^= StyleFlags.isFlashing;
             // Dont worry about invulnerability here - not gonna be invulnerable while flashing ever (see setInvulnerability)
             this.damageReduction = 1.0;
         }
 
         this.accel.add({
-            x: this.inputs.movement.x * this.cameraEntity.camera.values.movementSpeed,
-            y: this.inputs.movement.y * this.cameraEntity.camera.values.movementSpeed
+            x: this.inputs.movement.x * this.cameraEntity.cameraData.values.movementSpeed,
+            y: this.inputs.movement.y * this.cameraEntity.cameraData.values.movementSpeed
         });
         this.inputs.movement.set({
             x: 0,

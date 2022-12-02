@@ -48,7 +48,7 @@ export default class TestingArena extends ArenaEntity {
         super(game);
 
         this.updateBounds(4000, 4000);
-        this.arena.values.GUI |= ArenaFlags.canUseCheats;
+        this.arenaData.values.flags |= ArenaFlags.canUseCheats;
         setTimeout(() => {
             new FallenOverlord(game);
             new FallenSpike(game);
@@ -88,7 +88,7 @@ export default class TestingArena extends ArenaEntity {
 
     private spawnTestTank(id: Tank | DevTank) {
         const testTank = new TankBody(this.game, new CameraEntity(this.game), new Inputs());
-        testTank.cameraEntity.camera.player = testTank;
+        testTank.cameraEntity.cameraData.player = testTank;
         testTank.setTank(id);
         testTank.cameraEntity.setLevel(45);
         return testTank;

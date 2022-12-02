@@ -31,7 +31,7 @@ export default class FallenOverlord extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.name.values.name = 'Fallen Overlord';
+        this.nameData.values.name = 'Fallen Overlord';
 
         for (const barrelDefinition of TankDefinitions[Tank.Overlord].barrels) {
 
@@ -44,9 +44,9 @@ export default class FallenOverlord extends AbstractBoss {
     public tick(tick: number) {
         super.tick(tick);
 
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         if (this.ai.state !== AIState.possessed) {
-            this.position.angle += this.ai.passiveRotation;
+            this.positionData.angle += this.ai.passiveRotation;
         }
     }
 }

@@ -17,7 +17,7 @@
 */
 
 import GameServer from "../Game";
-import {  /* <template> auto-generated */ RelationsGroup, BarrelGroup, PhysicsGroup, HealthGroup, ArenaGroup, NameGroup, CameraGroup, PositionGroup, StyleGroup, ScoreGroup, TeamGroup } from "./FieldGroups";
+import { ^<<EXISTANT_FIELD_GROUPS.map(e => e[0] + 'Group').join(', ')>>^ } from "./FieldGroups";
 
 
 /**
@@ -48,51 +48,13 @@ export class Entity {
      * - `0b10`: Needs creation (unused)
      */
     public entityState = 0;
- /* <template> auto-generated */ 
-    /**
-     * Relations field group - contains fields relating to relations
+^<<
+EXISTANT_FIELD_GROUPS.map(e =>
+`\n    /**
+     * ${e[0]} field group - contains fields relating to ${e[0].toLowerCase()}
      */
-    public relationsData: RelationsGroup | null = null;
-    /**
-     * Barrel field group - contains fields relating to barrel
-     */
-    public barrelData: BarrelGroup | null = null;
-    /**
-     * Physics field group - contains fields relating to physics
-     */
-    public physicsData: PhysicsGroup | null = null;
-    /**
-     * Health field group - contains fields relating to health
-     */
-    public healthData: HealthGroup | null = null;
-    /**
-     * Arena field group - contains fields relating to arena
-     */
-    public arenaData: ArenaGroup | null = null;
-    /**
-     * Name field group - contains fields relating to name
-     */
-    public nameData: NameGroup | null = null;
-    /**
-     * Camera field group - contains fields relating to camera
-     */
-    public cameraData: CameraGroup | null = null;
-    /**
-     * Position field group - contains fields relating to position
-     */
-    public positionData: PositionGroup | null = null;
-    /**
-     * Style field group - contains fields relating to style
-     */
-    public styleData: StyleGroup | null = null;
-    /**
-     * Score field group - contains fields relating to score
-     */
-    public scoreData: ScoreGroup | null = null;
-    /**
-     * Team field group - contains fields relating to team
-     */
-    public teamData: TeamGroup | null = null;
+    public ${e[0].toLowerCase()}Data: ${e[0]}Group | null = null;`).join('');
+>>^
 
     /** The current game server. */
     public game: GameServer;
@@ -112,17 +74,10 @@ export class Entity {
 
     /** Makes the  entity no longer in need of update. */
     public wipeState() {
- /* <template> auto-generated */        if (this.relationsData) this.relationsData.wipe();
-       if (this.barrelData) this.barrelData.wipe();
-       if (this.physicsData) this.physicsData.wipe();
-       if (this.healthData) this.healthData.wipe();
-       if (this.arenaData) this.arenaData.wipe();
-       if (this.nameData) this.nameData.wipe();
-       if (this.cameraData) this.cameraData.wipe();
-       if (this.positionData) this.positionData.wipe();
-       if (this.styleData) this.styleData.wipe();
-       if (this.scoreData) this.scoreData.wipe();
-       if (this.teamData) this.teamData.wipe();
+^<<
+EXISTANT_FIELD_GROUPS.map(e =>
+`       if (this.${e[0].toLowerCase()}Data) this.${e[0].toLowerCase()}Data.wipe();`).join('\n');
+>>^
 
         this.entityState = 0;
     }

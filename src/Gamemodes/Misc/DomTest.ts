@@ -41,8 +41,8 @@ export default class SpikeboxArena extends ArenaEntity {
 
         // spike.cameraEntity.camera.player = spike;
         // spike.setTank(Tank.Spike);
-        // spike.style.styleFlags &= ~StyleFlags.invincibility;
-        // spike.physics.objectFlags |= ObjectFlags.base;
+        // spike.style.flags &= ~StyleFlags.invincibility;
+        // spike.physics.flags |= ObjectFlags.base;
         // /* @ts-ignore */
         // spike.damageReduction = 0;
         // Object.defineProperty(spike, "damagePerTick", {
@@ -57,7 +57,7 @@ export default class SpikeboxArena extends ArenaEntity {
         // spike.style.color = Colors.TeamBlue;
 
         const spike = new Dominator(this, new TeamBase(game, this, 0, 0, 750, 750, false), Tank.Spike);
-        spike.name.nametag &= ~NameFlags.hiddenName
+        spike.nameData.flags &= ~NameFlags.hiddenName
     }
 
     public tick(tick: number) {

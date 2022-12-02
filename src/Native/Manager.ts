@@ -121,7 +121,7 @@ export default class EntityManager {
 
     /** Ticks all entities in the game. */
     public tick(tick: number) {
-        this.collisionManager.reset(this.game.arena.arena.values.rightX, this.game.arena.arena.values.bottomY);
+        this.collisionManager.reset(this.game.arena.arenaData.values.rightX, this.game.arena.arenaData.values.bottomY);
 
         while (!this.inner[this.lastId] && this.lastId >= 0) {
             this.lastId -= 1;

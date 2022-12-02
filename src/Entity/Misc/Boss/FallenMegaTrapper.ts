@@ -34,7 +34,7 @@ export default class FallenMegaTrapper extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.name.values.name = 'Fallen Mega Trapper';
+        this.nameData.values.name = 'Fallen Mega Trapper';
 
         for (const barrelDefinition of TankDefinitions[Tank.MegaTrapper].barrels) {
             const def = Object.assign({}, barrelDefinition, {reload: 4});
@@ -47,13 +47,13 @@ export default class FallenMegaTrapper extends AbstractBoss {
 
     protected moveAroundMap() {
         if (this.ai.state === AIState.idle) {
-            this.position.angle += this.ai.passiveRotation;
+            this.positionData.angle += this.ai.passiveRotation;
             this.accel.set({x: 0, y: 0});
         } else {
-            const x = this.position.values.x,
-                  y = this.position.values.y;
+            const x = this.positionData.values.x,
+                  y = this.positionData.values.y;
 
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+            this.positionData.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
         }
     }
 

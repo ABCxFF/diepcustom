@@ -23,7 +23,7 @@ import ShapeManager from "../../Entity/Shape/Manager";
 import { Inputs } from "../../Entity/AI";
 import { CameraEntity } from "../../Native/Camera";
 import TankBody from "../../Entity/Tank/TankBody";
-import { Colors, PhysicsFlags, StyleFlags, Tank } from "../../Const/Enums";
+import { Color, PhysicsFlags, StyleFlags, Tank } from "../../Const/Enums";
 import { SandboxShapeManager } from "../Sandbox";
 
 /**
@@ -40,10 +40,10 @@ export default class SpikeboxArena extends ArenaEntity {
 
 		const spike = new TankBody(this.game, new CameraEntity(this.game), new Inputs());
 
-        spike.cameraEntity.camera.player = spike;
+        spike.cameraEntity.cameraData.player = spike;
         spike.setTank(Tank.Spike);
-        spike.style.styleFlags &= ~StyleFlags.isFlashing;
-        spike.physics.objectFlags |= PhysicsFlags.isBase;
+        spike.styleData.flags &= ~StyleFlags.isFlashing;
+        spike.physicsData.flags |= PhysicsFlags.isBase;
         /* @ts-ignore */
         spike.damageReduction = 0;
         Object.defineProperty(spike, "damagePerTick", {
@@ -52,10 +52,10 @@ export default class SpikeboxArena extends ArenaEntity {
             },
             set() {}
         });
-        spike.physics.values.pushFactor = 24;
-        spike.physics.absorbtionFactor = 0.0;
+        spike.physicsData.values.pushFactor = 24;
+        spike.physicsData.absorbtionFactor = 0.0;
         spike.cameraEntity.setLevel(101);
-        spike.style.color = Colors.TeamBlue;
+        spike.styleData.color = Color.TeamBlue;
     }
 
     public tick(tick: number) {

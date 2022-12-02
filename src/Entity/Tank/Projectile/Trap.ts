@@ -39,26 +39,26 @@ export default class Trap extends Bullet {
 
         this.baseSpeed = (barrel.bulletAccel / 2) + 30 - Math.random() * barrel.definition.bullet.scatterRate;
         this.baseAccel = 0;
-        this.physics.values.sides = bulletDefinition.sides ?? 3;
-        if (this.physics.values.objectFlags & PhysicsFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= PhysicsFlags.noOwnTeamCollision;
-        this.physics.values.objectFlags |= PhysicsFlags.onlySameOwnerCollision;
-        this.style.values.styleFlags |= StyleFlags.isTrap | StyleFlags.isStar;
-        this.style.values.styleFlags &= ~StyleFlags.hasNoDmgIndicator;
+        this.physicsData.values.sides = bulletDefinition.sides ?? 3;
+        if (this.physicsData.values.flags & PhysicsFlags.noOwnTeamCollision) this.physicsData.values.flags ^= PhysicsFlags.noOwnTeamCollision;
+        this.physicsData.values.flags |= PhysicsFlags.onlySameOwnerCollision;
+        this.styleData.values.flags |= StyleFlags.isTrap | StyleFlags.isStar;
+        this.styleData.values.flags &= ~StyleFlags.hasNoDmgIndicator;
 
         this.collisionEnd = this.lifeLength >> 3;
         this.lifeLength = (600 * barrel.definition.bullet.lifeLength) >> 3;
         if (tankDefinition && tankDefinition.id === DevTank.Bouncy) this.collisionEnd = this.lifeLength - 1;
         
         // Check this?
-        this.position.values.angle = Math.random() * PI2;
+        this.positionData.values.angle = Math.random() * PI2;
     }
 
     public tick(tick: number) {
         super.tick(tick);
 
         if (tick - this.spawnTick === this.collisionEnd) {
-            if (this.physics.values.objectFlags & PhysicsFlags.onlySameOwnerCollision) this.physics.objectFlags ^= PhysicsFlags.onlySameOwnerCollision;
-            this.physics.values.objectFlags |= PhysicsFlags.noOwnTeamCollision;
+            if (this.physicsData.values.flags & PhysicsFlags.onlySameOwnerCollision) this.physicsData.flags ^= PhysicsFlags.onlySameOwnerCollision;
+            this.physicsData.values.flags |= PhysicsFlags.noOwnTeamCollision;
         }
     }
 }

@@ -1,0 +1,333 @@
+/*
+    DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
+    Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>
+*/
+
+#
+#   ==========================================
+#           CHANGE NOTHING IN THIS FILE
+#   ==========================================
+#
+
+import { ValidScoreboardIndex, Stat, Tank, Color } from "../Const/Enums";
+import { DevTank } from "../Const/DevTankDefinitions";
+import { Entity } from "./Entity";
+# Define out fields
+^<<EXISTANT_FIELD_GROUPS.map(e => `\nexport type ${e[0]}FieldName = ${e[1].map(f => '"' + f.name + '"').join(" | ")};`).join("");>>^
+
+# Assume scoreboard and camera are forever present
+
+export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, ValueType> {
+    state: Uint8Array;
+    values: ValueType[];
+    owner: ArenaGroup;
+    fieldId: number;
+
+    constructor(defaultValue: ValueType, fieldId: number, owner: ArenaGroup) {
+        this.state = new Uint8Array(10);
+        this.values = Array(10).fill(defaultValue);
+        this.fieldId = fieldId;
+        this.owner = owner;
+    }
+
+    get [0]() {
+        return this.values[0];
+    }
+    set [0](value) {
+        if (value === this.values[0]) return;
+            
+        this.state[0] |= 1;
+        this.values[0] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [1]() {
+        return this.values[1];
+    }
+    set [1](value) {
+        if (value === this.values[1]) return;
+            
+        this.state[1] |= 1;
+        this.values[1] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [2]() {
+        return this.values[2];
+    }
+    set [2](value) {
+        if (value === this.values[2]) return;
+            
+        this.state[2] |= 1;
+        this.values[2] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [3]() {
+        return this.values[3];
+    }
+    set [3](value) {
+        if (value === this.values[3]) return;
+            
+        this.state[3] |= 1;
+        this.values[3] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [4]() {
+        return this.values[4];
+    }
+    set [4](value) {
+        if (value === this.values[4]) return;
+            
+        this.state[4] |= 1;
+        this.values[4] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [5]() {
+        return this.values[5];
+    }
+    set [5](value) {
+        if (value === this.values[5]) return;
+            
+        this.state[5] |= 1;
+        this.values[5] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [6]() {
+        return this.values[6];
+    }
+    set [6](value) {
+        if (value === this.values[6]) return;
+            
+        this.state[6] |= 1;
+        this.values[6] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [7]() {
+        return this.values[7];
+    }
+    set [7](value) {
+        if (value === this.values[7]) return;
+            
+        this.state[7] |= 1;
+        this.values[7] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [8]() {
+        return this.values[8];
+    }
+    set [8](value) {
+        if (value === this.values[8]) return;
+            
+        this.state[8] |= 1;
+        this.values[8] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [9]() {
+        return this.values[9];
+    }
+    set [9](value) {
+        if (value === this.values[9]) return;
+            
+        this.state[9] |= 1;
+        this.values[9] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    
+
+    findUpdate(): number[] {
+        return this.state.reduce((out: number[], v, i) => {
+            if (v) out.push(i);
+
+            return out;
+        }, []);
+    }
+}
+
+export class CameraTable<ValueType> implements Record<Stat, ValueType> {
+    state: Uint8Array;
+    values: ValueType[];
+    owner: CameraGroup;
+    fieldId: number;
+
+    constructor(defaultValue: ValueType, fieldId: number, owner: CameraGroup) {
+        this.state = new Uint8Array(8);
+        this.values = Array(8).fill(defaultValue);
+        this.fieldId = fieldId;
+        this.owner = owner;
+    }
+
+    get [0]() {
+        return this.values[0];
+    }
+    set [0](value) {
+        if (value === this.values[0]) return;
+            
+        this.state[0] |= 1;
+        this.values[0] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [1]() {
+        return this.values[1];
+    }
+    set [1](value) {
+        if (value === this.values[1]) return;
+            
+        this.state[1] |= 1;
+        this.values[1] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [2]() {
+        return this.values[2];
+    }
+    set [2](value) {
+        if (value === this.values[2]) return;
+            
+        this.state[2] |= 1;
+        this.values[2] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [3]() {
+        return this.values[3];
+    }
+    set [3](value) {
+        if (value === this.values[3]) return;
+            
+        this.state[3] |= 1;
+        this.values[3] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [4]() {
+        return this.values[4];
+    }
+    set [4](value) {
+        if (value === this.values[4]) return;
+            
+        this.state[4] |= 1;
+        this.values[4] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [5]() {
+        return this.values[5];
+    }
+    set [5](value) {
+        if (value === this.values[5]) return;
+            
+        this.state[5] |= 1;
+        this.values[5] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [6]() {
+        return this.values[6];
+    }
+    set [6](value) {
+        if (value === this.values[6]) return;
+            
+        this.state[6] |= 1;
+        this.values[6] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    get [7]() {
+        return this.values[7];
+    }
+    set [7](value) {
+        if (value === this.values[7]) return;
+            
+        this.state[7] |= 1;
+        this.values[7] = value;
+
+        this.owner.state[this.fieldId] |= 1;
+        this.owner.entity.entityState |= 1;
+    }
+    
+    findUpdate(): number[] {
+        return this.state.reduce((out: number[], v, i) => {
+            if (v) out.push(i);
+
+            return out;
+        }, []);
+    }
+}
+
+# Define out field groups
+
+# but first find their defaults
+^<<(EXISTANT_FIELD_GROUPS.forEach(e => e[1].forEach(f => {
+    if (f.hasOwnProperty('default')) return f.default = JSON.stringify(f.default);
+    f.default = ({
+        Color: "Color.Border",
+        string: '""',
+        number: 0,
+        "Tank | DevTank": "Tank.Basic",
+        Entity: "null"
+    })[f.type];
+})), "")>>^
+^<<EXISTANT_FIELD_GROUPS.map(e =>
+`\nexport class ${e[0]}Group {
+    entity: Entity;
+    state: Uint8Array = new Uint8Array(${e[1].length});
+    values: { ${e[1].map((f,i) => f.name + ": " + (
+        f.amount ? f.name.startsWith("scoreboard") ? "ScoreboardTable<" + f.type + ">" : f.name.startsWith("stat") ? "CameraTable<" + f.type + ">" : "null"
+        : (f.type === "Entity" ? ("null | Entity") : f.type)
+)).join(", ")} } = {
+        ${e[1].map((f,i) => f.name + ": " + (
+            f.amount ? f.name.startsWith("scoreboard") ? `new ScoreboardTable(${f.default}, ${i}, this)` : f.name.startsWith("stat") ? `new CameraTable(${f.default}, ${i}, this)` : "null"
+            : (f.default)
+        )).join(",\n        ")}
+    };
+
+    constructor(entity: Entity) { this.entity = entity; }
+    wipe() { this.state.fill(0); }${
+        `${e[1].map(f => "\n    get " + f.name + "() { return this.values." + f.name + "; }").join("")}`
+        +
+        `${e[1]
+.map((f,i) => f.amount ? "" : "\n    set " + f.name + "(" + f.name + ": " + (f.type === "Entity" ? ("null | Entity") : f.type) + ") { " +
+`if (${f.name} === this.values.${f.name}) { return; }; this.state[${i}] |= 1; this.entity.entityState |= 1; this.values.${f.name} = ${f.name};`
++ " }").join("")}`
+    }
+}`
+).join('\n')>>^

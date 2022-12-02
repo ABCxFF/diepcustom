@@ -1,14 +1,17 @@
 /*
     DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
+
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
@@ -19,83 +22,83 @@ import Writer from "../Coder/Writer";
 import TankBody from "../Entity/Tank/TankBody";
 import ObjectEntity from "../Entity/Object";
 
-import { Entity, EntityStateFlags, fieldGroupProps } from "./Entity";
+import { Entity, EntityStateFlags } from "./Entity";
 import { CameraGroup, RelationsGroup } from "./FieldGroups";
-import { CameraFlags, ClientBound, Colors, levelToScore, levelToScoreTable, PhysicsFlags, Stat } from "../Const/Enums";
+import { CameraFlags, ClientBound, Color, levelToScore, levelToScoreTable, PhysicsFlags, Stat } from "../Const/Enums";
 import { getTankById } from "../Const/TankDefinitions";
 import { removeFast } from "../util";
 
-import * as Fields from "../Const/Fields";
+import { compileCreation, compileUpdate } from "./UpcreateCompiler";
 
 /**
  * Represents any entity with a camera field group.
  */
 export class CameraEntity extends Entity {
     /** Always existant camera field group. Present in all GUI/camera entities. */
-    public camera: CameraGroup = new CameraGroup(this);
+    public cameraData: CameraGroup = new CameraGroup(this);
 
     /** The current size of the tank the camera is in charge of. Calculated with level stuff */
     public sizeFactor: number = 1;
 
     /** Used to set the current camera's level. Should be the only way used to set level. */
     public setLevel(level: number) {
-        const previousLevel = this.camera.values.level;
-        this.camera.level = level;
+        const previousLevel = this.cameraData.values.level;
+        this.cameraData.level = level;
         this.sizeFactor = Math.pow(1.01, level - 1);
-        this.camera.levelbarMax = level < 45 ? 1 : 0; // quick hack, not correct values
+        this.cameraData.levelbarMax = level < 45 ? 1 : 0; // quick hack, not correct values
         if (level <= 45) {
-            this.camera.scorebar = levelToScore(level);
+            this.cameraData.score = levelToScore(level);
 
-            const player = this.camera.values.player;
+            const player = this.cameraData.values.player;
             if (Entity.exists(player) && player instanceof TankBody) {
-                player.score.score = this.camera.values.scorebar;
-                player.scoreReward = this.camera.values.scorebar;
+                player.scoreData.score = this.cameraData.values.score;
+                player.scoreReward = this.cameraData.values.score;
             }
         }
 
         // Update stats available
         const statIncrease = ClientCamera.calculateStatCount(level) - ClientCamera.calculateStatCount(previousLevel);
-        this.camera.statsAvailable += statIncrease;
+        this.cameraData.statsAvailable += statIncrease;
 
-        this.setFieldFactor(getTankById(this.camera.values.tank)?.fieldFactor || 1);
+        this.setFieldFactor(getTankById(this.cameraData.values.tank)?.fieldFactor || 1);
     }
 
     /** Sets the current FOV by field factor. */
     public setFieldFactor(fieldFactor: number) {
-        this.camera.FOV = (.55 * fieldFactor) / Math.pow(1.01, (this.camera.values.level - 1) / 2);
+        this.cameraData.FOV = (.55 * fieldFactor) / Math.pow(1.01, (this.cameraData.values.level - 1) / 2);
     }
 
     public tick(tick: number) {
-        if (Entity.exists(this.camera.values.player)) {
-            const focus = this.camera.values.player;
-            if (!(this.camera.values.camera & CameraFlags.usesCameraCoords) && focus instanceof ObjectEntity) {
-                this.camera.cameraX = focus.rootParent.position.values.x;
-                this.camera.cameraY = focus.rootParent.position.values.y;
+        if (Entity.exists(this.cameraData.values.player)) {
+            const focus = this.cameraData.values.player;
+            if (!(this.cameraData.values.flags & CameraFlags.usesCameraCoords) && focus instanceof ObjectEntity) {
+                this.cameraData.cameraX = focus.rootParent.positionData.values.x;
+                this.cameraData.cameraY = focus.rootParent.positionData.values.y;
             }
 
-            if (this.camera.values.player instanceof TankBody) {
+            if (this.cameraData.values.player instanceof TankBody) {
                 // Update player related data
-                const player = this.camera.values.player as TankBody;
+                const player = this.cameraData.values.player as TankBody;
 
-                const score = this.camera.values.scorebar;
-                let newLevel = this.camera.values.level;
+                const score = this.cameraData.values.score;
+                let newLevel = this.cameraData.values.level;
                 while (newLevel < levelToScoreTable.length && score - levelToScore(newLevel + 1) >= 0) newLevel += 1
 
-                if (newLevel !== this.camera.values.level) {
+                if (newLevel !== this.cameraData.values.level) {
                     this.setLevel(newLevel);
-                    this.camera.scorebar = score;
+                    this.cameraData.score = score;
                 }
 
                 if (newLevel < levelToScoreTable.length) {
-                    const levelScore = levelToScore(this.camera.values.level)
-                    this.camera.levelbarMax = levelToScore(this.camera.values.level + 1) - levelScore;
-                    this.camera.levelbarProgress = score - levelScore;
+                    const levelScore = levelToScore(this.cameraData.values.level)
+                    this.cameraData.levelbarMax = levelToScore(this.cameraData.values.level + 1) - levelScore;
+                    this.cameraData.levelbarProgress = score - levelScore;
                 }
 
-                this.camera.movementSpeed = player.definition.speed * 2.55 * Math.pow(1.07, this.camera.values.statLevels.values[Stat.MovementSpeed]) / Math.pow(1.015, this.camera.values.level - 1)
+                this.cameraData.movementSpeed = player.definition.speed * 2.55 * Math.pow(1.07, this.cameraData.values.statLevels.values[Stat.MovementSpeed]) / Math.pow(1.015, this.cameraData.values.level - 1)
             }
         } else {
-            this.camera.camera |= CameraFlags.usesCameraCoords;
+            this.cameraData.flags |= CameraFlags.usesCameraCoords;
         }
     }
 }
@@ -111,7 +114,7 @@ export default class ClientCamera extends CameraEntity {
     private view: Entity[] = [];
 
     /** Always existant relations field group. Present in all GUI/camera entities. */
-    public relations: RelationsGroup = new RelationsGroup(this);
+    public relationsData: RelationsGroup = new RelationsGroup(this);
     /** Entity being spectated if any (deathscreen). */
     public spectatee: ObjectEntity | null = null;
 
@@ -128,10 +131,10 @@ export default class ClientCamera extends CameraEntity {
 
         this.client = client;
 
-        this.camera.values.respawnLevel = this.camera.values.level = this.camera.values.scorebar = 1;
+        this.cameraData.values.respawnLevel = this.cameraData.values.level = this.cameraData.values.score = 1;
 
-        this.camera.values.FOV = .35;
-        this.relations.values.team = this;
+        this.cameraData.values.FOV = .35;
+        this.relationsData.values.team = this;
     }
 
     /** Adds an entity the camera's current view. */
@@ -165,28 +168,28 @@ export default class ClientCamera extends CameraEntity {
             this.view.push(this.game.arena, this);
         }
 
-        const fov = this.camera.values.FOV;
+        const fov = this.cameraData.values.FOV;
         const width = (1920 / fov) / 1.5;
         const height = (1080 / fov) / 1.5;
 
         // TODO(speed)
-        const entitiesNearRange = this.game.entities.collisionManager.retrieve(this.camera.values.cameraX, this.camera.values.cameraY, width, height);
+        const entitiesNearRange = this.game.entities.collisionManager.retrieve(this.cameraData.values.cameraX, this.cameraData.values.cameraY, width, height);
         const entitiesInRange: ObjectEntity[] = [];
 
-        const l = this.camera.values.cameraX - width;
-        const r = this.camera.values.cameraX + width;
-        const t = this.camera.values.cameraY - height;
-        const b = this.camera.values.cameraY + height;
+        const l = this.cameraData.values.cameraX - width;
+        const r = this.cameraData.values.cameraX + width;
+        const t = this.cameraData.values.cameraY - height;
+        const b = this.cameraData.values.cameraY + height;
         for (let i = 0; i < entitiesNearRange.length; ++i) {
             const entity = entitiesNearRange[i];
-            const width = entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size;
-            const size = entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size;
+            const width = entity.physicsData.values.sides === 2 ? entity.physicsData.values.size / 2 : entity.physicsData.values.size;
+            const size = entity.physicsData.values.sides === 2 ? entity.physicsData.values.width / 2 : entity.physicsData.values.size;
                      
-            if (entity.position.values.x - width < r &&
-                entity.position.values.y + size > t &&
-                entity.position.values.x + width > l &&
-                entity.position.values.y - size < b) {
-                    if (entity !== this.camera.values.player &&!(entity.style.values.opacity === 0 && !entity.deletionAnimation)) {
+            if (entity.positionData.values.x - width < r &&
+                entity.positionData.values.y + size > t &&
+                entity.positionData.values.x + width > l &&
+                entity.positionData.values.y - size < b) {
+                    if (entity !== this.cameraData.values.player &&!(entity.styleData.values.opacity === 0 && !entity.deletionAnimation)) {
                         entitiesInRange.push(entity);
                     }
                 }
@@ -195,10 +198,10 @@ export default class ClientCamera extends CameraEntity {
         for (let id = 0; id <= this.game.entities.lastId; ++id) {
             const entity = this.game.entities.inner[id];
             
-            if (entity instanceof ObjectEntity && !entitiesInRange.includes(entity) && (entity.physics.values.objectFlags & PhysicsFlags.showsOnMap)) entitiesInRange.push(entity);
+            if (entity instanceof ObjectEntity && !entitiesInRange.includes(entity) && (entity.physicsData.values.flags & PhysicsFlags.showsOnMap)) entitiesInRange.push(entity);
         }
 
-        if (Entity.exists(this.camera.values.player) && this.camera.values.player instanceof ObjectEntity) entitiesInRange.push(this.camera.values.player);
+        if (Entity.exists(this.cameraData.values.player) && this.cameraData.values.player instanceof ObjectEntity) entitiesInRange.push(this.cameraData.values.player);
 
         for (let i = 0; i < this.view.length; ++i) {
             const entity = this.view[i]
@@ -283,125 +286,23 @@ export default class ClientCamera extends CameraEntity {
 
     /** Entity creation compiler function... Run! */
     private compileCreation(w: Writer, entity: Entity) {
-        w.entid(entity).u8(1);
-
-        // Field group def
-        let at = -1;
-        const groups = entity.fieldGroups;
-
-        for (let i = 0; i < groups.length; ++i) {
-            w.u8((groups[i] - at) ^ 1);
-
-            at = groups[i];
-        }
-        w.u8(1);
-
-        // Actual data
-        const fields: Fields.FieldName[] = [];
-        for (let i = 0; i < groups.length; ++i) {
-            const group = entity[fieldGroupProps[groups[i]]];
-
-            if (!group) throw new Error("Expected entity " + entity + " to have " + groups[i])
-            fields.push(...group.fields);
-        }
-        // TODO(speed)[ABC]:
-        // For field ordering, create Fields.pushToOrderedArray(arr, field),
-        // that (through kinda binary sort) adds it to the arr in order, and then use that for
-        // findUpdate()
-
-        Fields.order(fields);
-        for (let i = 0; i < fields.length; ++i) {
-            const fieldName = fields[i];
-
-            const field = Fields.List[fieldName];
-            const group = entity[fieldGroupProps[field.group]];
-
-            /* @ts-ignore */
-            const value = group.values[fieldName];
-
-            // Do this right
-            if (fieldName === "color" && value === Colors.Tank) {
-                if (entity.relations && entity.relations.values.team === (this.camera.values.player && this.camera.values.player.relations && this.camera.values.player.relations.values.team)) w.u8(Colors.Tank)
-                else w.u8(Colors.EnemyTank);
-                continue;
-            }
-
-            if (!field.amount) {
-                /* @ts-ignore */
-                w[field.encType](value);
-            } else {
-                /* @ts-ignore */
-                for (let i = 0; i < field.amount; ++i) w[field.encType](value.values[i]);
-            }
-        }
+        compileCreation(w, entity);
     }
 
     /** Entity update compiler function... Run! */
     private compileUpdate(w: Writer, entity: Entity) {
-        w.entid(entity).raw(0, 1);
-
-        const groups = entity.fieldGroups;
-
-        const fields: Fields.FieldName[] = [];
-        for (let i = 0; i < groups.length; ++i) {
-            const group = entity[fieldGroupProps[groups[i]]];
-            if (!group) throw new Error("Expected entity " + entity + " to have " + groups[i])
-            fields.push(...group.findUpdate());
-        }
-
-        Fields.order(fields);
-
-        let at = -1;
-        for (let i = 0; i < fields.length; ++i) {
-            const fieldName = fields[i];
-            const field = Fields.List[fieldName];
-            const group = entity[fieldGroupProps[field.group]];
-
-            /* @ts-ignore */
-            const value = group.values[fieldName];
-
-            w.u8((field.index - at) ^ 1);
-            at = field.index;
-            
-            // Do this right
-            if (fieldName === "color" && value === Colors.Tank) {
-                if (entity.relations && entity.relations.values.team === (this.camera.values.player && this.camera.values.player.relations && this.camera.values.player.relations.values.team)) w.u8(Colors.Tank)
-                else w.u8(Colors.EnemyTank);
-                continue
-            }
-
-            if (!field.amount) {
-                /* @ts-ignore */
-                w[field.encType](value);
-            } else {
-                const encType = fieldName === "scoreboardScores" ? "vi" : field.encType;
-                const updates = value.findUpdate();
-
-                let tAt = -1;
-
-                for (let j = 0; j < updates.length; ++j) {
-                    w.u8((updates[j] - tAt) ^ 1);
-
-                    tAt = updates[j];
-                    /* @ts-ignore */
-                    w[encType](value.values[tAt])
-                }
-
-                w.u8(1);
-            }
-        }
-        w.u8(1);
+        compileUpdate(w, entity);
     }
 
     public tick(tick: number) {
         super.tick(tick);
 
-        if (!Entity.exists(this.camera.values.player) || !(this.camera.values.player instanceof TankBody)) {
+        if (!Entity.exists(this.cameraData.values.player) || !(this.cameraData.values.player instanceof TankBody)) {
             if (Entity.exists(this.spectatee)) {
-                const pos = this.spectatee.rootParent.position.values;
-                this.camera.cameraX = pos.x;
-                this.camera.cameraY = pos.y;
-                this.camera.camera |= CameraFlags.usesCameraCoords;
+                const pos = this.spectatee.rootParent.positionData.values;
+                this.cameraData.cameraX = pos.x;
+                this.cameraData.cameraY = pos.y;
+                this.cameraData.flags |= CameraFlags.usesCameraCoords;
             }
         }
 

@@ -20,7 +20,7 @@ import ObjectEntity from "../Object";
 import Barrel from "./Barrel";
 
 import { BarrelBase } from "./TankBody";
-import { Colors, InputFlags, PositionFlags, NameFlags, PhysicsFlags, Stat, StyleFlags } from "../../Const/Enums";
+import { Color, InputFlags, PositionFlags, NameFlags, PhysicsFlags, Stat, StyleFlags } from "../../Const/Enums";
 import { BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
@@ -57,7 +57,7 @@ export default class AutoTurret extends ObjectEntity {
     // TODO(ABC):
     // Maybe just remove this
     /** For mounted turret name to show up on Auto Turrets. */
-    public name: NameGroup = new NameGroup(this);
+    public nameData: NameGroup = new NameGroup(this);
 
     /** Barrel's owner (Tank-like object). */
     private owner: BarrelBase;
@@ -89,24 +89,24 @@ export default class AutoTurret extends ObjectEntity {
         this.owner = owner;
         
         this.setParent(owner);
-        this.relations.values.owner = owner;
+        this.relationsData.values.owner = owner;
 
-        this.relations.values.team = owner.relations.values.team;
+        this.relationsData.values.team = owner.relationsData.values.team;
 
-        this.physics.values.sides = 1;
+        this.physicsData.values.sides = 1;
         this.baseSize = baseSize;
-        this.physics.values.size = this.baseSize * this.sizeFactor;
+        this.physicsData.values.size = this.baseSize * this.sizeFactor;
 
-        this.style.values.color = Colors.Barrel;
-        this.style.values.styleFlags |= StyleFlags.showsAboveParent;
+        this.styleData.values.color = Color.Barrel;
+        this.styleData.values.flags |= StyleFlags.showsAboveParent;
 
-        this.position.values.motion |= PositionFlags.absoluteRotation;
+        this.positionData.values.flags |= PositionFlags.absoluteRotation;
 
-        this.name.values.name = "Mounted Turret";
-        this.name.values.nametag |= NameFlags.hiddenName;
+        this.nameData.values.name = "Mounted Turret";
+        this.nameData.values.flags |= NameFlags.hiddenName;
 
         this.turret = new Barrel(this, turretDefinition);
-        this.turret.physics.values.objectFlags |= PhysicsFlags._unknown;
+        this.turret.physicsData.values.flags |= PhysicsFlags._unknown;
     }
     
     /**
@@ -130,7 +130,7 @@ export default class AutoTurret extends ObjectEntity {
 
         if (this.ai.state === AIState.hasTarget) this.ai.passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
 
-        this.physics.size = this.baseSize * this.sizeFactor;
+        this.physicsData.size = this.baseSize * this.sizeFactor;
 
         this.ai.aimSpeed = this.turret.bulletAccel;
         // Top Speed
@@ -148,18 +148,18 @@ export default class AutoTurret extends ObjectEntity {
             else {
                 // if (this.owner.inputs.attemptingRepel()) this.inputs.flags |= InputFlags.rightclick;
                 this.inputs.flags |= InputFlags.leftclick;
-                this.position.angle = Math.atan2(deltaPos.y, deltaPos.x);
+                this.positionData.angle = Math.atan2(deltaPos.y, deltaPos.x);
                 this.ai.state = AIState.hasTarget;
             }
         }
         if (useAI) {
             if (this.ai.state === AIState.idle) {
-                this.position.angle += this.ai.passiveRotation;
+                this.positionData.angle += this.ai.passiveRotation;
                 this.turret.attemptingShot = false;
             } else {
                 // Uh. Yeah
                 const {x, y} = this.getWorldPosition();
-                this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+                this.positionData.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
             }
         }
     }

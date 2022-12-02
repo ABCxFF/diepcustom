@@ -175,10 +175,10 @@ export default class DiepQuadTree extends QuadTreeNode<ObjectEntity> implements 
     public insertEntity(entity: ObjectEntity) {
         this._insert({
             content: entity,
-            x: entity.position.values.x,
-            y: entity.position.values.y,
-            radiW: entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size,
-            radiH: entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size,
+            x: entity.positionData.values.x,
+            y: entity.positionData.values.y,
+            radiW: entity.physicsData.values.sides === 2 ? entity.physicsData.values.size / 2 : entity.physicsData.values.size,
+            radiH: entity.physicsData.values.sides === 2 ? entity.physicsData.values.width / 2 : entity.physicsData.values.size,
         });
     }
 
@@ -195,10 +195,10 @@ export default class DiepQuadTree extends QuadTreeNode<ObjectEntity> implements 
     }
 
     public retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
-        return this.retrieve(entity.position.values.x,
-            entity.position.values.y,
-            entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size,
-            entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size);
+        return this.retrieve(entity.positionData.values.x,
+            entity.positionData.values.y,
+            entity.physicsData.values.sides === 2 ? entity.physicsData.values.size / 2 : entity.physicsData.values.size,
+            entity.physicsData.values.sides === 2 ? entity.physicsData.values.width / 2 : entity.physicsData.values.size);
     }
 
     public reset(bottomY: number, rightX: number) {

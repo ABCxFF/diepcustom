@@ -73,16 +73,16 @@ export default class Rocket extends Bullet implements BarrelBase {
         
         this.cameraEntity = tank.cameraEntity;
 
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
 
         const rocketBarrel = this.rocketBarrel = new Barrel(this, {...RocketBarrelDefinition});
-        rocketBarrel.style.values.color = this.style.values.color;
+        rocketBarrel.styleData.values.color = this.styleData.values.color;
     }
 
     public tick(tick: number) {
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
-        if (!this.deletionAnimation && this.rocketBarrel) this.rocketBarrel.definition.width = ((this.barrelEntity.definition.width / 2) * RocketBarrelDefinition.width) / this.physics.values.size;
+        if (!this.deletionAnimation && this.rocketBarrel) this.rocketBarrel.definition.width = ((this.barrelEntity.definition.width / 2) * RocketBarrelDefinition.width) / this.physicsData.values.size;
 
         super.tick(tick);
 

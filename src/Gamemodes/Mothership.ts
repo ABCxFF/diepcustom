@@ -1,20 +1,23 @@
 /*
     DiepCustom - custom tank game server that shares diep.io's WebSocket protocol
     Copyright (C) 2022 ABCxFF (github.com/ABCxFF)
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
+
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 import Client from "../Client";
-import { Colors, ArenaFlags, TeamFlags } from "../Const/Enums";
+import { Color, ArenaFlags, TeamFlags } from "../Const/Enums";
 import Mothership from "../Entity/Misc/Mothership";
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
 import TankBody from "../Entity/Tank/TankBody";
@@ -24,7 +27,7 @@ import { Entity } from "../Native/Entity";
 import { PI2 } from "../util";
 
 const arenaSize = 11150;
-const TEAM_COLORS = [Colors.TeamBlue, Colors.TeamRed];
+const TEAM_COLORS = [Color.TeamBlue, Color.TeamRed];
 
 /**
  * Mothership Gamemode Arena
@@ -42,7 +45,7 @@ export default class MothershipArena extends ArenaEntity {
         super(game);
         this.shapeScoreRewardMultiplier = 3.0;
 
-        this.arena.values.GUI |= ArenaFlags.hiddenScores;
+        this.arenaData.values.flags |= ArenaFlags.hiddenScores;
 
         // little fun thing to support multiple teams - spread colors around map
         let randAngle = Math.random() * PI2;
@@ -52,10 +55,10 @@ export default class MothershipArena extends ArenaEntity {
             const mot = new Mothership(this.game);
             this.motherships.push(mot);
     
-            mot.relations.values.team = team;
-            mot.style.values.color = team.team.values.teamColor;
-            mot.position.values.x = Math.cos(randAngle) * arenaSize * 0.75;
-            mot.position.values.y = Math.sin(randAngle) * arenaSize * 0.75;
+            mot.relationsData.values.team = team;
+            mot.styleData.values.color = team.teamData.values.teamColor;
+            mot.positionData.values.x = Math.cos(randAngle) * arenaSize * 0.75;
+            mot.positionData.values.y = Math.sin(randAngle) * arenaSize * 0.75;
 
             randAngle += PI2 / TEAM_COLORS.length;
         }
@@ -68,60 +71,60 @@ export default class MothershipArena extends ArenaEntity {
             const team = this.teams[~~(Math.random()*this.teams.length)];
             const { x, y } = this.findSpawnLocation();
 
-            tank.position.values.x = x;
-            tank.position.values.y = y;
-            tank.relations.values.team = team;
-            tank.style.values.color = team.team.teamColor;
+            tank.positionData.values.x = x;
+            tank.positionData.values.y = y;
+            tank.relationsData.values.team = team;
+            tank.styleData.values.color = team.teamData.teamColor;
             return;
         }
 
         const mothership = this.playerTeamMotMap.get(client) || this.motherships[~~(Math.random() * this.motherships.length)];
         this.playerTeamMotMap.set(client, mothership);
 
-        tank.relations.values.team = mothership.relations.values.team;
-        tank.style.values.color = mothership.style.values.color;
+        tank.relationsData.values.team = mothership.relationsData.values.team;
+        tank.styleData.values.color = mothership.styleData.values.color;
 
         // TODO: Possess mothership if its unpossessed
         if (Entity.exists(mothership)) {
-            tank.position.values.x = mothership.position.values.x;
-            tank.position.values.y = mothership.position.values.y;
+            tank.positionData.values.x = mothership.positionData.values.x;
+            tank.positionData.values.y = mothership.positionData.values.y;
         } else {
             const { x, y } = this.findSpawnLocation();
 
-            tank.position.values.x = x;
-            tank.position.values.y = y;
+            tank.positionData.values.x = x;
+            tank.positionData.values.y = y;
         }
 
-        if (client.camera) client.camera.relations.team = tank.relations.values.team;
+        if (client.camera) client.camera.relationsData.team = tank.relationsData.values.team;
     }
     public updateScoreboard(scoreboardPlayers: TankBody[]) {
-        this.motherships.sort((m1, m2) => m2.health.values.health - m1.health.values.health);
+        this.motherships.sort((m1, m2) => m2.healthData.values.health - m1.healthData.values.health);
         const length = Math.min(10, this.motherships.length);
         for (let i = 0; i < length; ++i) {
             const mothership = this.motherships[i];
-            const team = mothership.relations.values.team;
+            const team = mothership.relationsData.values.team;
             const isTeamATeam = team instanceof TeamEntity;
             if (isTeamATeam) {
-                team.team.mothershipX = mothership.position.values.x;
-                team.team.mothershipY = mothership.position.values.y;
-                team.team.mothership |= TeamFlags.hasMothership;
+                team.teamData.mothershipX = mothership.positionData.values.x;
+                team.teamData.mothershipY = mothership.positionData.values.y;
+                team.teamData.flags |= TeamFlags.hasMothership;
             }
             /** @ts-ignore */
-            if (mothership.style.values.color === Colors.Tank) this.arena.values.scoreboardColors[i] = Colors.ScoreboardBar;
+            if (mothership.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i] = Color.ScoreboardBar;
             /** @ts-ignore */
-            else this.arena.values.scoreboardColors[i] = mothership.style.values.color;
+            else this.arenaData.values.scoreboardColors[i] = mothership.styleData.values.color;
             /** @ts-ignore */
-            this.arena.values.scoreboardNames[i] = isTeamATeam ? team.teamName : `Mothership ${i+1}`;
+            this.arenaData.values.scoreboardNames[i] = isTeamATeam ? team.teamName : `Mothership ${i+1}`;
             // TODO: Change
             /** @ts-ignore */
-            this.arena.values.scoreboardTanks[i] = -1;
+            this.arenaData.values.scoreboardTanks[i] = -1;
             /** @ts-ignore */
-            this.arena.values.scoreboardScores[i] = mothership.health.values.health;
+            this.arenaData.values.scoreboardScores[i] = mothership.healthData.values.health;
             /** @ts-ignore */
-            this.arena.values.scoreboardSuffixes[i] = " HP";
+            this.arenaData.values.scoreboardSuffixes[i] = " HP";
         }
        
-        this.arena.scoreboardAmount = length;
+        this.arenaData.scoreboardAmount = length;
     }
     public tick(tick: number) {
         // backwards to preserve

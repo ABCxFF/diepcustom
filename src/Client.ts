@@ -299,39 +299,39 @@ export default class Client {
                     this.inputs.movement.angle = angle;
                 }
 
-                const player = camera.camera.values.player;
+                const player = camera.cameraData.values.player;
                 if (!Entity.exists(player) || !(player instanceof TankBody)) return;
 
                 // No AI
                 if (this.inputs.isPossessing && this.accessLevel !== config.AccessLevel.FullAccess) return;
                 
                 if ((flags & InputFlags.godmode)) {
-                    if (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats) {
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess) {
+                        player.nameData.flags |= NameFlags.highlightedName;
+                        this.devCheatsUsed = 1;
+                        player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
+                    } else if (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats) {
                         // only allow devs to go into godmode when players > 1
                         if (this.accessLevel === config.AccessLevel.FullAccess || (this.game.clients.size === 1 && this.game.arena.state === ArenaState.OPEN)) {
-                            player.name.nametag |= NameFlags.highlightedName;
+                            player.nameData.flags |= NameFlags.highlightedName;
                             this.devCheatsUsed = 1;
 
                             player.setInvulnerability(!player.isInvulnerable);
                             
                             this.notify(`God mode: ${player.isInvulnerable ? "ON" : "OFF"}`, 0x000000, 1000, 'godmode');
                         }
-                    } else if (this.accessLevel >= config.AccessLevel.BetaAccess) {
-                        player.name.nametag |= NameFlags.highlightedName;
-                        this.devCheatsUsed = 1;
-                        player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
-                    } 
+                    }
                 }
 
                 if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
-                    player.position.x = this.inputs.mouse.x;
-                    player.position.y = this.inputs.mouse.y;
+                    player.positionData.x = this.inputs.mouse.x;
+                    player.positionData.y = this.inputs.mouse.y;
                     player.setVelocity(0, 0);
                     player.entityState |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
-                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats)) {
-                        player.name.nametag |= NameFlags.highlightedName;
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats)) {
+                        player.nameData.flags |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
                         let tank = player.currentTank;
@@ -357,20 +357,20 @@ export default class Client {
                 }
                 if (flags & InputFlags.levelup) {
                     // If full access, or if the game allows cheating and lvl is < 45, or if the player is a BT access level and lvl is < 45
-                    if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.camera.values.level < 45 && ((this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
-                        player.name.nametag |= NameFlags.highlightedName;
+                    if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.cameraData.values.level < 45 && ((this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
+                        player.nameData.flags |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
-                        camera.setLevel(camera.camera.values.level + 1);
+                        camera.setLevel(camera.cameraData.values.level + 1);
                     }
                 }
                 if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
-                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arena.values.GUI & ArenaFlags.canUseCheats)) {
-                        player.name.nametag |= NameFlags.highlightedName;
+                    if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats)) {
+                        player.nameData.flags |= NameFlags.highlightedName;
                         this.devCheatsUsed = 1;
                         
-                        this.notify("You've killed " + (player.name.values.name === "" ? "an unnamed tank" : player.name.values.name));
-                        camera.camera.killedBy = player.name.values.name;
+                        this.notify("You've killed " + (player.nameData.values.name === "" ? "an unnamed tank" : player.nameData.values.name));
+                        camera.cameraData.killedBy = player.nameData.values.name;
                         player.destroy();
                     }
                 }
@@ -379,24 +379,24 @@ export default class Client {
             case ServerBound.Spawn: {
                 util.log("Client wants to spawn");
 
-                if (Entity.exists(camera.camera.values.player) || (this.game.arena.state >= ArenaState.CLOSING)) return;
+                if (Entity.exists(camera.cameraData.values.player) || (this.game.arena.state >= ArenaState.CLOSING)) return;
 
-                camera.camera.values.statsAvailable = 0;
-                camera.camera.values.level = 1;
+                camera.cameraData.values.statsAvailable = 0;
+                camera.cameraData.values.level = 1;
 
                 for (let i = 0; i < StatCount; ++i) {
-                    camera.camera.values.statLevels.values[i] = 0;
+                    camera.cameraData.values.statLevels.values[i] = 0;
                 }
 
                 const name = r.stringNT().slice(0, 16);
 
-                const tank = camera.camera.player = camera.relations.owner = camera.relations.parent = new TankBody(this.game, camera, this.inputs);
+                const tank = camera.cameraData.player = camera.relationsData.owner = camera.relationsData.parent = new TankBody(this.game, camera, this.inputs);
                 tank.setTank(Tank.Basic);
                 this.game.arena.spawnPlayer(tank, this);
-                camera.setLevel(camera.camera.values.respawnLevel);
+                camera.setLevel(camera.cameraData.values.respawnLevel);
 
-                tank.name.values.name = name;
-                if (this.devCheatsUsed) tank.name.values.nametag |= NameFlags.highlightedName;
+                tank.nameData.values.name = name;
+                if (this.devCheatsUsed) tank.nameData.values.flags |= NameFlags.highlightedName;
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.entityState = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
@@ -405,9 +405,9 @@ export default class Client {
                 return;
             }
             case ServerBound.StatUpgrade: {
-                if (camera.camera.statsAvailable <= 0) return;
+                if (camera.cameraData.statsAvailable <= 0) return;
 
-                const tank = camera.camera.values.player;
+                const tank = camera.cameraData.values.player;
                 if (!Entity.exists(tank) || !(tank instanceof TankBody)) return;
                 // No AI
                 if (this.inputs.isPossessing) return;
@@ -420,16 +420,16 @@ export default class Client {
                 if (statId < 0 || statId >= StatCount) return;
 
                 // const chosenLimit = r.vi();
-                const statLimit = camera.camera.values.statLimits.values[statId];
+                const statLimit = camera.cameraData.values.statLimits.values[statId];
 
-                if (camera.camera.values.statLevels.values[statId] >= statLimit) return;
+                if (camera.cameraData.values.statLevels.values[statId] >= statLimit) return;
 
-                camera.camera.statLevels[statId] += 1;
-                camera.camera.statsAvailable -= 1;
+                camera.cameraData.statLevels[statId] += 1;
+                camera.cameraData.statsAvailable -= 1;
                 return;
             }
             case ServerBound.TankUpgrade: {
-                const player = camera.camera.values.player;
+                const player = camera.cameraData.values.player;
                 // No AI
                 if (this.inputs.isPossessing) return;
                 if (!Entity.exists(player) || !(player instanceof TankBody)) return;
@@ -437,7 +437,7 @@ export default class Client {
                 const definition = getTankById(player.currentTank);
                 const tankId: Tank = r.vi() ^ TANK_XOR;
                 const tankDefinition = getTankById(tankId);
-                if (!definition || !definition.upgrades.includes(tankId) || !tankDefinition || tankDefinition.levelRequirement > camera.camera.values.level) return;
+                if (!definition || !definition.upgrades.includes(tankId) || !tankDefinition || tankDefinition.levelRequirement > camera.cameraData.values.level) return;
 
                 player.setTank(tankId);
                 return;
@@ -447,7 +447,7 @@ export default class Client {
                 return this.ban();
             case ServerBound.ToRespawn:
                 // Doesn't matter if the player is alive or not in real diep.
-                camera.camera.camera &= ~CameraFlags.showingDeathStats;
+                camera.cameraData.flags &= ~CameraFlags.showingDeathStats;
                 // if (this.game.arena.arenaState !== ArenaState.OPEN) return this.terminate();
                 return;
             case ServerBound.TakeTank: {
@@ -468,11 +468,11 @@ export default class Client {
                         this.notify("Team switched to arena");
                     }
                 */
-                if (!Entity.exists(camera.camera.values.player)) return;
+                if (!Entity.exists(camera.cameraData.values.player)) return;
                 if (!this.game.entities.AIs.length) return this.notify("Someone has already taken that tank", 0x000000, 5000, "cant_claim_info");
                 if (!this.inputs.isPossessing) {
-                    const x = camera.camera.values.player.position?.values.x || 0;
-                    const y = camera.camera.values.player.position?.values.y || 0;
+                    const x = camera.cameraData.values.player.positionData?.values.x || 0;
+                    const y = camera.cameraData.values.player.positionData?.values.y || 0;
                     const AIs = Array.from(this.game.entities.AIs);
                     AIs.sort((a: AI, b: AI) => {
                         const {x: x1, y: y1} = a.owner.getWorldPosition();
@@ -482,7 +482,7 @@ export default class Client {
                     });
 
                     for (let i = 0; i < AIs.length; ++i) {
-                        if ((AIs[i].state !== AIState.possessed) && ((AIs[i].owner.relations.values.team === camera.relations.values.team && AIs[i].isClaimable) || this.accessLevel === config.AccessLevel.FullAccess)) {
+                        if ((AIs[i].state !== AIState.possessed) && ((AIs[i].owner.relationsData.values.team === camera.relationsData.values.team && AIs[i].isClaimable) || this.accessLevel === config.AccessLevel.FullAccess)) {
                             if(!this.possess(AIs[i])) continue;
                             this.notify("Press H to surrender control of your tank", 0x000000, 5000);
                             return;
@@ -513,7 +513,7 @@ export default class Client {
     
     /** Attempts possession of an AI */
     public possess(ai: AI) {
-        if (!this.camera?.camera || ai.state === AIState.possessed) return false;
+        if (!this.camera?.cameraData || ai.state === AIState.possessed) return false;
 
         this.inputs.deleted = true;
         ai.inputs = this.inputs = new ClientInputs(this);
@@ -521,41 +521,45 @@ export default class Client {
         ai.state = AIState.possessed;
 
         // Silly workaround to change color of player when needed
-        if (this.camera?.camera.values.player instanceof ObjectEntity) this.camera.camera.values.player.entityState |= this.camera.camera.values.player.style.state.color = 1;
+        if (this.camera?.cameraData.values.player instanceof ObjectEntity) {
+            const color = this.camera.cameraData.values.player.styleData.values.color;
+            this.camera.cameraData.values.player.styleData.values.color = -1;
+            this.camera.cameraData.values.player.styleData.color = color;
+        }
 
-        this.camera.camera.tankOverride = ai.owner.name?.values.name || "";
+        this.camera.cameraData.tankOverride = ai.owner.nameData?.values.name || "";
         
-        this.camera.camera.tank = 53;
+        this.camera.cameraData.tank = 53;
         
         // AI stats, confirmed by Mounted Turret videos
-        for (let i = 0; i < StatCount; ++i) this.camera.camera.statLevels[i as Stat] = 0;
-        for (let i = 0; i < StatCount; ++i) this.camera.camera.statLimits[i as Stat] = 7;
-        for (let i = 0; i < StatCount; ++i) this.camera.camera.statNames[i as Stat] = "";
+        for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statLevels[i as Stat] = 0;
+        for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statLimits[i as Stat] = 7;
+        for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statNames[i as Stat] = "";
 
 
-        this.camera.camera.killedBy = "";
-        this.camera.camera.player = ai.owner;
-        this.camera.camera.movementSpeed = ai.movementSpeed;
+        this.camera.cameraData.killedBy = "";
+        this.camera.cameraData.player = ai.owner;
+        this.camera.cameraData.movementSpeed = ai.movementSpeed;
 
         if (ai.owner instanceof TankBody) {
             // If its a TankBody, set the stats, level, and tank to that of the TankBody
-            this.camera.camera.tank = ai.owner.cameraEntity.camera.values.tank;
-            this.camera.setLevel(ai.owner.cameraEntity.camera.values.level);
+            this.camera.cameraData.tank = ai.owner.cameraEntity.cameraData.values.tank;
+            this.camera.setLevel(ai.owner.cameraEntity.cameraData.values.level);
             
-            for (let i = 0; i < StatCount; ++i) this.camera.camera.statLevels[i as Stat] = ai.owner.cameraEntity.camera.statLevels.values[i];
-            for (let i = 0; i < StatCount; ++i) this.camera.camera.statLimits[i as Stat] = ai.owner.cameraEntity.camera.statLimits.values[i];
-            for (let i = 0; i < StatCount; ++i) this.camera.camera.statNames[i as Stat] = ai.owner.cameraEntity.camera.statNames.values[i];
+            for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statLevels[i as Stat] = ai.owner.cameraEntity.cameraData.statLevels.values[i];
+            for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statLimits[i as Stat] = ai.owner.cameraEntity.cameraData.statLimits.values[i];
+            for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statNames[i as Stat] = ai.owner.cameraEntity.cameraData.statNames.values[i];
 
-            this.camera.camera.FOV = 0.35;
+            this.camera.cameraData.FOV = 0.35;
         } else if (ai.owner instanceof AbstractBoss) {
             this.camera.setLevel(75);
-            this.camera.camera.FOV = 0.25;
+            this.camera.cameraData.FOV = 0.25;
         } else {
             this.camera.setLevel(30);
         }
         
-        this.camera.camera.statsAvailable = 0;
-        this.camera.camera.scorebar = 0;
+        this.camera.cameraData.statsAvailable = 0;
+        this.camera.cameraData.score = 0;
         return true;
     }
 
@@ -619,10 +623,10 @@ export default class Client {
             }
         } else if (this.inputs.deleted) {
             this.inputs = new ClientInputs(this);
-            this.camera.camera.player = null;
-            this.camera.camera.respawnLevel = 0;
-            this.camera.camera.cameraX = this.camera.camera.cameraY = 0;
-            this.camera.camera.camera &= ~CameraFlags.showingDeathStats;
+            this.camera.cameraData.player = null;
+            this.camera.cameraData.respawnLevel = 0;
+            this.camera.cameraData.cameraX = this.camera.cameraData.cameraY = 0;
+            this.camera.cameraData.flags &= ~CameraFlags.showingDeathStats;
         }
         if (tick >= this.lastPingTick + 60 * config.tps) {
             return this.terminate();
@@ -633,7 +637,7 @@ export default class Client {
         const tokens: string[] = [];
 
         if (this.discordId) tokens.push("disc=<@" + this.discordId + ">");
-        if (this.camera?.camera?.player?.name?.name) tokens.push("name=" + JSON.stringify(this.camera?.camera?.player?.name?.name));
+        if (this.camera?.cameraData?.player?.nameData?.name) tokens.push("name=" + JSON.stringify(this.camera?.cameraData?.player?.nameData?.name));
         if (verbose) {
             if (this.ipAddress) tokens.push("ip=" + this.ipAddress);
             if (this.game.gamemode) tokens.push("game.gamemode=" + this.game.gamemode);

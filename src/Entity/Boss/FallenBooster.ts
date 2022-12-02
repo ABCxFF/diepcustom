@@ -34,7 +34,7 @@ export default class FallenBooster extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.name.values.name = 'Fallen Booster';
+        this.nameData.values.name = 'Fallen Booster';
         for (const barrelDefinition of TankDefinitions[Tank.Booster].barrels) {
 
             const def = Object.assign({}, barrelDefinition, {});
@@ -44,18 +44,18 @@ export default class FallenBooster extends AbstractBoss {
     }
 
     protected moveAroundMap() {
-      const x = this.position.values.x,
-      y = this.position.values.y
+      const x = this.positionData.values.x,
+      y = this.positionData.values.y
         if (this.ai.state === AIState.idle) {
             super.moveAroundMap();
-            this.position.angle = Math.atan2(this.inputs.movement.y, this.inputs.movement.x)
+            this.positionData.angle = Math.atan2(this.inputs.movement.y, this.inputs.movement.x)
         } else {
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x)
+            this.positionData.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x)
         }
     }
 
     public tick(tick: number) {
         super.tick(tick);
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
     }
 }
