@@ -26,7 +26,7 @@ import LivingEntity from "../Live";
  */
 export default class TeamBase extends LivingEntity {
 
-    constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean=true) {
+    public constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean=true) {
         super(game);
 
         this.relationsData.values.team = team;

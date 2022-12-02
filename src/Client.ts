@@ -93,7 +93,7 @@ export class ClientInputs extends Inputs {
     /** The Client owner */
     public client: Client;
 
-    constructor(client: Client) {
+    public constructor(client: Client) {
         super();
         this.client = client;
     }

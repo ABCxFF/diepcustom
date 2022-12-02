@@ -48,7 +48,7 @@ import BallArena from "./Gamemodes/Misc/Ball";
 class WSSWriterStream extends Writer {
     private game: GameServer;
 
-    constructor(game: GameServer) {
+    public constructor(game: GameServer) {
         super();
         this.game = game;
     }

@@ -24,7 +24,7 @@ import { PhysicsFlags, Color } from "../../Const/Enums";
  * Only used for maze walls and nothing else.
  */
 export default class MazeWall extends ObjectEntity {
-    constructor(game: GameServer, x: number, y: number, width: number, height: number) {
+    public constructor(game: GameServer, x: number, y: number, width: number, height: number) {
         super(game);
 
         this.positionData.values.x = x;

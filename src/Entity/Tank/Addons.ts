@@ -154,7 +154,7 @@ export class GuardObject extends ObjectEntity implements BarrelBase {
     /** Radians per tick, how many radians the guard will rotate in a tick */
     public radiansPerTick: number;
 
-    constructor(game: GameServer, owner: BarrelBase, sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
+    public constructor(game: GameServer, owner: BarrelBase, sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
         super(game);
 
         this.owner = owner;

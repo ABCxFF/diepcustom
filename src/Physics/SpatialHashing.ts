@@ -30,7 +30,7 @@ export default class SpatialHashing implements CollisionManager {
         this.cellSize = cellSize;
     }
 
-    insertEntity(entity: ObjectEntity) {
+    public insertEntity(entity: ObjectEntity) {
         const { sides, size, width } = entity.physicsData.values;
         const { x, y } = entity.positionData.values;
         const isLine = sides === 2;
@@ -55,7 +55,7 @@ export default class SpatialHashing implements CollisionManager {
         }
     }
 
-    retrieve(x: number, y: number, width: number, height: number): ObjectEntity[] {
+    public retrieve(x: number, y: number, width: number, height: number): ObjectEntity[] {
         const result: ObjectEntity[] = [];
 
         const startX = (x - width) >> this.cellSize;
@@ -83,7 +83,7 @@ export default class SpatialHashing implements CollisionManager {
         return result;
     }
 
-    retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
+    public retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
         const { sides, size, width } = entity.physicsData.values;
         const { x, y } = entity.positionData;
         const isLine = sides === 2;
@@ -92,7 +92,7 @@ export default class SpatialHashing implements CollisionManager {
         return this.retrieve(x, y, w, h);
     }
 
-    reset() {
+    public reset() {
         this.hashMap = new Map();
     }
 }
