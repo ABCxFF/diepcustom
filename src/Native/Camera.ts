@@ -24,7 +24,7 @@ import ObjectEntity from "../Entity/Object";
 
 import { Entity, EntityStateFlags } from "./Entity";
 import { CameraGroup, RelationsGroup } from "./FieldGroups";
-import { CameraFlags, ClientBound, Color, levelToScore, levelToScoreTable, PhysicsFlags, Stat } from "../Const/Enums";
+import { CameraFlags, ClientBound, levelToScore, levelToScoreTable, PhysicsFlags, Stat } from "../Const/Enums";
 import { getTankById } from "../Const/TankDefinitions";
 import { removeFast } from "../util";
 

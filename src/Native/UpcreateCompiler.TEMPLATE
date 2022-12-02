@@ -25,7 +25,7 @@ import { Entity } from "./Entity";
 export const compileCreation = (w: Writer, entity: Entity) => {
     w.entid(entity).u8(1);
 
-
+# for every field group, define if its set on the entity
 ^<<
 FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 `\n    const has${e[0]} = !!entity.${e[0].toLowerCase()}Data;`
@@ -34,6 +34,7 @@ FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 
     // Field group def
     let at = -1;
+# if the entity has the field group, add the field group to the field group xor table
 ^<<
 FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 `\n    if (has${e[0]}) { w.u8((${i} - at) ^ 1); at = ${i}; };`
@@ -41,6 +42,7 @@ FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 >>^
     w.u8(1); // close table
 
+# now for every field, in the order of FIELD_ORDER, check if the group of that field is set on the entity, and if it is, write the field to the packet
 ^<<
 FIELD_ORDER.map(([group, name], idx) => {
     const g = EXISTANT_FIELD_GROUPS.find(e => e[0] === group);
@@ -61,7 +63,7 @@ FIELD_ORDER.map(([group, name], idx) => {
 export const compileUpdate = (w: Writer, entity: Entity) => {
     w.entid(entity).raw(0, 1);
 
-
+# define variables that store if a field group exists
 ^<<
 FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 `\n    const has${e[0]} = !!entity.${e[0].toLowerCase()}Data;`
@@ -69,7 +71,7 @@ FIELD_GROUPS.map((e,i) => e[0].startsWith('!') ? "" : (
 >>^
 
     let at = -1;
-
+# for every field in the field order, check if the fieldgroup exists, if it does, check if the field has an update, and if it does, compile the field's value to the packet
 ^<<
 FIELD_ORDER.map(([group, name], idx) => {
     const g = EXISTANT_FIELD_GROUPS.find(e => e[0] === group);

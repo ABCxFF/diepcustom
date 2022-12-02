@@ -20,26 +20,26 @@
  * The IDs for all the team colors, by name.
  */
 export const enum Color {
-    Border,
-    Barrel,
-    Tank,
-    TeamBlue,
-    TeamRed,
-    TeamPurple,
-    TeamGreen,
-    Shiny,
-    EnemySquare,
-    EnemyTriangle,
-    EnemyPentagon,
-    EnemyCrasher,
-    Neutral,
-    ScoreboardBar,
-    Box,
-    EnemyTank,
-    NecromancerSquare,
-    Fallen,
+    Border = 0,
+    Barrel = 1,
+    Tank = 2,
+    TeamBlue = 3,
+    TeamRed = 4,
+    TeamPurple = 5,
+    TeamGreen = 6,
+    Shiny = 7,
+    EnemySquare = 8,
+    EnemyTriangle = 9,
+    EnemyPentagon = 10,
+    EnemyCrasher = 11,
+    Neutral = 12,
+    ScoreboardBar = 13,
+    Box = 14,
+    EnemyTank = 15,
+    NecromancerSquare = 16,
+    Fallen = 17,
 
-    kMaxColors
+    kMaxColors = 18
 }
 
 /**

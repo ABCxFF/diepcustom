@@ -17,6 +17,7 @@
 */
 
 import GameServer from "../Game";
+# for every group, import that group
 import { ^<<EXISTANT_FIELD_GROUPS.map(e => e[0] + 'Group').join(', ')>>^ } from "./FieldGroups";
 
 
@@ -48,6 +49,7 @@ export class Entity {
      * - `0b10`: Needs creation (unused)
      */
     public entityState = 0;
+# for every group, define it on the Entity class
 ^<<
 EXISTANT_FIELD_GROUPS.map(e =>
 `\n    /**
@@ -74,6 +76,7 @@ EXISTANT_FIELD_GROUPS.map(e =>
 
     /** Makes the  entity no longer in need of update. */
     public wipeState() {
+# for every group, output code to clear (wipe) that group's state
 ^<<
 EXISTANT_FIELD_GROUPS.map(e =>
 `       if (this.${e[0].toLowerCase()}Data) this.${e[0].toLowerCase()}Data.wipe();`).join('\n');
