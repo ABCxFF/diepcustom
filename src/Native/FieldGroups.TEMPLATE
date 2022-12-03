@@ -32,7 +32,7 @@ import { Entity } from "./Entity";
 
 export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, ValueType> {
     state: Uint8Array;
-    values: ValueTypgroup[];
+    values: ValueType[];
     owner: ArenaGroup;
     fieldId: number;
 
@@ -49,10 +49,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [0](value) {
         if (value === this.values[0]) return;
             
-        this.statgroup[0] |= 1;
+        this.state[0] |= 1;
         this.values[0] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [1]() {
@@ -61,10 +61,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [1](value) {
         if (value === this.values[1]) return;
             
-        this.statgroup[1] |= 1;
+        this.state[1] |= 1;
         this.values[1] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [2]() {
@@ -73,10 +73,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [2](value) {
         if (value === this.values[2]) return;
             
-        this.statgroup[2] |= 1;
+        this.state[2] |= 1;
         this.values[2] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [3]() {
@@ -85,10 +85,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [3](value) {
         if (value === this.values[3]) return;
             
-        this.statgroup[3] |= 1;
+        this.state[3] |= 1;
         this.values[3] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [4]() {
@@ -97,10 +97,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [4](value) {
         if (value === this.values[4]) return;
             
-        this.statgroup[4] |= 1;
+        this.state[4] |= 1;
         this.values[4] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [5]() {
@@ -109,10 +109,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [5](value) {
         if (value === this.values[5]) return;
             
-        this.statgroup[5] |= 1;
+        this.state[5] |= 1;
         this.values[5] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [6]() {
@@ -121,10 +121,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [6](value) {
         if (value === this.values[6]) return;
             
-        this.statgroup[6] |= 1;
+        this.state[6] |= 1;
         this.values[6] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [7]() {
@@ -133,10 +133,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [7](value) {
         if (value === this.values[7]) return;
             
-        this.statgroup[7] |= 1;
+        this.state[7] |= 1;
         this.values[7] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [8]() {
@@ -145,10 +145,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [8](value) {
         if (value === this.values[8]) return;
             
-        this.statgroup[8] |= 1;
+        this.state[8] |= 1;
         this.values[8] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [9]() {
@@ -157,10 +157,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
     set [9](value) {
         if (value === this.values[9]) return;
             
-        this.statgroup[9] |= 1;
+        this.state[9] |= 1;
         this.values[9] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     
@@ -176,7 +176,7 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
 
 export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     state: Uint8Array;
-    values: ValueTypgroup[];
+    values: ValueType[];
     owner: CameraGroup;
     fieldId: number;
 
@@ -193,10 +193,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [0](value) {
         if (value === this.values[0]) return;
             
-        this.statgroup[0] |= 1;
+        this.state[0] |= 1;
         this.values[0] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [1]() {
@@ -205,10 +205,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [1](value) {
         if (value === this.values[1]) return;
             
-        this.statgroup[1] |= 1;
+        this.state[1] |= 1;
         this.values[1] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [2]() {
@@ -217,10 +217,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [2](value) {
         if (value === this.values[2]) return;
             
-        this.statgroup[2] |= 1;
+        this.state[2] |= 1;
         this.values[2] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [3]() {
@@ -229,10 +229,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [3](value) {
         if (value === this.values[3]) return;
             
-        this.statgroup[3] |= 1;
+        this.state[3] |= 1;
         this.values[3] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [4]() {
@@ -241,10 +241,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [4](value) {
         if (value === this.values[4]) return;
             
-        this.statgroup[4] |= 1;
+        this.state[4] |= 1;
         this.values[4] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [5]() {
@@ -253,10 +253,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [5](value) {
         if (value === this.values[5]) return;
             
-        this.statgroup[5] |= 1;
+        this.state[5] |= 1;
         this.values[5] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [6]() {
@@ -265,10 +265,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [6](value) {
         if (value === this.values[6]) return;
             
-        this.statgroup[6] |= 1;
+        this.state[6] |= 1;
         this.values[6] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     get [7]() {
@@ -277,10 +277,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     set [7](value) {
         if (value === this.values[7]) return;
             
-        this.statgroup[7] |= 1;
+        this.state[7] |= 1;
         this.values[7] = value;
 
-        this.owner.statgroup[this.fieldId] |= 1;
+        this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
     

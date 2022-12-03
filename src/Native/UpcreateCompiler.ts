@@ -19,12 +19,13 @@
 */
 
 import Writer from "../Coder/Writer";
+import { Color } from "../Const/Enums";
+import { CameraEntity } from "./Camera";
 import { Entity } from "./Entity";
 
 /** Entity creation compiler function... Run! */
-export const compileCreation = (w: Writer, entity: Entity) => {
+export const compileCreation = (camera: CameraEntity, w: Writer, entity: Entity) => {
     w.entid(entity).u8(1);
-
 
  /* <template> auto-generated */ 
     const hasRelations = !!entity.relationsData;
@@ -62,7 +63,7 @@ export const compileCreation = (w: Writer, entity: Entity) => {
     if (hasPhysics) w.float(entity.physicsData.values.size);
     if (hasCamera) w.entid(entity.cameraData.values.player);
     if (hasArena) w.vu(entity.arenaData.values.flags);
-    if (hasStyle) w.vu(entity.styleData.values.color);
+    if (hasStyle) w.vu(entity.styleData.values.color === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (camera.cameraData.values.player && camera.cameraData.values.player.relationsData && camera.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.styleData.values.color);
     if (hasArena) for (at = 0; at < 10; ++at) w.vu(entity.arenaData.values.scoreboardColors.values[at]);
     if (hasCamera) w.stringNT(entity.cameraData.values.killedBy);
     if (hasArena) w.vi(entity.arenaData.values.playersNeeded);
@@ -126,9 +127,8 @@ export const compileCreation = (w: Writer, entity: Entity) => {
 };
 
 /** Entity update compiler function... Run! */
-export const compileUpdate = (w: Writer, entity: Entity) => {
+export const compileUpdate = (camera: Camera, w: Writer, entity: Entity) => {
     w.entid(entity).raw(0, 1);
-
 
  /* <template> auto-generated */ 
     const hasRelations = !!entity.relationsData;
@@ -144,7 +144,6 @@ export const compileUpdate = (w: Writer, entity: Entity) => {
     const hasTeam = !!entity.teamData;
 
     let at = -1;
-
  /* <template> auto-generated */ 
     if (hasPosition) if (entity.positionData.state[1]) {w.u8((0 - at) ^ 1); at = 0; w.vi(entity.positionData.values.y);};
     if (hasPosition) if (entity.positionData.state[0]) {w.u8((1 - at) ^ 1); at = 1; w.vi(entity.positionData.values.x);};
@@ -152,7 +151,7 @@ export const compileUpdate = (w: Writer, entity: Entity) => {
     if (hasPhysics) if (entity.physicsData.state[2]) {w.u8((3 - at) ^ 1); at = 3; w.float(entity.physicsData.values.size);};
     if (hasCamera) if (entity.cameraData.state[2]) {w.u8((4 - at) ^ 1); at = 4; w.entid(entity.cameraData.values.player);};
     if (hasArena) if (entity.arenaData.state[0]) {w.u8((5 - at) ^ 1); at = 5; w.vu(entity.arenaData.values.flags);};
-    if (hasStyle) if (entity.styleData.state[1]) {w.u8((6 - at) ^ 1); at = 6; w.vu(entity.styleData.values.color);};
+    if (hasStyle) if (entity.styleData.state[1]) { w.u8((6 - at) ^ 1); at = 6; w.vu(entity.styleData.values.color === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (camera.cameraData.values.player && camera.cameraData.values.player.relationsData && camera.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.styleData.values.color);};
     if (hasArena) if (entity.arenaData.state[8]) { w.u8((7 - at) ^ 1); at = -1; if (entity.arenaData.values.scoreboardColors.state[0]) { w.u8((0 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[0]); at = 0; } if (entity.arenaData.values.scoreboardColors.state[1]) { w.u8((1 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[1]); at = 1; } if (entity.arenaData.values.scoreboardColors.state[2]) { w.u8((2 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[2]); at = 2; } if (entity.arenaData.values.scoreboardColors.state[3]) { w.u8((3 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[3]); at = 3; } if (entity.arenaData.values.scoreboardColors.state[4]) { w.u8((4 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[4]); at = 4; } if (entity.arenaData.values.scoreboardColors.state[5]) { w.u8((5 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[5]); at = 5; } if (entity.arenaData.values.scoreboardColors.state[6]) { w.u8((6 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[6]); at = 6; } if (entity.arenaData.values.scoreboardColors.state[7]) { w.u8((7 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[7]); at = 7; } if (entity.arenaData.values.scoreboardColors.state[8]) { w.u8((8 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[8]); at = 8; } if (entity.arenaData.values.scoreboardColors.state[9]) { w.u8((9 - at) ^ 1); w.vu(entity.arenaData.values.scoreboardColors.values[9]); at = 9; } w.u8(1); at = 7; };
     if (hasCamera) if (entity.cameraData.state[16]) {w.u8((8 - at) ^ 1); at = 8; w.stringNT(entity.cameraData.values.killedBy);};
     if (hasArena) if (entity.arenaData.state[13]) {w.u8((9 - at) ^ 1); at = 9; w.vi(entity.arenaData.values.playersNeeded);};
