@@ -17,11 +17,9 @@
 */
 import ArenaEntity, { ArenaState } from "../Native/Arena";
 import MazeWall from "../Entity/Misc/MazeWall";
+import { VectorAbstract } from "../Physics/Vector";
 
-/**
- * Maze Gamemode Arena
- */
-
+// constss.
 const CELL_SIZE = 635;
 const GRID_SIZE = 40;
 const ARENA_SIZE = CELL_SIZE * GRID_SIZE;
@@ -30,16 +28,27 @@ const TURN_CHANCE = 0.15;
 const BRANCH_CHANCE = 0.1;
 const TERMINATION_CHANCE = 0.15;
 
-let SEEDS: any[] = [];
-let MAZE: number[] = Array(GRID_SIZE * GRID_SIZE).fill(0);
-let WALLS: any[] = [];
-
+/**
+ * Maze Gamemode Arena
+ * 
+ * Implementation details:
+ * Maze map generator by damocles <github.com/SpanksMcYeet>
+ *  - Added into codebase on December 3rd 2022
+ */
 export default class Maze extends ArenaEntity {
+    /** Stores all the "seed"s */
+    private SEEDS: VectorAbstract[] = [];
+    /** Stores all the "wall"s, contains cell based coords */
+    private WALLS: (VectorAbstract & {width: number, height: number})[] = [];
+    /** Rolled out matrix of the grid */
+    private MAZE: Uint8Array = new Uint8Array(GRID_SIZE * GRID_SIZE);
+
     public constructor(a: any) {
         super(a);
         this.updateBounds(ARENA_SIZE, ARENA_SIZE);
-        this._mazeZone();
+        this._buildMaze();
     }
+    /** Creates a maze wall from cell coords */
     private _buildWallFromGridCoord(gridX: number, gridY: number, gridW: number, gridH: number) {
         const scaledW = gridW * CELL_SIZE;
         const scaledH = gridH * CELL_SIZE;
@@ -47,30 +56,36 @@ export default class Maze extends ArenaEntity {
         const scaledY = gridY * CELL_SIZE - (gridH + ARENA_SIZE) / 2 + (scaledH / 2);
         new MazeWall(this.game, scaledX, scaledY, scaledH, scaledW);
     }
-    private _get(x: number, y: number) {
-        return MAZE[y * GRID_SIZE + x];
+    /** Allows for easier (x, y) based getting of maze cells */
+    private _get(x: number, y: number): number {
+        return this.MAZE[y * GRID_SIZE + x];
     }
-    private _set(x: number, y: number, value: number) {
-        return MAZE[y * GRID_SIZE + x] = value;
+    /** Allows for easier (x, y) based setting of maze cells */
+    private _set(x: number, y: number, value: number): number {
+        return this.MAZE[y * GRID_SIZE + x] = value;
     }
-    private _mapValues() {
-        return MAZE.map((r, i) => [i % GRID_SIZE, Math.floor(i / GRID_SIZE), r]);
+    /** Converts MAZE grid into an array of set and unset bits for ease of use */
+    private _mapValues(): [x: number, y: number, value: number][] {
+        const values: [x: number, y: number, value: number][] = Array(this.MAZE.length);
+        for (let i = 0; i < this.MAZE.length; ++i) values[i] = [i % GRID_SIZE, Math.floor(i / GRID_SIZE), this.MAZE[i]];
+        return values;
     }
-    private _mazeZone() {
+    /** Builds the maze */
+    private _buildMaze() {
         // Plant some seeds
         for (let i = 0; i < 10000; i++) {
             // Stop if we exceed our maximum seed amount
-            if (SEEDS.length >= SEED_AMOUNT) break;
+            if (this.SEEDS.length >= SEED_AMOUNT) break;
             // Attempt a seed planting
-            let seed = {
+            let seed: VectorAbstract = {
                 x: Math.floor((Math.random() * GRID_SIZE) - 1),
                 y: Math.floor((Math.random() * GRID_SIZE) - 1),
             };
             // Check if our seed is valid (is 3 GU away from another seed, and is not on the border)
-            if (SEEDS.some(a => (Math.abs(seed.x - a.x) <= 3 && Math.abs(seed.y - a.y) <= 3))) continue;
+            if (this.SEEDS.some(a => (Math.abs(seed.x - a.x) <= 3 && Math.abs(seed.y - a.y) <= 3))) continue;
             if (seed.x <= 0 || seed.y <= 0 || seed.x >= GRID_SIZE - 1 || seed.y >= GRID_SIZE - 1) continue;
             // Push it to the pending seeds and set its grid to a wall cell
-            SEEDS.push(seed);
+            this.SEEDS.push(seed);
             this._set(seed.x, seed.y, 1);
         }
         const direction: number[][] = [
@@ -78,7 +93,7 @@ export default class Maze extends ArenaEntity {
             [0, -1], [0, 1], // up and down
         ];
         // Let it grow!
-        for (let seed of SEEDS) {
+        for (let seed of this.SEEDS) {
             // Select a direction we want to head in
             let dir: number[] = direction[Math.floor(Math.random() * 4)];
             let termination = 1;
@@ -96,7 +111,7 @@ export default class Maze extends ArenaEntity {
                 // Now lets see if we want to branch or turn
                 if (Math.random() <= BRANCH_CHANCE) {
                     // If the seeds exceeds 75, then we're going to stop creating branches in order to avoid making a massive maze tumor(s)
-                    if (SEEDS.length > 75) continue;
+                    if (this.SEEDS.length > 75) continue;
                     // Get which side we want the branch to be on (left or right if moving up or down, and up and down if moving left or right)
                     let [ xx, yy ] = direction.filter(a => a.every((b, c) => b !== dir[c]))[Math.floor(Math.random() * 2)];
                     // Create the seed
@@ -105,7 +120,7 @@ export default class Maze extends ArenaEntity {
                         y: seed.y + yy,
                     };
                     // Push the seed and set its grid to a maze zone
-                    SEEDS.push(newSeed);
+                    this.SEEDS.push(newSeed);
                     this._set(seed.x, seed.y, 1);
                 } else if (Math.random() <= TURN_CHANCE) {
                     // Get which side we want to turn to (left or right if moving up or down, and up and down if moving left or right)
@@ -179,19 +194,11 @@ export default class Maze extends ArenaEntity {
                         this._set(x + i, y + chunk.height, 2);
                     chunk.height++;
                 }
-                WALLS.push(chunk);
+                this.WALLS.push(chunk);
             }
         }
         // Create the walls!
-        for (let {x, y, width, height} of WALLS)
+        for (let {x, y, width, height} of this.WALLS)
             this._buildWallFromGridCoord(x, y, width, height);
-    }
-    public tick(tick: number) {
-        if (this.state === ArenaState.CLOSED) {
-            WALLS.length = 0;
-            SEEDS.length = 0;
-            MAZE = Array(GRID_SIZE * GRID_SIZE).fill(0);
-        }
-        super.tick(tick);
     }
 }
