@@ -79,7 +79,7 @@ export class ShootCycle {
         if (this.pos >= reloadTime * (1 + this.barrelEntity.definition.delay)) {
             this.barrelEntity.barrel.reloadTime = reloadTime;
             this.barrelEntity.shoot();
-            this.pos %= reloadTime;
+            this.pos = 1;
         } else {
             this.pos += 1;
         }
