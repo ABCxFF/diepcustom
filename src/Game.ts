@@ -41,6 +41,7 @@ import DominationTestingArena from "./Gamemodes/Misc/DomTest";
 import JungleArena from "./Gamemodes/Misc/Jungle";
 import FactoryTestArena from "./Gamemodes/Misc/FactoryTest";
 import BallArena from "./Gamemodes/Misc/Ball";
+import MazeArena from "./Gamemodes/Maze";
 
 /**
  * WriterStream that broadcasts to all of the game's WebSockets.
@@ -74,7 +75,7 @@ const GamemodeToArenaClass: Record<DiepGamemodeID, (typeof ArenaEntity) | null> 
     "survival": null,
     "tag": null,
     "mot": MothershipArena,
-    "maze": null,
+    "maze": MazeArena,
     "testing": TestingArena,
     "spike": SpikeboxArena,
     "domtest": DominationTestingArena,

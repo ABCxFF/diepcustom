@@ -35,7 +35,7 @@ const TERMINATION_CHANCE = 0.15;
  * Maze map generator by damocles <github.com/SpanksMcYeet>
  *  - Added into codebase on December 3rd 2022
  */
-export default class Maze extends ArenaEntity {
+export default class MazeArena extends ArenaEntity {
     /** Stores all the "seed"s */
     private SEEDS: VectorAbstract[] = [];
     /** Stores all the "wall"s, contains cell based coords */
