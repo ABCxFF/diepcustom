@@ -18,45 +18,45 @@
 
 import GameServer from "../../Game";
 
-import { Colors } from "../../Const/Enums";
+import { Color } from "../../Const/Enums";
 import { Entity } from "../../Native/Entity";
 import { TeamGroup } from "../../Native/FieldGroups";
 
-export type TeamGroupEntity = Entity & { team: TeamGroup }
+export type TeamGroupEntity = Entity & { teamData: TeamGroup }
 
-export const ColorsTeamName: Record<Colors, string> = {
-    [Colors.Border]: "BORDER",
-    [Colors.Barrel]: "BARREL",
-    [Colors.Tank]: "TANK",
-    [Colors.TeamBlue]: "BLUE",
-    [Colors.TeamRed]: "RED",
-    [Colors.TeamPurple]: "PURPLE",
-    [Colors.TeamGreen]: "GREEN",
-    [Colors.Shiny]: "SHINY",
-    [Colors.EnemySquare]: "SQUARE",
-    [Colors.EnemyTriangle]: "TRIANGLE",
-    [Colors.EnemyPentagon]: "PENTAGON",
-    [Colors.EnemyCrasher]: "CRASHER",
-    [Colors.Neutral]: "a mysterious group",
-    [Colors.ScoreboardBar]: "SCOREBOARD",
-    [Colors.Box]: "MAZE",
-    [Colors.EnemyTank]: "ENEMY",
-    [Colors.NecromancerSquare]: "SUNCHIP",
-    [Colors.Fallen]: "FALLEN",
-    [Colors.kMaxColors]: "UNKNOWN"
+export const ColorsTeamName: Record<Color, string> = {
+    [Color.Border]: "BORDER",
+    [Color.Barrel]: "BARREL",
+    [Color.Tank]: "TANK",
+    [Color.TeamBlue]: "BLUE",
+    [Color.TeamRed]: "RED",
+    [Color.TeamPurple]: "PURPLE",
+    [Color.TeamGreen]: "GREEN",
+    [Color.Shiny]: "SHINY",
+    [Color.EnemySquare]: "SQUARE",
+    [Color.EnemyTriangle]: "TRIANGLE",
+    [Color.EnemyPentagon]: "PENTAGON",
+    [Color.EnemyCrasher]: "CRASHER",
+    [Color.Neutral]: "a mysterious group",
+    [Color.ScoreboardBar]: "SCOREBOARD",
+    [Color.Box]: "MAZE",
+    [Color.EnemyTank]: "ENEMY",
+    [Color.NecromancerSquare]: "SUNCHIP",
+    [Color.Fallen]: "FALLEN",
+    [Color.kMaxColors]: "UNKNOWN"
 }
 
 export class TeamEntity extends Entity implements TeamGroupEntity {
     /** This group makes `this` a team entity in the first place. */
-    public team: TeamGroup = new TeamGroup(this);
+    public teamData: TeamGroup = new TeamGroup(this);
 
     /** Used for notifications in team based gamemodes */
     public teamName: string;
 
-    public constructor(game: GameServer, color: Colors, name: string = ColorsTeamName[color]) {
+    public constructor(game: GameServer, color: Color, name: string = ColorsTeamName[color]) {
         super(game);
 
-        this.team.values.teamColor = color;
+        this.teamData.values.teamColor = color;
         this.teamName = name;
     }
 }

@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Drone from "./Drone";
 
-import { InputFlags, ObjectFlags } from "../../../Const/Enums";
+import { InputFlags, PhysicsFlags } from "../../../Const/Enums";
 import { BarrelDefinition, TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AIState, Inputs } from "../../AI";
@@ -79,15 +79,15 @@ export default class Minion extends Drone implements BarrelBase {
         this.ai.viewRange = 900;
         this.usePosAngle = false;
 
-        this.physics.values.sides = bulletDefinition.sides ?? 1;
-        this.physics.values.size *= 1.2;
+        this.physicsData.values.sides = bulletDefinition.sides ?? 1;
+        this.physicsData.values.size *= 1.2;
         
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        if (this.physics.values.objectFlags & ObjectFlags.canEscapeArena) this.physics.values.objectFlags ^= ObjectFlags.canEscapeArena;
+        if (this.physicsData.values.flags & PhysicsFlags.noOwnTeamCollision) this.physicsData.values.flags ^= PhysicsFlags.noOwnTeamCollision;
+        if (this.physicsData.values.flags & PhysicsFlags.canEscapeArena) this.physicsData.values.flags ^= PhysicsFlags.canEscapeArena;
 
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
+        this.physicsData.values.flags |= PhysicsFlags.onlySameOwnerCollision;
 
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         this.cameraEntity = tank.cameraEntity;
 
         this.minionBarrel = new Barrel(this, MinionBarrelDefinition);
@@ -96,24 +96,24 @@ export default class Minion extends Drone implements BarrelBase {
 
     /** This allows for factory to hook in before the entity moves. */
     protected tickMixin(tick: number) {
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
 
         const usingAI = !this.canControlDrones || !this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel();
         const inputs = !usingAI ? this.tank.inputs : this.ai.inputs;
 
         if (usingAI && this.ai.state === AIState.idle) {
-            this.movementAngle = this.position.values.angle;
+            this.movementAngle = this.positionData.values.angle;
         } else {
             this.inputs.flags |= InputFlags.leftclick;
 
-            const dist = inputs.mouse.distanceToSQ(this.position.values);
+            const dist = inputs.mouse.distanceToSQ(this.positionData.values);
 
             if (dist < Minion.FOCUS_RADIUS / 4) { // Half
-                this.movementAngle = this.position.values.angle + Math.PI;
+                this.movementAngle = this.positionData.values.angle + Math.PI;
             } else if (dist < Minion.FOCUS_RADIUS) {
-                this.movementAngle = this.position.values.angle + Math.PI / 2;
-            } else this.movementAngle = this.position.values.angle;
+                this.movementAngle = this.positionData.values.angle + Math.PI / 2;
+            } else this.movementAngle = this.positionData.values.angle;
         }
 
         super.tickMixin(tick);

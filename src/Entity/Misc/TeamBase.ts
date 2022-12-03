@@ -18,7 +18,7 @@
 
 import GameServer from "../../Game";
 
-import { HealthbarFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
+import { HealthFlags, PhysicsFlags, StyleFlags } from "../../Const/Enums";
 import { TeamGroupEntity } from "./TeamEntity";
 import LivingEntity from "../Live";
 /**
@@ -26,36 +26,36 @@ import LivingEntity from "../Live";
  */
 export default class TeamBase extends LivingEntity {
 
-    constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean=true) {
+    public constructor(game: GameServer, team: TeamGroupEntity, x: number, y: number, width: number, height: number, painful: boolean=true) {
         super(game);
 
-        this.relations.values.team = team;
+        this.relationsData.values.team = team;
 
-        this.position.values.x = x;
-        this.position.values.y = y;
+        this.positionData.values.x = x;
+        this.positionData.values.y = y;
 
-        this.physics.values.width = width;
-        this.physics.values.size = height;
-        this.physics.values.sides = 2;
-        this.physics.values.objectFlags |= ObjectFlags.minimap | ObjectFlags.noOwnTeamCollision | ObjectFlags.base;
-        this.physics.values.pushFactor = 2;
+        this.physicsData.values.width = width;
+        this.physicsData.values.size = height;
+        this.physicsData.values.sides = 2;
+        this.physicsData.values.flags |= PhysicsFlags.showsOnMap | PhysicsFlags.noOwnTeamCollision | PhysicsFlags.isBase;
+        this.physicsData.values.pushFactor = 2;
         this.damagePerTick = 5;
 
         if (!painful) {
-            this.physics.values.pushFactor = 0;
+            this.physicsData.values.pushFactor = 0;
             this.damagePerTick = 0;
         }
 
         this.damageReduction = 0;
-        this.physics.values.absorbtionFactor = 0;
+        this.physicsData.values.absorbtionFactor = 0;
 
-        this.style.values.opacity = 0.1;
-        this.style.values.borderThickness = 0;
-        this.style.values.color = team.team.teamColor;
-        this.style.values.styleFlags |= StyleFlags.minimap2 | StyleFlags.noDmgIndicator;
+        this.styleData.values.opacity = 0.1;
+        this.styleData.values.borderWidth = 0;
+        this.styleData.values.color = team.teamData.teamColor;
+        this.styleData.values.flags |= StyleFlags._minimap | StyleFlags.hasNoDmgIndicator;
 
-        this.health.healthbar |= HealthbarFlags.hidden
-        this.health.health = this.health.values.maxHealth = 0xABCFF;
+        this.healthData.flags |= HealthFlags.hiddenHealthbar
+        this.healthData.health = this.healthData.values.maxHealth = 0xABCFF;
     }
 
     public tick(tick: number) {

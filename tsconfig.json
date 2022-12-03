@@ -3,7 +3,8 @@
         "target": "ES2021",
         "module": "CommonJS",
         "outDir": "./lib",
-        "strict": true
+        "strict": true,
+        "removeComments": true
     },
     "include": [
         "src",

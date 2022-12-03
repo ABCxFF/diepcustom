@@ -48,7 +48,7 @@ import BallArena from "./Gamemodes/Misc/Ball";
 class WSSWriterStream extends Writer {
     private game: GameServer;
 
-    constructor(game: GameServer) {
+    public constructor(game: GameServer) {
         super();
         this.game = game;
     }
@@ -141,20 +141,17 @@ const HOSTED_ENDPOINTS: string[] = [];
 
         this.listen();
         this.clients = new Set();
-        /** @ts-ignore */ // Keeps player count updating
-        this.clients._add = this.clients.add;
+        // Keeps player count updating per addition
+        const _add = this.clients.add;
         this.clients.add = (client: Client) => {
             GameServer.globalPlayerCount += 1;
             this.broadcastPlayerCount();
             
-            /** @ts-ignore */
-            return this.clients._add(client);
+            return _add.call(this.clients, client);
         }
-        /** @ts-ignore */ // Keeps player count updating
-        this.clients._delete = this.clients.delete;
+        const _delete = this.clients.delete;
         this.clients.delete = (client: Client) => {
-            /** @ts-ignore */
-            let success = this.clients._delete(client);
+            let success = _delete.call(this.clients, client);
             if (success) {
                 GameServer.globalPlayerCount -= 1;
                 this.broadcastPlayerCount();
@@ -162,14 +159,12 @@ const HOSTED_ENDPOINTS: string[] = [];
 
             return success;
         }
-        /** @ts-ignore */ // Keeps player count updating
-        this.clients._clear = this.clients.clear;
+        const _clear = this.clients.clear;
         this.clients.clear = () => {
             GameServer.globalPlayerCount -= this.clients.size;
             this.broadcastPlayerCount();
             
-            /** @ts-ignore */
-            return this.clients._clear();
+            return _clear.call(this.clients);
         }
 
         this.entities = new EntityManager(this);
@@ -194,7 +189,7 @@ const HOSTED_ENDPOINTS: string[] = [];
             if (!(!HOSTED_ENDPOINTS.includes(endpoint)) && this.gamemode !== endpoint) return;
 
             util.log("Incoming client");
-            if (this.arena.arenaState !== ArenaState.OPEN) {
+            if (this.arena.state !== ArenaState.OPEN) {
                 util.log("Arena is not open: Closing client");
                 return  ws.terminate();
             }

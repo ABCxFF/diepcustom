@@ -24,7 +24,7 @@ import TeamBase from "../Entity/Misc/TeamBase";
 import TankBody from "../Entity/Tank/TankBody";
 
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
-import { Colors } from "../Const/Enums";
+import { Color } from "../Const/Enums";
 
 const arenaSize = 11150;
 const baseSize = 3345;
@@ -48,25 +48,25 @@ export default class Teams4Arena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
         this.updateBounds(arenaSize * 2, arenaSize * 2);
-        this.blueTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamBlue), -arenaSize + baseSize / 2,  -arenaSize + baseSize / 2, baseSize, baseSize);
-        this.redTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamRed), arenaSize - baseSize / 2, arenaSize - baseSize / 2, baseSize, baseSize);
-        this.greenTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamGreen), -arenaSize + baseSize / 2,  arenaSize - baseSize / 2, baseSize, baseSize);
-        this.purpleTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamPurple), arenaSize - baseSize / 2, -arenaSize + baseSize / 2, baseSize, baseSize);
+        this.blueTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamBlue), -arenaSize + baseSize / 2,  -arenaSize + baseSize / 2, baseSize, baseSize);
+        this.redTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamRed), arenaSize - baseSize / 2, arenaSize - baseSize / 2, baseSize, baseSize);
+        this.greenTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamGreen), -arenaSize + baseSize / 2,  arenaSize - baseSize / 2, baseSize, baseSize);
+        this.purpleTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamPurple), arenaSize - baseSize / 2, -arenaSize + baseSize / 2, baseSize, baseSize);
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
-        tank.position.values.y = arenaSize * Math.random() - arenaSize;
+        tank.positionData.values.y = arenaSize * Math.random() - arenaSize;
 
         const xOffset = (Math.random() - 0.5) * baseSize,
               yOffset = (Math.random() - 0.5) * baseSize;
         
         const base = this.playerTeamMap.get(client) || [this.blueTeamBase, this.redTeamBase, this.greenTeamBase, this.purpleTeamBase][0|Math.random()*4];
-        tank.relations.values.team = base.relations.values.team;
-        tank.style.values.color = base.style.values.color;
-        tank.position.values.x = base.position.values.x + xOffset;
-        tank.position.values.y = base.position.values.y + yOffset;
+        tank.relationsData.values.team = base.relationsData.values.team;
+        tank.styleData.values.color = base.styleData.values.color;
+        tank.positionData.values.x = base.positionData.values.x + xOffset;
+        tank.positionData.values.y = base.positionData.values.y + yOffset;
         this.playerTeamMap.set(client, base);
 
-        if (client.camera) client.camera.relations.team = tank.relations.values.team;
+        if (client.camera) client.camera.relationsData.team = tank.relationsData.values.team;
     }
 }

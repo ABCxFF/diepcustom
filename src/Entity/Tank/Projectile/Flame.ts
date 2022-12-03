@@ -30,8 +30,8 @@ export default class Flame extends Bullet {
         this.baseAccel = 0;
         this.damageReduction = 1;
         
-        this.physics.values.sides = 4;
-        this.physics.values.absorbtionFactor = this.physics.values.pushFactor = 0;
+        this.physicsData.values.sides = 4;
+        this.physicsData.values.absorbtionFactor = this.physicsData.values.pushFactor = 0;
         this.lifeLength = 25 * barrel.definition.bullet.lifeLength;
     }
 
@@ -43,6 +43,6 @@ export default class Flame extends Bullet {
         super.tick(tick);
 
         this.damageReduction += 1 / 25;
-        this.style.opacity -= 1 / 25;
+        this.styleData.opacity -= 1 / 25;
     }
 }

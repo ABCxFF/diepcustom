@@ -19,7 +19,7 @@
 import Barrel from "../Barrel";
 import Bullet from "./Bullet";
 
-import { ObjectFlags, StyleFlags } from "../../../Const/Enums";
+import { PhysicsFlags, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { Entity } from "../../../Native/Entity";
 import { AI, AIState } from "../../AI";
@@ -50,23 +50,23 @@ export default class Drone extends Bullet {
         
         this.ai = new AI(this);
         this.ai.viewRange = 850 * tank.sizeFactor;
-        this.ai.targetFilter = (targetPos) => (targetPos.x - this.tank.position.values.x) ** 2 + (targetPos.y - this.tank.position.values.y) ** 2 <= this.ai.viewRange ** 2; // (1000 ** 2) 1000 radius
+        this.ai.targetFilter = (targetPos) => (targetPos.x - this.tank.positionData.values.x) ** 2 + (targetPos.y - this.tank.positionData.values.y) ** 2 <= this.ai.viewRange ** 2; // (1000 ** 2) 1000 radius
         this.canControlDrones = typeof this.barrelEntity.definition.canControlDrones === 'boolean' && this.barrelEntity.definition.canControlDrones;
-        this.physics.values.sides = bulletDefinition.sides ?? 3;
-        if (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) this.physics.values.objectFlags ^= ObjectFlags.noOwnTeamCollision;
-        this.physics.values.objectFlags |= ObjectFlags.onlySameOwnerCollision;
-        this.style.values.styleFlags &= ~StyleFlags.noDmgIndicator;
+        this.physicsData.values.sides = bulletDefinition.sides ?? 3;
+        if (this.physicsData.values.flags & PhysicsFlags.noOwnTeamCollision) this.physicsData.values.flags ^= PhysicsFlags.noOwnTeamCollision;
+        this.physicsData.values.flags |= PhysicsFlags.onlySameOwnerCollision;
+        this.styleData.values.flags &= ~StyleFlags.hasNoDmgIndicator;
 
         if (barrel.definition.bullet.lifeLength !== -1) {
             this.lifeLength = 88 * barrel.definition.bullet.lifeLength;
         } else {
             this.lifeLength = Infinity;
-            if (this.physics.values.objectFlags & ObjectFlags.canEscapeArena) this.physics.values.objectFlags ^= ObjectFlags.canEscapeArena;
+            if (this.physicsData.values.flags & PhysicsFlags.canEscapeArena) this.physicsData.values.flags ^= PhysicsFlags.canEscapeArena;
         }
         this.deathAccelFactor = 1;
 
-        this.physics.values.pushFactor = 4;
-        this.physics.values.absorbtionFactor = bulletDefinition.absorbtionFactor;
+        this.physicsData.values.pushFactor = 4;
+        this.physicsData.values.absorbtionFactor = bulletDefinition.absorbtionFactor;
 
         this.baseSpeed /= 3;
 
@@ -93,8 +93,8 @@ export default class Drone extends Bullet {
 
         if (usingAI && this.ai.state === AIState.idle) {
             const delta = {
-                x: this.position.values.x - this.tank.position.values.x,
-                y: this.position.values.y - this.tank.position.values.y
+                x: this.positionData.values.x - this.tank.positionData.values.x,
+                y: this.positionData.values.y - this.tank.positionData.values.y
             }
             const base = this.baseAccel;
 
@@ -102,14 +102,14 @@ export default class Drone extends Bullet {
             let unitDist = (delta.x ** 2 + delta.y ** 2) / Drone.MAX_RESTING_RADIUS;
             if (unitDist <= 1 && this.restCycle) {
                 this.baseAccel /= 6;
-                this.position.angle += 0.01 + 0.012 * unitDist;
+                this.positionData.angle += 0.01 + 0.012 * unitDist;
             } else {
                 const offset = Math.atan2(delta.y, delta.x) + Math.PI / 2
-                delta.x = this.tank.position.values.x + Math.cos(offset) * this.tank.physics.values.size * 1.2 - this.position.values.x;
-                delta.y = this.tank.position.values.y + Math.sin(offset) * this.tank.physics.values.size * 1.2 - this.position.values.y;
-                this.position.angle = Math.atan2(delta.y, delta.x);
+                delta.x = this.tank.positionData.values.x + Math.cos(offset) * this.tank.physicsData.values.size * 1.2 - this.positionData.values.x;
+                delta.y = this.tank.positionData.values.y + Math.sin(offset) * this.tank.physicsData.values.size * 1.2 - this.positionData.values.y;
+                this.positionData.angle = Math.atan2(delta.y, delta.x);
                 if (unitDist < 0.5) this.baseAccel /= 3;
-                this.restCycle = (delta.x ** 2 + delta.y ** 2) <= 4 * (this.tank.physics.values.size ** 2);
+                this.restCycle = (delta.x ** 2 + delta.y ** 2) <= 4 * (this.tank.physicsData.values.size ** 2);
             }
 
             if (!Entity.exists(this.barrelEntity)) this.destroy();
@@ -120,14 +120,14 @@ export default class Drone extends Bullet {
 
             return;
         } else {
-            this.position.angle = Math.atan2(inputs.mouse.y - this.position.values.y, inputs.mouse.x - this.position.values.x);
+            this.positionData.angle = Math.atan2(inputs.mouse.y - this.positionData.values.y, inputs.mouse.x - this.positionData.values.x);
             this.restCycle = false
         }
 
 
         
         if (this.canControlDrones && inputs.attemptingRepel()) {
-            this.position.angle += Math.PI; 
+            this.positionData.angle += Math.PI; 
         }
 
         // So that switch tank works, as well as on death

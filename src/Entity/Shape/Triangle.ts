@@ -19,17 +19,17 @@
 import GameServer from "../../Game";
 import AbstractShape from "./AbstractShape";
 
-import { Colors } from "../../Const/Enums";
+import { Color } from "../../Const/Enums";
 
 export default class Triangle extends AbstractShape {
     public constructor(game: GameServer, shiny=Math.random() < 0.000001) {
         super(game);
         
-        this.name.values.name = "Triangle";
-        this.health.values.health = this.health.values.maxHealth = 30;
-        this.physics.values.size = 55 * Math.SQRT1_2;
-        this.physics.values.sides = 3;
-        this.style.values.color = shiny ? Colors.Shiny : Colors.EnemyTriangle;
+        this.nameData.values.name = "Triangle";
+        this.healthData.values.health = this.healthData.values.maxHealth = 30;
+        this.physicsData.values.size = 55 * Math.SQRT1_2;
+        this.physicsData.values.sides = 3;
+        this.styleData.values.color = shiny ? Color.Shiny : Color.EnemyTriangle;
 
         this.damagePerTick = 8;
         this.scoreReward = 25;
@@ -37,7 +37,7 @@ export default class Triangle extends AbstractShape {
 
         if (shiny) {
             this.scoreReward *= 100;
-            this.health.values.health = this.health.values.maxHealth *= 10;
+            this.healthData.values.health = this.healthData.values.maxHealth *= 10;
         }
     }
 }

@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import ObjectEntity from "../Object";
 import AutoTurret from "./AutoTurret";
 
-import { Colors, MotionFlags, ObjectFlags, StyleFlags } from "../../Const/Enums";
+import { Color, PositionFlags, PhysicsFlags, StyleFlags } from "../../Const/Enums";
 import { BarrelBase } from "./TankBody";
 import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
@@ -72,7 +72,7 @@ export class Addon {
 
         const ROT_OFFSET = 0.8;
 
-        if (rotator.style.values.styleFlags & StyleFlags.visible) rotator.style.values.styleFlags ^= StyleFlags.visible;
+        if (rotator.styleData.values.flags & StyleFlags.isVisible) rotator.styleData.values.flags ^= StyleFlags.isVisible;
 
         for (let i = 0; i < count; ++i) {
             const base = new AutoTurret(rotator, AutoTurretMiniDefinition);
@@ -84,25 +84,25 @@ export class Addon {
                 const pos = base.getWorldPosition();
                 const angleToTarget = Math.atan2(targetPos.y - pos.y, targetPos.x - pos.x);
                 
-                const deltaAngle = normalizeAngle(angleToTarget - ((angle + rotator.position.values.angle)));
+                const deltaAngle = normalizeAngle(angleToTarget - ((angle + rotator.positionData.values.angle)));
 
                 return deltaAngle < MAX_ANGLE_RANGE || deltaAngle > (PI2 - MAX_ANGLE_RANGE);
             }
 
-            base.position.values.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
-            base.position.values.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+            base.positionData.values.y = this.owner.physicsData.values.size * Math.sin(angle) * ROT_OFFSET;
+            base.positionData.values.x = this.owner.physicsData.values.size * Math.cos(angle) * ROT_OFFSET;
 
-            if (base.style.values.styleFlags & StyleFlags.aboveParent) base.style.values.styleFlags ^= StyleFlags.aboveParent;
-            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+            if (base.styleData.values.flags & StyleFlags.showsAboveParent) base.styleData.values.flags ^= StyleFlags.showsAboveParent;
+            base.physicsData.values.flags |= PositionFlags.absoluteRotation;
 
             const tickBase = base.tick;
             base.tick = (tick: number) => {
-                base.position.y = this.owner.physics.values.size * Math.sin(angle) * ROT_OFFSET;
-                base.position.x = this.owner.physics.values.size * Math.cos(angle) * ROT_OFFSET;
+                base.positionData.y = this.owner.physicsData.values.size * Math.sin(angle) * ROT_OFFSET;
+                base.positionData.x = this.owner.physicsData.values.size * Math.cos(angle) * ROT_OFFSET;
 
                 tickBase.call(base, tick);
 
-                if (base.ai.state === AIState.idle) base.position.angle = angle + rotator.position.values.angle;
+                if (base.ai.state === AIState.idle) base.positionData.angle = angle + rotator.positionData.values.angle;
             }
 
             rotator.turrets.push(base);
@@ -154,7 +154,7 @@ export class GuardObject extends ObjectEntity implements BarrelBase {
     /** Radians per tick, how many radians the guard will rotate in a tick */
     public radiansPerTick: number;
 
-    constructor(game: GameServer, owner: BarrelBase, sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
+    public constructor(game: GameServer, owner: BarrelBase, sides: number, sizeRatio: number, offsetAngle: number, radiansPerTick: number) {
         super(game);
 
         this.owner = owner;
@@ -166,15 +166,15 @@ export class GuardObject extends ObjectEntity implements BarrelBase {
         this.radiansPerTick = radiansPerTick;
 
         this.setParent(owner);
-        this.relations.values.owner = owner;
-        this.relations.values.team = owner.relations.values.team;
+        this.relationsData.values.owner = owner;
+        this.relationsData.values.team = owner.relationsData.values.team;
 
-        this.style.values.color = Colors.Border;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
-        this.position.values.angle = offsetAngle;
-        this.physics.values.sides = sides;
+        this.styleData.values.color = Color.Border;
+        this.positionData.values.flags |= PositionFlags.absoluteRotation;
+        this.positionData.values.angle = offsetAngle;
+        this.physicsData.values.sides = sides;
         this.reloadTime = owner.reloadTime;
-        this.physics.values.size = owner.physics.values.size * sizeRatio;
+        this.physicsData.values.size = owner.physicsData.values.size * sizeRatio;
     }
 
     /**
@@ -189,16 +189,14 @@ export class GuardObject extends ObjectEntity implements BarrelBase {
      * Spreads onKill to owner
      */
     public onKill(killedEntity: LivingEntity) {
-        // TODO(ABC):
-        // Make this, work differently (Maybe KillerEntity interface)
-        /** @ts-ignore */
-        if (typeof this.owner.onKill === 'function') this.owner.onKill(killedEntity);
+        if (!(this.owner instanceof LivingEntity)) return;
+        this.owner.onKill(killedEntity);
     }
 
     public tick(tick: number): void {
         this.reloadTime = this.owner.reloadTime;
-        this.physics.size = this.sizeRatio * this.owner.physics.values.size;
-        this.position.angle += this.radiansPerTick;
+        this.physicsData.size = this.sizeRatio * this.owner.physicsData.values.size;
+        this.positionData.angle += this.radiansPerTick;
         // It won't ever do any collisions, so no need to tick the object
         // super.tick(tick);
     }
@@ -248,26 +246,26 @@ class LauncherAddon extends Addon {
         const launcher = new ObjectEntity(this.game);
         const sizeRatio = 65.5 * Math.SQRT2 / 50;
         const widthRatio = 33.6 / 50;
-        const size = this.owner.physics.values.size;
+        const size = this.owner.physicsData.values.size;
 
         launcher.setParent(this.owner);
-        launcher.relations.values.owner = this.owner;
-        launcher.relations.values.team = this.owner.relations.values.team;
+        launcher.relationsData.values.owner = this.owner;
+        launcher.relationsData.values.team = this.owner.relationsData.values.team;
 
-        launcher.physics.values.size = sizeRatio * size;
-        launcher.physics.values.width = widthRatio * size;
-        launcher.position.values.x = launcher.physics.values.size / 2;
+        launcher.physicsData.values.size = sizeRatio * size;
+        launcher.physicsData.values.width = widthRatio * size;
+        launcher.positionData.values.x = launcher.physicsData.values.size / 2;
 
-        launcher.style.values.color = Colors.Barrel;
-        launcher.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
-        launcher.physics.values.sides = 2;
+        launcher.styleData.values.color = Color.Barrel;
+        launcher.physicsData.values.flags |= PhysicsFlags.isTrapezoid;
+        launcher.physicsData.values.sides = 2;
 
         launcher.tick = () => {
-            const size = this.owner.physics.values.size;
+            const size = this.owner.physicsData.values.size;
 
-            launcher.physics.size = sizeRatio * size;
-            launcher.physics.width = widthRatio * size;
-            launcher.position.x = launcher.physics.values.size / 2;
+            launcher.physicsData.size = sizeRatio * size;
+            launcher.physicsData.width = widthRatio * size;
+            launcher.positionData.x = launcher.physicsData.values.size / 2;
         }
     }
 }
@@ -314,27 +312,27 @@ class PronouncedAddon extends Addon {
         const sizeRatio = 50 / 50;
         const widthRatio = 42 / 50;
         const offsetRatio = 40 / 50;
-        const size = this.owner.physics.values.size;
+        const size = this.owner.physicsData.values.size;
 
         pronounce.setParent(this.owner);
-        pronounce.relations.values.owner = this.owner;
-        pronounce.relations.values.team = this.owner.relations.values.team
+        pronounce.relationsData.values.owner = this.owner;
+        pronounce.relationsData.values.team = this.owner.relationsData.values.team
 
-        pronounce.physics.values.size = sizeRatio * size;
-        pronounce.physics.values.width = widthRatio * size;
-        pronounce.position.values.x = offsetRatio * size;
-        pronounce.position.values.angle = Math.PI;
+        pronounce.physicsData.values.size = sizeRatio * size;
+        pronounce.physicsData.values.width = widthRatio * size;
+        pronounce.positionData.values.x = offsetRatio * size;
+        pronounce.positionData.values.angle = Math.PI;
 
-        pronounce.style.values.color = Colors.Barrel;
-        pronounce.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
-        pronounce.physics.values.sides = 2;
+        pronounce.styleData.values.color = Color.Barrel;
+        pronounce.physicsData.values.flags |= PhysicsFlags.isTrapezoid;
+        pronounce.physicsData.values.sides = 2;
 
         pronounce.tick = () => {
-            const size = this.owner.physics.values.size;
+            const size = this.owner.physicsData.values.size;
 
-            pronounce.physics.size = sizeRatio * size;
-            pronounce.physics.width = widthRatio * size;
-            pronounce.position.x = offsetRatio * size;
+            pronounce.physicsData.size = sizeRatio * size;
+            pronounce.physicsData.width = widthRatio * size;
+            pronounce.positionData.x = offsetRatio * size;
         }
     }
 }
@@ -347,27 +345,27 @@ class PronouncedDomAddon extends Addon {
         const sizeRatio = 22 / 50;
         const widthRatio = 35 / 50;
         const offsetRatio = 50 / 50;
-        const size = this.owner.physics.values.size;
+        const size = this.owner.physicsData.values.size;
 
         pronounce.setParent(this.owner);
-        pronounce.relations.values.owner = this.owner;
-        pronounce.relations.values.team = this.owner.relations.values.team
+        pronounce.relationsData.values.owner = this.owner;
+        pronounce.relationsData.values.team = this.owner.relationsData.values.team
 
-        pronounce.physics.values.size = sizeRatio * size;
-        pronounce.physics.values.width = widthRatio * size;
-        pronounce.position.values.x = offsetRatio * size;
-        pronounce.position.values.angle = Math.PI;
+        pronounce.physicsData.values.size = sizeRatio * size;
+        pronounce.physicsData.values.width = widthRatio * size;
+        pronounce.positionData.values.x = offsetRatio * size;
+        pronounce.positionData.values.angle = Math.PI;
         
-        pronounce.style.values.color = Colors.Barrel;
-        pronounce.physics.values.objectFlags |= ObjectFlags.isTrapezoid;
-        pronounce.physics.values.sides = 2;
+        pronounce.styleData.values.color = Color.Barrel;
+        pronounce.physicsData.values.flags |= PhysicsFlags.isTrapezoid;
+        pronounce.physicsData.values.sides = 2;
 
         pronounce.tick = () => {
-            const size = this.owner.physics.values.size;
+            const size = this.owner.physicsData.values.size;
 
-            pronounce.physics.size = sizeRatio * size;
-            pronounce.physics.width = widthRatio * size;
-            pronounce.position.x = offsetRatio * size;
+            pronounce.physicsData.size = sizeRatio * size;
+            pronounce.physicsData.width = widthRatio * size;
+            pronounce.positionData.x = offsetRatio * size;
         }
     }
 }
@@ -427,7 +425,7 @@ class AutoRocketAddon extends Addon {
 
         new LauncherAddon(base);
 
-        base.turret.style.zIndex += 2;
+        base.turret.styleData.zIndex += 2;
     }
 }
 /** SPIESK addon. */

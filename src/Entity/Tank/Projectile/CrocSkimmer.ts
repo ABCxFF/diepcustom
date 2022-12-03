@@ -73,7 +73,7 @@ export default class CrocSkimmer extends Bullet implements BarrelBase {
 
         this.cameraEntity = tank.cameraEntity;
 
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
 
         const skimmerBarrels: Barrel[] = this.skimmerBarrels =[];
 
@@ -82,8 +82,8 @@ export default class CrocSkimmer extends Bullet implements BarrelBase {
         s2Definition.angle += Math.PI
         const s2 = new Barrel(this, s2Definition);
 
-        s1.style.values.color = this.style.values.color;
-        s2.style.values.color = this.style.values.color;
+        s1.styleData.values.color = this.styleData.values.color;
+        s2.styleData.values.color = this.styleData.values.color;
 
         skimmerBarrels.push(s1, s2);
 
@@ -92,7 +92,7 @@ export default class CrocSkimmer extends Bullet implements BarrelBase {
     }
 
     public tick(tick: number) {
-        this.sizeFactor = this.physics.values.size / 50;
+        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
         super.tick(tick);
 

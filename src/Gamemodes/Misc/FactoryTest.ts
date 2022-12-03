@@ -23,7 +23,7 @@ import ShapeManager from "../../Entity/Shape/Manager";
 import { Inputs } from "../../Entity/AI";
 import { CameraEntity } from "../../Native/Camera";
 import TankBody from "../../Entity/Tank/TankBody";
-import { Colors, ObjectFlags, StyleFlags, Tank } from "../../Const/Enums";
+import { Color, PhysicsFlags, StyleFlags, Tank } from "../../Const/Enums";
 import { SandboxShapeManager } from "../Sandbox";
 import Client from "../../Client";
 
@@ -44,11 +44,11 @@ export default class FactoryTestArena extends ArenaEntity {
 
 		const nimdac = this.nimdac = new TankBody(this.game, new CameraEntity(this.game), new Inputs());
 
-        nimdac.cameraEntity.camera.player = nimdac;
+        nimdac.cameraEntity.cameraData.player = nimdac;
         nimdac.setTank(Tank.Factory);
         nimdac.barrels[0].droneCount = 6;
-        nimdac.style.styleFlags &= ~StyleFlags.invincibility;
-        nimdac.physics.objectFlags |= ObjectFlags.base;
+        nimdac.styleData.flags &= ~StyleFlags.isFlashing;
+        nimdac.physicsData.flags |= PhysicsFlags.isBase;
         /* @ts-ignore */
         nimdac.damageReduction = 0;
         /* @ts-ignore */
@@ -59,11 +59,11 @@ export default class FactoryTestArena extends ArenaEntity {
             },
             set() {}
         });
-        nimdac.physics.values.pushFactor = 50;
-        nimdac.physics.absorbtionFactor = 0.0;
+        nimdac.physicsData.values.pushFactor = 50;
+        nimdac.physicsData.absorbtionFactor = 0.0;
         nimdac.cameraEntity.setLevel(150);
-        nimdac.style.color = Colors.Neutral;
-        nimdac.name.name = "The Factory"
+        nimdac.styleData.color = Color.Neutral;
+        nimdac.nameData.name = "The Factory"
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
@@ -73,10 +73,10 @@ export default class FactoryTestArena extends ArenaEntity {
 
         const {x, y} = this.nimdac.getWorldPosition();
         const barrel = this.nimdac.barrels[0];
-        const shootAngle = barrel.definition.angle + this.nimdac.position.values.angle
+        const shootAngle = barrel.definition.angle + this.nimdac.positionData.values.angle
 
-        tank.position.values.x = x + (Math.cos(shootAngle) * barrel.physics.values.size * 0.5) - Math.sin(shootAngle) * barrel.definition.offset * this.nimdac.sizeFactor;
-        tank.position.values.y = y + (Math.sin(shootAngle) * barrel.physics.values.size * 0.5) + Math.cos(shootAngle) * barrel.definition.offset * this.nimdac.sizeFactor;
+        tank.positionData.values.x = x + (Math.cos(shootAngle) * barrel.physicsData.values.size * 0.5) - Math.sin(shootAngle) * barrel.definition.offset * this.nimdac.sizeFactor;
+        tank.positionData.values.y = y + (Math.sin(shootAngle) * barrel.physicsData.values.size * 0.5) + Math.cos(shootAngle) * barrel.definition.offset * this.nimdac.sizeFactor;
         tank.addAcceleration(shootAngle, 40);
     }
 

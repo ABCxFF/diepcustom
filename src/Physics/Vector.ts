@@ -37,6 +37,8 @@ export default class Vector implements VectorAbstract {
 
     /** Converts coordinates from the polar coordinate system to the cartesian coordinate system */
     public static fromPolar(theta: number, distance: number) {
+        // TODO(speed):
+        // This might be overused
         return new Vector(
             distance * Math.cos(theta),
             distance * Math.sin(theta)
@@ -92,6 +94,8 @@ export default class Vector implements VectorAbstract {
     }
 
     public get angle() {
+        // TODO(speed):
+        // This also might be overused
         return Math.atan2(this.y, this.x);
     }
 }

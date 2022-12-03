@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import LivingEntity from "../Live";
 
-import { Colors, MotionFlags, NametagFlags } from "../../Const/Enums";
+import { Color, PositionFlags, NameFlags } from "../../Const/Enums";
 import { NameGroup } from "../../Native/FieldGroups";
 import { AI } from "../AI";
 import { normalizeAngle, PI2 } from "../../util";
@@ -43,10 +43,12 @@ export default class AbstractShape extends LivingEntity {
     protected static BASE_VELOCITY = 1;
 
     /** Always existant name field group, present in all shapes. */
-    public name: NameGroup = new NameGroup(this);
+    public nameData: NameGroup = new NameGroup(this);
     /** If the shape is shiny or not */
     public isShiny: boolean = false;
 
+    /** Wether or not to do idle movements */
+    protected doIdleRotate: boolean = true;
     /** The current direction of the shape's orbit. */
     protected orbitAngle: number;
     /** The decided orbit rate, based on the constructor's BASE_ORBIT. *//* @ts-ignore */
@@ -64,12 +66,12 @@ export default class AbstractShape extends LivingEntity {
     public constructor(game: GameServer) {
         super(game);
 
-        this.relations.values.team = game.arena;
+        this.relationsData.values.team = game.arena;
 
         // shape names are by default hidden
-        this.name.values.nametag = NametagFlags.hidden;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
-        this.orbitAngle = this.position.values.angle = (Math.random() * PI2);
+        this.nameData.values.flags = NameFlags.hiddenName;
+        this.positionData.values.flags |= PositionFlags.absoluteRotation;
+        this.orbitAngle = this.positionData.values.angle = (Math.random() * PI2);
     }
 
     protected turnTo(angle: number) {
@@ -79,24 +81,31 @@ export default class AbstractShape extends LivingEntity {
     }
 
     public tick(tick: number) {
+        if (!this.doIdleRotate) {
+            return super.tick(tick);
+        }
+        
+        const y = this.positionData.values.y;
+        const x = this.positionData.values.x;
+
         // goes down too much
         if (this.isTurning === 0) {
-            if (this.position.values.x > this.game.arena.arena.values.rightX - 400
-                || this.position.values.x < this.game.arena.arena.values.leftX + 400
-                || this.position.values.y < this.game.arena.arena.values.topY + 400
-                || this.position.values.y > this.game.arena.arena.values.bottomY - 400) {
-                this.turnTo(Math.PI + Math.atan2(this.position.values.y, this.position.values.x));
-            } else if (this.position.values.x > this.game.arena.arena.values.rightX - 500) {
+            if (x > this.game.arena.arenaData.values.rightX - 400
+                || x < this.game.arena.arenaData.values.leftX + 400
+                || y < this.game.arena.arenaData.values.topY + 400
+                || y > this.game.arena.arenaData.values.bottomY - 400) {
+                this.turnTo(Math.PI + Math.atan2(y, x));
+            } else if (x > this.game.arena.arenaData.values.rightX - 500) {
                 this.turnTo(Math.sign(this.orbitRate) * Math.PI / 2);
-            } else if (this.position.values.x < this.game.arena.arena.values.leftX + 500) {
+            } else if (x < this.game.arena.arenaData.values.leftX + 500) {
                 this.turnTo(-1 * Math.sign(this.orbitRate) * Math.PI / 2);
-            } else if (this.position.values.y < this.game.arena.arena.values.topY + 500) {
+            } else if (y < this.game.arena.arenaData.values.topY + 500) {
                 this.turnTo(this.orbitRate > 0 ? 0 : Math.PI);
-            } else if (this.position.values.y > this.game.arena.arena.values.bottomY - 500) {
+            } else if (y > this.game.arena.arenaData.values.bottomY - 500) {
                 this.turnTo(this.orbitRate > 0 ? Math.PI : 0);
             }
         }
-        this.position.angle += this.rotationRate;
+        this.positionData.angle += this.rotationRate;
         this.orbitAngle += this.orbitRate + (this.isTurning === TURN_TIMEOUT ? this.orbitRate * 10 : 0);
         if (this.isTurning === TURN_TIMEOUT && (((this.orbitAngle - this.targetTurningAngle) % (PI2)) + (PI2)) % (PI2) < 0.20) {
             this.isTurning -= 1;

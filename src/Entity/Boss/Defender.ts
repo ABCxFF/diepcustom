@@ -21,7 +21,7 @@ import Barrel from "../Tank/Barrel";
 import AutoTurret, { AutoTurretDefinition } from "../Tank/AutoTurret";
 import AbstractBoss from "./AbstractBoss";
 
-import { Colors, Tank, MotionFlags } from "../../Const/Enums";
+import { Color, Tank, PositionFlags } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
@@ -39,7 +39,7 @@ const MountedTurretDefinition: BarrelDefinition = {
         speed: 2.3,
         damage: 0.75,
         health: 12.5,
-        color: Colors.Neutral
+        color: Color.Neutral
     }
 };
 
@@ -67,7 +67,7 @@ const DefenderDefinition: BarrelDefinition = {
         scatterRate: 1,
         lifeLength: 8,
         absorbtionFactor: 1,
-        color: Colors.Neutral
+        color: Color.Neutral
     }
 }
 
@@ -86,13 +86,13 @@ export default class Defender extends AbstractBoss {
 
     public constructor(game: GameServer) {
         super(game);
-        this.name.values.name = 'Defender';
-        this.style.values.color = Colors.EnemyTriangle;
-        this.relations.values.team = this.game.arena;
-        this.physics.values.size = DEFENDER_SIZE * Math.SQRT1_2;
+        this.nameData.values.name = 'Defender';
+        this.styleData.values.color = Color.EnemyTriangle;
+        this.relationsData.values.team = this.game.arena;
+        this.physicsData.values.size = DEFENDER_SIZE * Math.SQRT1_2;
         this.ai.viewRange = 0;
         this.sizeFactor = 1;
-        this.physics.values.sides = 3;
+        this.physicsData.values.sides = 3;
 
         for (let i = 0; i < 3; ++i) {
             // Add trap launcher
@@ -108,15 +108,15 @@ export default class Defender extends AbstractBoss {
 
             const angle = base.ai.inputs.mouse.angle = PI2 * (i / 3);
 
-            base.position.values.y = this.physics.values.size * Math.sin(angle) * 0.6;
-            base.position.values.x = this.physics.values.size * Math.cos(angle) * 0.6;
+            base.positionData.values.y = this.physicsData.values.size * Math.sin(angle) * 0.6;
+            base.positionData.values.x = this.physicsData.values.size * Math.cos(angle) * 0.6;
 
-            base.physics.values.objectFlags |= MotionFlags.absoluteRotation;
+            base.physicsData.values.flags |= PositionFlags.absoluteRotation;
 
             const tickBase = base.tick;
             base.tick = (tick: number) => {
-                base.position.y = this.physics.values.size * Math.sin(angle) * 0.6;
-                base.position.x = this.physics.values.size * Math.cos(angle) * 0.6;
+                base.positionData.y = this.physicsData.values.size * Math.sin(angle) * 0.6;
+                base.positionData.x = this.physicsData.values.size * Math.cos(angle) * 0.6;
 
                 tickBase.call(base, tick);
             }
@@ -126,9 +126,9 @@ export default class Defender extends AbstractBoss {
     public tick(tick: number) {
        super.tick(tick);
 
-       this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
+       this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
-            this.position.angle += this.ai.passiveRotation * Math.PI * Math.SQRT1_2;
+            this.positionData.angle += this.ai.passiveRotation * Math.PI * Math.SQRT1_2;
         }
     }
 }

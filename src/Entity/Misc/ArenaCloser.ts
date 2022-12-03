@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import TankBody from "../Tank/TankBody";
 
-import { Colors, HealthbarFlags, MotionFlags, ObjectFlags, Stat, Tank } from "../../Const/Enums";
+import { Color, HealthFlags, PhysicsFlags, PositionFlags, Stat, Tank } from "../../Const/Enums";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
 
@@ -47,12 +47,11 @@ export default class ArenaCloser extends TankBody {
 
         super(game, camera, inputs);
 
-        this.relations.values.team = game.arena;
+        this.relationsData.values.team = game.arena;
 
         this.ai = new AI(this);
         this.ai.inputs = inputs;
         this.ai.viewRange = Infinity;
-
 
         this.setTank(Tank.ArenaCloser);
 
@@ -62,32 +61,31 @@ export default class ArenaCloser extends TankBody {
         // Fix all the stats
         def.speed = 1;
 
-        this.damageReduction = 0;
         this.damagePerTick = 200;
 
-        this.name.values.name = "Arena Closer";
-        this.physics.values.absorbtionFactor = 0;
-        this.style.values.color = Colors.Neutral;
-        this.position.values.motion |= MotionFlags.canMoveThroughWalls;
-        this.physics.values.objectFlags |= ObjectFlags.canEscapeArena;
-        camera.camera.values.player = this;
+        this.nameData.values.name = "Arena Closer";
+        this.styleData.values.color = Color.Neutral;
+        this.positionData.values.flags |= PositionFlags.canMoveThroughWalls;
+        this.physicsData.values.flags |= PhysicsFlags.canEscapeArena;
+        camera.cameraData.values.player = this;
 
-        for (let i = Stat.MovementSpeed; i < Stat.BodyDamage; ++i) camera.camera.values.statLevels.values[i] = 7;
+        for (let i = Stat.MovementSpeed; i < Stat.BodyDamage; ++i) camera.cameraData.values.statLevels.values[i] = 7;
 
         this.ai.aimSpeed = this.barrels[0].bulletAccel * 1.6;
+        this.setInvulnerability(true);
     }
 
     public tick(tick: number) {
-        this.ai.movementSpeed = this.cameraEntity.camera.values.movementSpeed * 10;
+        this.ai.movementSpeed = this.cameraEntity.cameraData.values.movementSpeed * 10;
 
         this.inputs = this.ai.inputs;
 
         if (this.ai.state === AIState.idle) {
-            const angle = this.position.values.angle + this.ai.passiveRotation;
-            const mag = Math.sqrt((this.inputs.mouse.x - this.position.values.x) ** 2 + (this.inputs.mouse.y - this.position.values.y) ** 2);
+            const angle = this.positionData.values.angle + this.ai.passiveRotation;
+            const mag = Math.sqrt((this.inputs.mouse.x - this.positionData.values.x) ** 2 + (this.inputs.mouse.y - this.positionData.values.y) ** 2);
             this.inputs.mouse.set({
-                x: this.position.values.x + Math.cos(angle) * mag,
-                y: this.position.values.y + Math.sin(angle) * mag
+                x: this.positionData.values.x + Math.cos(angle) * mag,
+                y: this.positionData.values.y + Math.sin(angle) * mag
             });
         }
 

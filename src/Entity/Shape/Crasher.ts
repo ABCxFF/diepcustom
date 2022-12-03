@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import LivingEntity from "../Live";
 import AbstractShape from "./AbstractShape";
 
-import { Colors, MotionFlags } from "../../Const/Enums";
+import { Color, PositionFlags } from "../../Const/Enums";
 import { AI, AIState } from "../AI";
 import { tps } from "../../config";
 
@@ -39,16 +39,16 @@ export default class Crasher extends AbstractShape {
     public constructor(game: GameServer, large=false) {
         super(game);
 
-        this.name.values.name = "Crasher";
+        this.nameData.values.name = "Crasher";
 
-        this.position.values.motion |= MotionFlags.canMoveThroughWalls;
-        this.health.values.health = this.health.values.maxHealth = large ? 30 : 10;
-        this.physics.values.size = (large ? 55 : 35) * Math.SQRT1_2;
-        this.physics.values.sides = 3;
-        this.physics.values.absorbtionFactor = large ? 0.1 : 2;
-        this.physics.values.pushFactor =  large ? 12 : 8;
+        this.positionData.values.flags |= PositionFlags.canMoveThroughWalls;
+        this.healthData.values.health = this.healthData.values.maxHealth = large ? 30 : 10;
+        this.physicsData.values.size = (large ? 55 : 35) * Math.SQRT1_2;
+        this.physicsData.values.sides = 3;
+        this.physicsData.values.absorbtionFactor = large ? 0.1 : 2;
+        this.physicsData.values.pushFactor =  large ? 12 : 8;
 
-        this.style.values.color = Colors.EnemyCrasher;
+        this.styleData.values.color = Color.EnemyCrasher;
 
         this.scoreReward = large ? 25 : 15;
         this.damagePerTick = 8;
@@ -58,29 +58,29 @@ export default class Crasher extends AbstractShape {
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
         this.ai.aimSpeed = (this.ai.movementSpeed = this.targettingSpeed);
-        this.ai._findTargetInterval = tps;
+        this.ai['_findTargetInterval'] = tps;
     }
 
     tick(tick: number) {
         this.ai.aimSpeed = 0;
         this.ai.movementSpeed = this.targettingSpeed;
         
-        if (this.ai.state === AIState.idle) super.tick(tick);
-        else {
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - this.position.values.y, this.ai.inputs.mouse.x - this.position.values.x);
+        if (this.ai.state === AIState.idle) {
+            this.doIdleRotate = true;
+        } else {
+            this.doIdleRotate = false;
+            this.positionData.angle = Math.atan2(this.ai.inputs.mouse.y - this.positionData.values.y, this.ai.inputs.mouse.x - this.positionData.values.x);
             this.accel.add({
                 x: this.ai.inputs.movement.x * this.targettingSpeed,
                 y: this.ai.inputs.movement.y * this.targettingSpeed
             });
-            
-            // TODO(ABC):
-            // Better way?
-            LivingEntity.prototype.tick.call(this, tick);
         }
 
         this.ai.inputs.movement.set({
             x: 0,
             y: 0
         })
+
+        super.tick(tick);
     }
 }

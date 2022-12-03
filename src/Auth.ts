@@ -17,6 +17,7 @@
 */
 
 import { IncomingMessage, ServerResponse } from "http";
+
 import { AccessLevel } from "./config";
 
 interface DiscordAuthInterface {

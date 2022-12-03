@@ -19,6 +19,8 @@
 import ObjectEntity from "../Entity/Object";
 import CollisionManager from "./CollisionManager";
 
+// TODO(speed): speed up spatial hashing somehow someway
+
 export default class SpatialHashing implements CollisionManager {
     public cellSize: number;
     public hashMap = new Map<number, ObjectEntity[]>();
@@ -28,28 +30,32 @@ export default class SpatialHashing implements CollisionManager {
         this.cellSize = cellSize;
     }
 
-    insertEntity(entity: ObjectEntity) {
-        const physics = entity.physics;
-        const position = entity.position;
-        const radiW = (physics.sides === 2 ? physics.size / 2 : physics.size);
-        const radiH = (physics.sides === 2 ? physics.width / 2 : physics.size);
-        const startX = ((position.x - radiW) >> this.cellSize);
-        const startY = ((position.y - radiH) >> this.cellSize);
-        const endX = ((position.x + radiW) >> this.cellSize);
-        const endY = ((position.y + radiH) >> this.cellSize);
+    public insertEntity(entity: ObjectEntity) {
+        const { sides, size, width } = entity.physicsData.values;
+        const { x, y } = entity.positionData.values;
+        const isLine = sides === 2;
+        const radiW = isLine ? size / 2 : size;
+        const radiH = isLine ? width / 2 : size;
+        
+        const topX = (x - radiW) >> this.cellSize;
+        const topY = (y - radiH) >> this.cellSize;
+        const bottomX = (x + radiW) >> this.cellSize;
+        const bottomY = (y + radiH) >> this.cellSize;
 
         // Iterating over the y axis first is more cache friendly.
-        for (let y = startY; y <= endY; y++) {
-            for (let x = startX; x <= endX; x++) {
-                const key = x | (y << 10);
-                if (!this.hashMap.has(key)) this.hashMap.set(key, []);
+        for(let y = topY; y <= bottomY; ++y) {
+            for(let x = topX; x <= bottomX; ++x) {
+                const key: number = x | (y << 10);
+                if(!this.hashMap.has(key)) {
+                    this.hashMap.set(key, []);
+                }
                 /** @ts-ignore the key is guaranteed to be set */
                 this.hashMap.get(key).push(entity);
             }
         }
     }
 
-    retrieve(x: number, y: number, width: number, height: number): ObjectEntity[] {
+    public retrieve(x: number, y: number, width: number, height: number): ObjectEntity[] {
         const result: ObjectEntity[] = [];
 
         const startX = (x - width) >> this.cellSize;
@@ -57,17 +63,19 @@ export default class SpatialHashing implements CollisionManager {
         const endX = ((x + width) >> this.cellSize);
         const endY = ((y + height) >> this.cellSize);
 
-        for (let y = startY; y <= endY; y++)
-            for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; ++y) {
+            for (let x = startX; x <= endX; ++x) {
                 const key = x | (y << 10);
                 const cell = this.hashMap.get(key);
                 if (cell == null) continue;
-                for (let i = 0; i < cell.length; i++)
-                    if (cell[i].physics.queryId != this.queryId) {
-                        cell[i].physics.queryId = this.queryId;
+                for (let i = 0; i < cell.length; ++i) {
+                    if (cell[i]['_queryId'] != this.queryId) {
+                        cell[i]['_queryId'] = this.queryId;
                         if (cell[i].hash !== 0) result.push(cell[i]);
                     }
+                }
             }
+        }
 
         // Force uint32 to prevent the queryId from going too high for javascript to handle.
         this.queryId = (this.queryId + 1) >>> 0;
@@ -75,18 +83,16 @@ export default class SpatialHashing implements CollisionManager {
         return result;
     }
 
-    retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
-        const physics = entity.physics;
-        const position = entity.position;
-
-        return this.retrieve(
-            position.x,
-            position.y,
-            entity.physics.values.sides === 2 ? entity.physics.values.size / 2 : entity.physics.values.size,
-            entity.physics.values.sides === 2 ? entity.physics.values.width / 2 : entity.physics.values.size);
+    public retrieveEntitiesByEntity(entity: ObjectEntity): ObjectEntity[] {
+        const { sides, size, width } = entity.physicsData.values;
+        const { x, y } = entity.positionData;
+        const isLine = sides === 2;
+        const w = isLine ? size / 2 : size;
+        const h = isLine ? width / 2 : size;
+        return this.retrieve(x, y, w, h);
     }
 
-    reset() {
+    public reset() {
         this.hashMap = new Map();
     }
 }

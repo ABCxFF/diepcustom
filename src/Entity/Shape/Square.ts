@@ -19,16 +19,16 @@
 import GameServer from "../../Game";
 import AbstractShape from "./AbstractShape";
 
-import { Colors } from "../../Const/Enums";
+import { Color } from "../../Const/Enums";
 
 export default class Square extends AbstractShape {
     public constructor(game: GameServer, shiny=Math.random() < 0.000001) {
         super(game);
-        this.name.values.name = "Square";
-        this.health.values.health = this.health.values.maxHealth = 10;
-        this.physics.values.size = 55 * Math.SQRT1_2;
-        this.physics.values.sides = 4;
-        this.style.values.color = shiny ? Colors.Shiny : Colors.EnemySquare;
+        this.nameData.values.name = "Square";
+        this.healthData.values.health = this.healthData.values.maxHealth = 10;
+        this.physicsData.values.size = 55 * Math.SQRT1_2;
+        this.physicsData.values.sides = 4;
+        this.styleData.values.color = shiny ? Color.Shiny : Color.EnemySquare;
 
         this.damagePerTick = 8;
         this.scoreReward = 10;
@@ -36,7 +36,7 @@ export default class Square extends AbstractShape {
 
         if (shiny) {
             this.scoreReward *= 100;
-            this.health.values.health = this.health.values.maxHealth *= 10;
+            this.healthData.values.health = this.healthData.values.maxHealth *= 10;
         }
     }
 }

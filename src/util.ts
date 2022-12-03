@@ -36,7 +36,7 @@ export const inspectLog = (object: any, c = 14) => {
 
 /**
  * Removes an element from an array by index quickly.
- * Unsorted removal.
+ * Unordered removal.
  */
 export const removeFast = (array: any[], index: number) => {
     if (index < 0 || index >= array.length) throw new RangeError("Index out of range. In `removeFast`")
@@ -44,7 +44,6 @@ export const removeFast = (array: any[], index: number) => {
     if (index === array.length - 1) array.pop();
     else array[index] = array.pop();
 }
-
 
 /**
  * Contrains a value between bounds

@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
 import AbstractBoss from "./AbstractBoss";
 
-import { Colors, Tank } from "../../Const/Enums";
+import { Color, Tank } from "../../Const/Enums";
 import { AIState } from "../AI";
 import { BarrelDefinition } from "../../Const/TankDefinitions";
 
@@ -59,12 +59,12 @@ export default class Guardian extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.name.values.name = 'Guardian';
+        this.nameData.values.name = 'Guardian';
         this.altName = 'Guardian of the Pentagons';
-        this.style.values.color = Colors.EnemyCrasher;
-        this.relations.values.team = this.game.arena;
-        this.physics.values.size = GUARDIAN_SIZE * Math.SQRT1_2;
-        this.physics.values.sides = 3;
+        this.styleData.values.color = Color.EnemyCrasher;
+        this.relationsData.values.team = this.game.arena;
+        this.physicsData.values.size = GUARDIAN_SIZE * Math.SQRT1_2;
+        this.physicsData.values.sides = 3;
         this.sizeFactor = 1.0;
 
         this.barrels.push(new Barrel(this, GuardianSpawnerDefinition));
@@ -72,12 +72,12 @@ export default class Guardian extends AbstractBoss {
 
     protected moveAroundMap() {
         super.moveAroundMap();
-        this.position.angle = Math.atan2(this.inputs.movement.y, this.inputs.movement.x)
+        this.positionData.angle = Math.atan2(this.inputs.movement.y, this.inputs.movement.x)
     }
 
     public tick(tick: number) {
         super.tick(tick);
         // Let it scale with the guardian
-        this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / GUARDIAN_SIZE;
+        this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / GUARDIAN_SIZE;
     }
 }

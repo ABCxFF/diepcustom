@@ -23,7 +23,7 @@ import Vector from "../Physics/Vector";
 
 import { PhysicsGroup, PositionGroup, RelationsGroup, StyleGroup } from "../Native/FieldGroups";
 import { Entity } from "../Native/Entity";
-import { MotionFlags, ObjectFlags } from "../Const/Enums";
+import { PositionFlags, PhysicsFlags } from "../Const/Enums";
 
 /**
  * The animator for how entities delete (the opacity and size fade out).
@@ -49,11 +49,11 @@ class DeletionAnimation {
                 return;
             }
             case 5:
-                this.entity.style.opacity = 1 - (1 / 6);
+                this.entity.styleData.opacity = 1 - (1 / 6);
             default:
-                this.entity.physics.size *= 1.1;
-                this.entity.style.opacity -= 1 / 6;
-                if (this.entity.style.values.opacity < 0) this.entity.style.opacity = 0;
+                this.entity.physicsData.size *= 1.1;
+                this.entity.styleData.opacity -= 1 / 6;
+                if (this.entity.styleData.values.opacity < 0) this.entity.styleData.opacity = 0;
                 break;
         }
 
@@ -69,13 +69,13 @@ class DeletionAnimation {
  */
 export default class ObjectEntity extends Entity {
     /** Always existant relations field group. Present in all objects. */
-    public relations: RelationsGroup = new RelationsGroup(this);
+    public relationsData: RelationsGroup = new RelationsGroup(this);
     /** Always existant physics field group. Present in all objects. */
-    public physics: PhysicsGroup = new PhysicsGroup(this);
+    public physicsData: PhysicsGroup = new PhysicsGroup(this);
     /** Always existant position field group. Present in all objects. */
-    public position: PositionGroup = new PositionGroup(this);
+    public positionData: PositionGroup = new PositionGroup(this);
     /** Always existant style field group. Present in all objects. */
-    public style: StyleGroup = new StyleGroup(this);
+    public styleData: StyleGroup = new StyleGroup(this);
 
     /** Animator used for deletion animation */
     public deletionAnimation: DeletionAnimation | null = null;
@@ -100,6 +100,9 @@ export default class ObjectEntity extends Entity {
     /** Acceleration used for physics. */
     public accel = new Vector();
 
+    /** For internal spatial hash grid */
+    private _queryId: number = -1;
+
     /** Cache of all ObjectEntitys who are colliding with `this` one at the current tick */
     private cachedCollisions: ObjectEntity[] = [];
     /** Tick that the cache was taken. */
@@ -108,7 +111,7 @@ export default class ObjectEntity extends Entity {
     public constructor(game: GameServer) {
         super(game);
 
-        this.style.zIndex = game.entities.zIndex++;
+        this.styleData.zIndex = game.entities.zIndex++;
     }
 
     /** Calls the deletion animation, unless animate is set to false, in that case it instantly deletes. */
@@ -152,7 +155,7 @@ export default class ObjectEntity extends Entity {
     /** Sets the velocity of the object. */
     public setVelocity(angle: number, magnitude: number) {
         // this.a.set(Vector.fromPolar(angle, acceleration));
-        this.velocity.setPosition(this.position.values);
+        this.velocity.setPosition(this.positionData.values);
         this.velocity.set(Vector.fromPolar(angle, magnitude));
     }
 
@@ -165,11 +168,11 @@ export default class ObjectEntity extends Entity {
     /** Internal physics method used for calculating the current position of the object. */
     public applyPhysics() {
         if (!this.isViewed) {
-            this.velocity.setPosition(this.position.values);
+            this.velocity.setPosition(this.positionData.values);
             this.accel.set(new Vector(0, 0));
             return;
         }
-        this.velocity.setPosition(this.position.values);
+        this.velocity.setPosition(this.positionData.values);
 
         // apply friction opposite of current velocity
         this.addAcceleration(this.velocity.angle, this.velocity.magnitude * -0.1);
@@ -180,59 +183,59 @@ export default class ObjectEntity extends Entity {
         if (this.velocity.magnitude < 0.01) this.velocity.magnitude = 0;
         // when being deleted, entities slow down half speed
         else if (this.deletionAnimation) this.velocity.magnitude /= 2;
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
+        this.positionData.x += this.velocity.x;
+        this.positionData.y += this.velocity.y;
 
         // don't accumulate acceleration across ticks
         this.accel.set(new Vector(0, 0));
 
         // Keep things in the arena
-        if (!(this.physics.values.objectFlags & ObjectFlags.canEscapeArena)) {
+        if (!(this.physicsData.values.flags & PhysicsFlags.canEscapeArena)) {
             const arena = this.game.arena;
             xPos: {
-                if (this.position.values.x < arena.arena.values.leftX - arena.ARENA_PADDING) this.position.x = arena.arena.values.leftX - arena.ARENA_PADDING;
-                else if (this.position.values.x > arena.arena.values.rightX + arena.ARENA_PADDING) this.position.x = arena.arena.values.rightX + arena.ARENA_PADDING;
+                if (this.positionData.values.x < arena.arenaData.values.leftX - arena.ARENA_PADDING) this.positionData.x = arena.arenaData.values.leftX - arena.ARENA_PADDING;
+                else if (this.positionData.values.x > arena.arenaData.values.rightX + arena.ARENA_PADDING) this.positionData.x = arena.arenaData.values.rightX + arena.ARENA_PADDING;
                 else break xPos;
 
-                this.velocity.position.x = this.position.values.x;
+                this.velocity.position.x = this.positionData.values.x;
             }
             yPos: {
-                if (this.position.values.y < arena.arena.values.topY - arena.ARENA_PADDING) this.position.y = arena.arena.values.topY - arena.ARENA_PADDING;
-                else if (this.position.values.y > arena.arena.values.bottomY + arena.ARENA_PADDING) this.position.y = arena.arena.values.bottomY + arena.ARENA_PADDING;
+                if (this.positionData.values.y < arena.arenaData.values.topY - arena.ARENA_PADDING) this.positionData.y = arena.arenaData.values.topY - arena.ARENA_PADDING;
+                else if (this.positionData.values.y > arena.arenaData.values.bottomY + arena.ARENA_PADDING) this.positionData.y = arena.arenaData.values.bottomY + arena.ARENA_PADDING;
                 else break yPos;
 
-                this.velocity.position.y = this.position.values.y;
+                this.velocity.position.y = this.positionData.values.y;
             }
         }
     }
 
     /** Applies knockback after hitting `entity` */
     protected receiveKnockback(entity: ObjectEntity) {
-        let kbMagnitude = this.physics.values.absorbtionFactor * entity.physics.values.pushFactor;
+        let kbMagnitude = this.physicsData.values.absorbtionFactor * entity.physicsData.values.pushFactor;
         let kbAngle: number;
-        let diffY = this.position.values.y - entity.position.values.y;
-        let diffX = this.position.values.x - entity.position.values.x;
+        let diffY = this.positionData.values.y - entity.positionData.values.y;
+        let diffX = this.positionData.values.x - entity.positionData.values.x;
         // Prevents drone stacking etc
         if (diffX === 0 && diffY === 0) kbAngle = Math.random() * util.PI2;
         else kbAngle = Math.atan2(diffY, diffX);
 
-        if ((entity.physics.values.objectFlags & ObjectFlags.wall || entity.physics.values.objectFlags & ObjectFlags.base) && !(this.position.values.motion & MotionFlags.canMoveThroughWalls))  {
+        if ((entity.physicsData.values.flags & PhysicsFlags.isSolidWall || entity.physicsData.values.flags & PhysicsFlags.isBase) && !(this.positionData.values.flags & PositionFlags.canMoveThroughWalls))  {
             this.accel.magnitude *= 0.3;
             // this.velocity.magnitude *= 0.3;
             kbMagnitude /= 0.3;
         }
-        if (entity.physics.values.sides === 2) {
-            if (this.position.values.motion & MotionFlags.canMoveThroughWalls) {
+        if (entity.physicsData.values.sides === 2) {
+            if (this.positionData.values.flags & PositionFlags.canMoveThroughWalls) {
                 kbMagnitude = 0;
-            } else if ((!(entity.physics.values.objectFlags & ObjectFlags.base) || entity.physics.values.pushFactor !== 0) && this.relations.values.owner instanceof ObjectEntity && !(Entity.exists(this.relations.values.team) && this.relations.values.team === entity.relations.values.team)) {
+            } else if ((!(entity.physicsData.values.flags & PhysicsFlags.isBase) || entity.physicsData.values.pushFactor !== 0) && this.relationsData.values.owner instanceof ObjectEntity && !(Entity.exists(this.relationsData.values.team) && this.relationsData.values.team === entity.relationsData.values.team)) {
                 // this is a bit off still. k
-                this.velocity.setPosition(this.position.values);
+                this.velocity.setPosition(this.positionData.values);
                 this.setVelocity(0, 0);
                 this.destroy(true) // Kills off bullets etc
                 return;
             } else {
-                const relA = Math.cos(kbAngle) / entity.physics.values.size;
-                const relB = Math.sin(kbAngle) / entity.physics.values.width;
+                const relA = Math.cos(kbAngle) / entity.physicsData.values.size;
+                const relB = Math.sin(kbAngle) / entity.physicsData.values.width;
                 if (Math.abs(relA) <= Math.abs(relB)) {
                     if (relB < 0) {
                         this.addAcceleration(Math.PI * 3 / 2, kbMagnitude);
@@ -261,41 +264,43 @@ export default class ObjectEntity extends Entity {
 
         // Lets just let the game deal with this next tick.
         if (this.hash === 0) return [];
-        if (this.physics.values.sides === 0) return [];
+        if (this.physicsData.values.sides === 0) return [];
 
+        // TODO(speed):
+        // and the for loop
         const entities = this.game.entities.collisionManager.retrieveEntitiesByEntity(this);
         for (let i = 0; i < entities.length; ++i) {
             const entity = entities[i];
             if (entity === this) continue;
             if (entity.deletionAnimation) continue;
-            if (entity.relations.values.team === this.relations.values.team) {
-                if ((entity.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision) ||
-                    (this.physics.values.objectFlags & ObjectFlags.noOwnTeamCollision)) continue;
+            if (entity.relationsData.values.team === this.relationsData.values.team) {
+                if ((entity.physicsData.values.flags & PhysicsFlags.noOwnTeamCollision) ||
+                    (this.physicsData.values.flags & PhysicsFlags.noOwnTeamCollision)) continue;
 
-                if (entity.relations.values.owner !== this.relations.values.owner) {
-                    if ((entity.physics.values.objectFlags & ObjectFlags.onlySameOwnerCollision) ||
-                        (this.physics.values.objectFlags & ObjectFlags.onlySameOwnerCollision)) continue;
+                if (entity.relationsData.values.owner !== this.relationsData.values.owner) {
+                    if ((entity.physicsData.values.flags & PhysicsFlags.onlySameOwnerCollision) ||
+                        (this.physicsData.values.flags & PhysicsFlags.onlySameOwnerCollision)) continue;
                 }
             }
             
-            if (this.relations.values.team === this.game.arena && (entity.physics.values.objectFlags & ObjectFlags.base)) continue;
+            if (this.relationsData.values.team === this.game.arena && (entity.physicsData.values.flags & PhysicsFlags.isBase)) continue;
 
-            if (entity.physics.values.sides === 0) continue;
-            if (entity.physics.values.sides === 2 && this.physics.values.sides === 2) {
+            if (entity.physicsData.values.sides === 0) continue;
+            if (entity.physicsData.values.sides === 2 && this.physicsData.values.sides === 2) {
                 // in Diep.io source code, rectangles do not support collisions
                 // hence, they are not supported here
-            } else if (this.physics.values.sides !== 2 && entity.physics.values.sides === 2) {
-                const dX = util.constrain(this.position.values.x, entity.position.values.x - entity.physics.values.size / 2, entity.position.values.x + entity.physics.values.size / 2) - this.position.values.x;
-                const dY = util.constrain(this.position.values.y, entity.position.values.y - entity.physics.values.width / 2, entity.position.values.y + entity.physics.values.width / 2) - this.position.values.y;
+            } else if (this.physicsData.values.sides !== 2 && entity.physicsData.values.sides === 2) {
+                const dX = util.constrain(this.positionData.values.x, entity.positionData.values.x - entity.physicsData.values.size / 2, entity.positionData.values.x + entity.physicsData.values.size / 2) - this.positionData.values.x;
+                const dY = util.constrain(this.positionData.values.y, entity.positionData.values.y - entity.physicsData.values.width / 2, entity.positionData.values.y + entity.physicsData.values.width / 2) - this.positionData.values.y;
 
-                if (dX ** 2 + dY ** 2 <= this.physics.size ** 2) this.cachedCollisions.push(entity);
-            } else if (this.physics.values.sides === 2 && entity.physics.values.sides !== 2) {
-                const dX = util.constrain(entity.position.values.x, this.position.values.x - this.physics.values.size / 2, this.position.values.x + this.physics.values.size / 2) - entity.position.values.x;
-                const dY = util.constrain(entity.position.values.y, this.position.values.y - this.physics.values.width / 2, this.position.values.y + this.physics.values.width / 2) - entity.position.values.y;
+                if (dX ** 2 + dY ** 2 <= this.physicsData.size ** 2) this.cachedCollisions.push(entity);
+            } else if (this.physicsData.values.sides === 2 && entity.physicsData.values.sides !== 2) {
+                const dX = util.constrain(entity.positionData.values.x, this.positionData.values.x - this.physicsData.values.size / 2, this.positionData.values.x + this.physicsData.values.size / 2) - entity.positionData.values.x;
+                const dY = util.constrain(entity.positionData.values.y, this.positionData.values.y - this.physicsData.values.width / 2, this.positionData.values.y + this.physicsData.values.width / 2) - entity.positionData.values.y;
 
-                if (dX ** 2 + dY ** 2 <= entity.physics.size ** 2) this.cachedCollisions.push(entity);
+                if (dX ** 2 + dY ** 2 <= entity.physicsData.size ** 2) this.cachedCollisions.push(entity);
             } else {
-                if ((entity.position.values.x - this.position.values.x) ** 2 + (entity.position.values.y - this.position.values.y) ** 2 <= (entity.physics.values.size + this.physics.values.size) ** 2) {
+                if ((entity.positionData.values.x - this.positionData.values.x) ** 2 + (entity.positionData.values.y - this.positionData.values.y) ** 2 <= (entity.physicsData.values.size + this.physicsData.values.size) ** 2) {
                     this.cachedCollisions.push(entity);
                 }
             }
@@ -306,7 +311,7 @@ export default class ObjectEntity extends Entity {
 
     /** Sets the parent in align with everything else. */
     public setParent(parent: ObjectEntity) {
-        this.relations.parent = parent;
+        this.relationsData.parent = parent;
         this.rootParent = parent.rootParent;
         this.rootParent.children.push(this);
 
@@ -316,15 +321,15 @@ export default class ObjectEntity extends Entity {
 
     /** Returns the true world position (even for objects who have parents). */
     public getWorldPosition(): Vector {
-        let pos = new Vector(this.position.values.x, this.position.values.y);
+        let pos = new Vector(this.positionData.values.x, this.positionData.values.y);
 
         let entity: ObjectEntity = this;
-        while (entity.relations.values.parent instanceof ObjectEntity) {
+        while (entity.relationsData.values.parent instanceof ObjectEntity) {
             
-            if (!(entity.relations.values.parent.position.values.motion & MotionFlags.absoluteRotation)) pos.angle += entity.position.values.angle;
-            entity = entity.relations.values.parent;
-            pos.x += entity.position.values.x;
-            pos.y += entity.position.values.y;
+            if (!(entity.relationsData.values.parent.positionData.values.flags & PositionFlags.absoluteRotation)) pos.angle += entity.positionData.values.angle;
+            entity = entity.relationsData.values.parent;
+            pos.x += entity.positionData.values.x;
+            pos.y += entity.positionData.values.y;
         }
 
         return pos;

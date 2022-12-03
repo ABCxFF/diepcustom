@@ -20,7 +20,7 @@ import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
 import AbstractBoss from "./AbstractBoss";
 
-import { Colors, Tank } from "../../Const/Enums";
+import { Color, Tank } from "../../Const/Enums";
 import { AIState } from "../AI";
 
 import { BarrelDefinition } from "../../Const/TankDefinitions";
@@ -48,7 +48,7 @@ const SummonerSpawnerDefinition: BarrelDefinition = {
         scatterRate: 1,
         lifeLength: -1,
         absorbtionFactor: 1,
-        color: Colors.NecromancerSquare,
+        color: Color.NecromancerSquare,
         sides: 4
     }
 };
@@ -65,12 +65,12 @@ export default class Summoner extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.name.values.name = 'Summoner';
-        this.style.values.color = Colors.EnemySquare;
-        this.relations.values.team = this.game.arena;
-        this.physics.values.size = SUMMONER_SIZE * Math.SQRT1_2;
+        this.nameData.values.name = 'Summoner';
+        this.styleData.values.color = Color.EnemySquare;
+        this.relationsData.values.team = this.game.arena;
+        this.physicsData.values.size = SUMMONER_SIZE * Math.SQRT1_2;
         this.sizeFactor = 1;
-        this.physics.values.sides = 4;
+        this.physicsData.values.sides = 4;
 
         for (let i = 0; i < 4; ++i) {
             this.spawners.push(new Barrel(this, {
@@ -84,9 +84,9 @@ export default class Summoner extends AbstractBoss {
     public tick(tick: number) {
         super.tick(tick);
 
-        this.sizeFactor = (this.physics.values.size / Math.SQRT1_2) / SUMMONER_SIZE;
+        this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / SUMMONER_SIZE;
         if (this.ai.state !== AIState.possessed) {
-            this.position.angle += this.ai.passiveRotation;
+            this.positionData.angle += this.ai.passiveRotation;
         }
     }
 }

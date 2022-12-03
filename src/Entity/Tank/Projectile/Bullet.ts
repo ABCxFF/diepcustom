@@ -19,7 +19,7 @@
 import LivingEntity from "../../Live";
 import Barrel from "../Barrel";
 
-import { HealthbarFlags, MotionFlags, ObjectFlags, Stat, StyleFlags } from "../../../Const/Enums";
+import { HealthFlags, PositionFlags, PhysicsFlags, Stat, StyleFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import { BarrelBase } from "../TankBody";
 import { EntityStateFlags } from "../../../Native/Entity";
@@ -61,35 +61,35 @@ export default class Bullet extends LivingEntity {
         this.barrelEntity = barrel;
         this.spawnTick = barrel.game.tick;
 
-        this.relations.values.owner = tank;
+        this.relationsData.values.owner = tank;
 
-        tank.rootParent.style.zIndex = barrel.game.entities.zIndex++;
+        tank.rootParent.styleData.zIndex = barrel.game.entities.zIndex++;
 
         const bulletDefinition = barrel.definition.bullet;
         const sizeFactor = tank.sizeFactor;
-        const statLevels = tank.cameraEntity.camera?.values.statLevels.values;
+        const statLevels = tank.cameraEntity.cameraData?.values.statLevels.values;
 
-        this.relations.values.team = barrel.relations.values.team;
-        this.relations.values.owner = tank;
+        this.relationsData.values.team = barrel.relationsData.values.team;
+        this.relationsData.values.owner = tank;
 
-        this.physics.values.sides = bulletDefinition.sides ?? 1;
-        this.physics.values.objectFlags |= ObjectFlags.noOwnTeamCollision | ObjectFlags.canEscapeArena;
-        if (tank.position.values.motion & MotionFlags.canMoveThroughWalls) this.position.values.motion |= MotionFlags.canMoveThroughWalls
-        this.physics.values.size = (barrel.physics.values.width / 2) * bulletDefinition.sizeRatio;
-        this.style.values.color = bulletDefinition.color || tank.rootParent.style.values.color;
-        this.style.values.styleFlags |= StyleFlags.noDmgIndicator;
-        this.health.values.healthbar = HealthbarFlags.hidden;
+        this.physicsData.values.sides = bulletDefinition.sides ?? 1;
+        this.physicsData.values.flags |= PhysicsFlags.noOwnTeamCollision | PhysicsFlags.canEscapeArena;
+        if (tank.positionData.values.flags & PositionFlags.canMoveThroughWalls) this.positionData.values.flags |= PositionFlags.canMoveThroughWalls
+        this.physicsData.values.size = (barrel.physicsData.values.width / 2) * bulletDefinition.sizeRatio;
+        this.styleData.values.color = bulletDefinition.color || tank.rootParent.styleData.values.color;
+        this.styleData.values.flags |= StyleFlags.hasNoDmgIndicator;
+        this.healthData.values.flags = HealthFlags.hiddenHealthbar;
 
         const bulletDamage = statLevels ? statLevels[Stat.BulletDamage] : 0;
         const bulletPenetration = statLevels ? statLevels[Stat.BulletPenetration] : 0;
 
-        this.physics.values.absorbtionFactor = bulletDefinition.absorbtionFactor;
-        this.physics.values.pushFactor = ((7 / 3) + bulletDamage) * bulletDefinition.damage * bulletDefinition.absorbtionFactor;
+        this.physicsData.values.absorbtionFactor = bulletDefinition.absorbtionFactor;
+        this.physicsData.values.pushFactor = ((7 / 3) + bulletDamage) * bulletDefinition.damage * bulletDefinition.absorbtionFactor;
 
         this.baseAccel = barrel.bulletAccel;
         this.baseSpeed = barrel.bulletAccel + 30 - Math.random() * bulletDefinition.scatterRate;
 
-        this.health.values.health = this.health.values.maxHealth = (1.5 * bulletPenetration + 2) * bulletDefinition.health;
+        this.healthData.values.health = this.healthData.values.maxHealth = (1.5 * bulletPenetration + 2) * bulletDefinition.health;
         this.damagePerTick = (7 + bulletDamage * 3) * bulletDefinition.damage;
         this.damageReduction = 0.25;
 
@@ -97,9 +97,9 @@ export default class Bullet extends LivingEntity {
 
         const {x, y} = tank.getWorldPosition();
         
-        this.position.values.x = x + (Math.cos(shootAngle) * barrel.physics.values.size) - Math.sin(shootAngle) * barrel.definition.offset * sizeFactor;
-        this.position.values.y = y + (Math.sin(shootAngle) * barrel.physics.values.size) + Math.cos(shootAngle) * barrel.definition.offset * sizeFactor;
-        this.position.values.angle = shootAngle;
+        this.positionData.values.x = x + (Math.cos(shootAngle) * barrel.physicsData.values.size) - Math.sin(shootAngle) * barrel.definition.offset * sizeFactor;
+        this.positionData.values.y = y + (Math.sin(shootAngle) * barrel.physicsData.values.size) + Math.cos(shootAngle) * barrel.definition.offset * sizeFactor;
+        this.positionData.values.angle = shootAngle;
     }
 
     /** Extends LivingEntity.onKill - passes kill to the owner. */
@@ -114,11 +114,11 @@ export default class Bullet extends LivingEntity {
         super.tick(tick);
 
         if (tick === this.spawnTick + 1) this.addAcceleration(this.movementAngle, this.baseSpeed);
-        else this.maintainVelocity(this.usePosAngle ? this.position.values.angle : this.movementAngle, this.baseAccel);
+        else this.maintainVelocity(this.usePosAngle ? this.positionData.values.angle : this.movementAngle, this.baseAccel);
 
         if (tick - this.spawnTick >= this.lifeLength) this.destroy(true);
         // TODO(ABC):
         // This code will be reimplemented in the update that allows for easy camera entity switches
-        if ((this.relations.values.team?.state || 0) & EntityStateFlags.needsDelete) this.relations.values.team = null
+        if ((this.relationsData.values.team?.entityState || 0) & EntityStateFlags.needsDelete) this.relationsData.values.team = null
     }
 }

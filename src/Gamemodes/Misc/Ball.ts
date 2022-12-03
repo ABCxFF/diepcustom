@@ -22,7 +22,7 @@ import ObjectEntity from "../../Entity/Object";
 
 import Pentagon from "../../Entity/Shape/Pentagon";
 
-import { Colors, GUIFlags, ObjectFlags } from "../../Const/Enums";
+import { Color, ArenaFlags, PhysicsFlags } from "../../Const/Enums";
 import { NameGroup } from "../../Native/FieldGroups";
 import AbstractShape from "../../Entity/Shape/AbstractShape";
 import { SandboxShapeManager } from "../Sandbox";
@@ -36,9 +36,9 @@ class CustomShapeManager extends SandboxShapeManager {
 
         const penta = new Pentagon(this.game, Math.random() < 0.25, Math.random() < 0.1);
 
-        penta.position.values.x = Math.sign(x) * (Math.abs(x) - 200);
-        penta.position.values.y = Math.sign(y) * (Math.abs(y) - 200);
-        penta.relations.values.owner = penta.relations.values.team = this.arena;
+        penta.positionData.values.x = Math.sign(x) * (Math.abs(x) - 200);
+        penta.positionData.values.y = Math.sign(y) * (Math.abs(y) - 200);
+        penta.relationsData.values.owner = penta.relationsData.values.team = this.arena;
 
         return penta;
     }
@@ -54,17 +54,17 @@ export default class BallArena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
 
-        this.arena.values.GUI |= GUIFlags.canUseCheats;
+        this.arenaData.values.flags |= ArenaFlags.canUseCheats;
         this.updateBounds(2500, 2500);
 
         const ball = new ObjectEntity(game);
-        ball.name = new NameGroup(ball);
-        ball.name.values.name = "im pacman"
-        ball.physics.values.sides = 1;
-        ball.style.values.color = Colors.ScoreboardBar;
-        ball.physics.values.size = 100;
-        ball.physics.values.absorbtionFactor = 10;
-        ball.physics.values.objectFlags |= ObjectFlags.base | ObjectFlags.noOwnTeamCollision;
-        ball.relations.values.team = ball;
+        ball.nameData = new NameGroup(ball);
+        ball.nameData.values.name = "im pacman"
+        ball.physicsData.values.sides = 1;
+        ball.styleData.values.color = Color.ScoreboardBar;
+        ball.physicsData.values.size = 100;
+        ball.physicsData.values.absorbtionFactor = 10;
+        ball.physicsData.values.flags |= PhysicsFlags.isBase | PhysicsFlags.noOwnTeamCollision;
+        ball.relationsData.values.team = ball;
     }
 }

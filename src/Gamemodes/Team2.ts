@@ -24,7 +24,7 @@ import TeamBase from "../Entity/Misc/TeamBase";
 import TankBody from "../Entity/Tank/TankBody";
 
 import { TeamEntity } from "../Entity/Misc/TeamEntity";
-import { Colors } from "../Const/Enums";
+import { Color } from "../Const/Enums";
 
  const arenaSize = 11150;
  const baseWidth = 2007;
@@ -52,21 +52,21 @@ export default class Teams2Arena extends ArenaEntity {
     public constructor(game: GameServer) {
         super(game);
         this.updateBounds(arenaSize * 2, arenaSize * 2);
-        this.blueTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamBlue), -arenaSize + baseWidth / 2, 0, arenaSize * 2, baseWidth);
-        this.redTeamBase = new TeamBase(game, new TeamEntity(this.game, Colors.TeamRed), arenaSize - baseWidth / 2, 0, arenaSize * 2, baseWidth);
+        this.blueTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamBlue), -arenaSize + baseWidth / 2, 0, arenaSize * 2, baseWidth);
+        this.redTeamBase = new TeamBase(game, new TeamEntity(this.game, Color.TeamRed), arenaSize - baseWidth / 2, 0, arenaSize * 2, baseWidth);
     }
 
     public spawnPlayer(tank: TankBody, client: Client) {
-        tank.position.values.y = arenaSize * Math.random() - arenaSize;
+        tank.positionData.values.y = arenaSize * Math.random() - arenaSize;
 
         const xOffset = (Math.random() - 0.5) * baseWidth;
         
         const base = this.playerTeamMap.get(client) || [this.blueTeamBase, this.redTeamBase][0|Math.random()*2];
-        tank.relations.values.team = base.relations.values.team;
-        tank.style.values.color = base.style.values.color;
-        tank.position.values.x = base.position.values.x + xOffset;
+        tank.relationsData.values.team = base.relationsData.values.team;
+        tank.styleData.values.color = base.styleData.values.color;
+        tank.positionData.values.x = base.positionData.values.x + xOffset;
         this.playerTeamMap.set(client, base);
 
-        if (client.camera) client.camera.relations.team = tank.relations.values.team;
+        if (client.camera) client.camera.relationsData.team = tank.relationsData.values.team;
     }
 }

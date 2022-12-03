@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import Barrel from "../Tank/Barrel";
 
-import { ClientBound, Colors, MotionFlags } from "../../Const/Enums";
+import { ClientBound, Color, PositionFlags } from "../../Const/Enums";
 import { VectorAbstract } from "../../Physics/Vector";
 import { AI, AIState, Inputs } from "../AI";
 import { NameGroup } from "../../Native/FieldGroups";
@@ -50,7 +50,7 @@ class BossMovementControl {
     }
     
     public moveBoss() {
-        const { x, y } = this.boss.position.values;
+        const { x, y } = this.boss.positionData.values;
         if (this.target === Target.None) {
             if (x >= 0 && y >= 0) {
                 this.target = Target.BottomRight;
@@ -64,10 +64,10 @@ class BossMovementControl {
         }
 
         const target: VectorAbstract = this.target === Target.BottomRight ?
-            { x: 3 * this.boss.game.arena.arena.values.rightX / 4, y: 3 * this.boss.game.arena.arena.values.bottomY / 4} : this.target === Target.BottomLeft ?
-            { x: 3 * this.boss.game.arena.arena.values.leftX / 4, y: 3 * this.boss.game.arena.arena.values.bottomY / 4} : this.target === Target.TopLeft ? 
-            { x: 3 * this.boss.game.arena.arena.values.leftX / 4, y: 3 * this.boss.game.arena.arena.values.topY / 4} :
-            { x: 3 * this.boss.game.arena.arena.values.rightX / 4, y: 3 * this.boss.game.arena.arena.values.topY  / 4};
+            { x: 3 * this.boss.game.arena.arenaData.values.rightX / 4, y: 3 * this.boss.game.arena.arenaData.values.bottomY / 4} : this.target === Target.BottomLeft ?
+            { x: 3 * this.boss.game.arena.arenaData.values.leftX / 4, y: 3 * this.boss.game.arena.arenaData.values.bottomY / 4} : this.target === Target.TopLeft ? 
+            { x: 3 * this.boss.game.arena.arenaData.values.leftX / 4, y: 3 * this.boss.game.arena.arenaData.values.topY / 4} :
+            { x: 3 * this.boss.game.arena.arenaData.values.rightX / 4, y: 3 * this.boss.game.arena.arenaData.values.topY  / 4};
 
         // Target becomes delta now
         target.x = (target.x - x);
@@ -87,7 +87,7 @@ class BossMovementControl {
  */
 export default class AbstractBoss extends LivingEntity {
     /** Always existant name field group, present in all bosses. */
-    public name: NameGroup = new NameGroup(this);
+    public nameData: NameGroup = new NameGroup(this);
     /** Alternate name, eg Guardian and Guardian of the Pentagons to appear in notifications" */
     public altName: string | null = null;
 
@@ -119,31 +119,31 @@ export default class AbstractBoss extends LivingEntity {
         super(game);
 
         const {x, y} = this.game.arena.findSpawnLocation()
-        this.position.values.x = x;
-        this.position.values.y = y;
+        this.positionData.values.x = x;
+        this.positionData.values.y = y;
         
-        this.relations.values.team = this.cameraEntity;
+        this.relationsData.values.team = this.cameraEntity;
 
-        this.physics.values.absorbtionFactor = 0.05;
-        this.position.values.motion |= MotionFlags.absoluteRotation;
+        this.physicsData.values.absorbtionFactor = 0.05;
+        this.positionData.values.flags |= PositionFlags.absoluteRotation;
         this.scoreReward = 30000 * this.game.arena.shapeScoreRewardMultiplier;
         this.damagePerTick = 60;
 
         this.ai = new AI(this);
         this.ai.viewRange = 2000;
-        this.ai._findTargetInterval = 0;
+        this.ai['_findTargetInterval'] = 0;
         this.inputs = this.ai.inputs;
 
-        // default eh
-        this.style.values.color = Colors.Fallen;
+        // default ehColor
+        this.styleData.values.color = Color.Fallen;
 
-        this.physics.values.sides = 1;
-        this.physics.values.size = 50 * Math.pow(1.01, 75 - 1);
+        this.physicsData.values.sides = 1;
+        this.physicsData.values.size = 50 * Math.pow(1.01, 75 - 1);
 
         this.reloadTime = 15 * Math.pow(0.914, 7);
 
-        this.sizeFactor = this.physics.values.size / 50;
-        this.health.values.health = this.health.values.maxHealth = 3000;
+        this.sizeFactor = this.physicsData.values.size / 50;
+        this.healthData.values.health = this.healthData.values.maxHealth = 3000;
     }
 
     // For map wide movement
@@ -159,10 +159,10 @@ export default class AbstractBoss extends LivingEntity {
         // Reset arena.boss
         if (this.game.arena.boss === this) this.game.arena.boss = null;
 
-        const killerName = (killer instanceof TankBody && killer.name.values.name) || "an unnamed tank"
+        const killerName = (killer instanceof TankBody && killer.nameData.values.name) || "an unnamed tank"
         this.game.broadcast()
             .u8(ClientBound.Notification)
-            .stringNT(`The ${this.altName || this.name.values.name} has been defeated by ${killerName}!`)
+            .stringNT(`The ${this.altName || this.nameData.values.name} has been defeated by ${killerName}!`)
             .u32(0x000000)
             .float(10000)
             .stringNT("").send();
@@ -176,10 +176,10 @@ export default class AbstractBoss extends LivingEntity {
         
         if (this.ai.state !== AIState.possessed) this.moveAroundMap();
         else {
-            const x = this.position.values.x,
-                  y = this.position.values.y;
+            const x = this.positionData.values.x,
+                  y = this.positionData.values.y;
 
-            this.position.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
+            this.positionData.angle = Math.atan2(this.ai.inputs.mouse.y - y, this.ai.inputs.mouse.x - x);
         }
         this.accel.add({
             x: this.inputs.movement.x * this.movementSpeed,
@@ -190,13 +190,13 @@ export default class AbstractBoss extends LivingEntity {
             y: 0
         });
 
-        this.regenPerTick = this.health.values.maxHealth / 25000;
+        this.regenPerTick = this.healthData.values.maxHealth / 25000;
 
         // So the name can be set in an extended constructor
         if (!this.hasBeenWelcomed) {
             let message = "An unnamed boss has spawned!"
-            if (this.name.values.name) {
-                message = `The ${this.altName || this.name.values.name} has spawned!`;
+            if (this.nameData.values.name) {
+                message = `The ${this.altName || this.nameData.values.name} has spawned!`;
             }
             this.game.broadcast().u8(ClientBound.Notification).stringNT(message).u32(0x000000).float(10000).stringNT("").send();
             this.hasBeenWelcomed = true;

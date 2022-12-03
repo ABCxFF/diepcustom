@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Colors, ObjectFlags } from "../../Const/Enums";
+import { Color, PhysicsFlags } from "../../Const/Enums";
 import { barrelAddonId } from "../../Const/TankDefinitions";
 import GameServer from "../../Game";
 import ObjectEntity from "../Object";
@@ -56,21 +56,21 @@ export class TrapLauncher extends ObjectEntity {
 
         this.barrelEntity = barrel;
         this.setParent(barrel);
-        this.relations.values.team = barrel;
-        this.physics.values.objectFlags = ObjectFlags.isTrapezoid | ObjectFlags.unknown1;
-        this.style.values.color = Colors.Barrel;
+        this.relationsData.values.team = barrel;
+        this.physicsData.values.flags = PhysicsFlags.isTrapezoid | PhysicsFlags._unknown;
+        this.styleData.values.color = Color.Barrel;
 
-        this.physics.values.sides = 2;
-        this.physics.values.width = barrel.physics.values.width;
-        this.physics.values.size = barrel.physics.values.width * (20 / 42);
-        this.position.values.x = (barrel.physics.values.size + this.physics.values.size) / 2;
+        this.physicsData.values.sides = 2;
+        this.physicsData.values.width = barrel.physicsData.values.width;
+        this.physicsData.values.size = barrel.physicsData.values.width * (20 / 42);
+        this.positionData.values.x = (barrel.physicsData.values.size + this.physicsData.values.size) / 2;
     }
 
     public resize() {
-        this.physics.sides = 2;
-        this.physics.width = this.barrelEntity.physics.values.width;
-        this.physics.size = this.barrelEntity.physics.values.width * (20 / 42);
-        this.position.x = (this.barrelEntity.physics.values.size + this.physics.values.size) / 2;
+        this.physicsData.sides = 2;
+        this.physicsData.width = this.barrelEntity.physicsData.values.width;
+        this.physicsData.size = this.barrelEntity.physicsData.values.width * (20 / 42);
+        this.positionData.x = (this.barrelEntity.physicsData.values.size + this.physicsData.values.size) / 2;
     }
 
 

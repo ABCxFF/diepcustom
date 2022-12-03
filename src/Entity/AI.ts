@@ -22,7 +22,7 @@ import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
 import TankBody from "./Tank/TankBody";
 
-import { InputFlags, ObjectFlags } from "../Const/Enums";
+import { InputFlags, PhysicsFlags } from "../Const/Enums";
 import { Entity } from "../Native/Entity";
 import { tps } from "../config";
 
@@ -34,7 +34,7 @@ import { tps } from "../config";
  * - `idle`: When the AI is idle
  * - `target`: When the AI has found a target
  */
-export enum AIState {
+export const enum AIState {
     idle = 0,
     hasTarget = 1,
     possessed = 3
@@ -103,7 +103,7 @@ export class AI {
     /** Stores the creation of the AI, used to optimize ticking */
     private _creationTick: number;
 
-    public _findTargetInterval: number = 2;
+    private _findTargetInterval: number = 2;
 
     public constructor(owner: ObjectEntity, claimable?: boolean) {
         this.owner = owner;
@@ -128,25 +128,26 @@ export class AI {
             return this.target || null;
         }
 
-        const rootPos = this.owner.rootParent.position.values;
-        const team = this.owner.relations.values.team;
+        const rootPos = this.owner.rootParent.positionData.values;
+        const team = this.owner.relationsData.values.team;
 
+        // TODO(speed): find a way to speed up
         if (Entity.exists(this.target)) {
 
             // If the AI already has a valid target within view distance, it's not necessary to find a new one
 
             // Make sure the target hasn't changed teams, and is existant (sides != 0)
-            if (team !== this.target.relations.values.team && this.target.physics.values.sides !== 0) {
+            if (team !== this.target.relationsData.values.team && this.target.physicsData.values.sides !== 0) {
                 // confirm its within range
-                const targetDistSq = (this.target.position.values.x - rootPos.x) ** 2 + (this.target.position.values.y - rootPos.y) ** 2;
-                if (this.targetFilter(this.target.position.values) && targetDistSq < (this.viewRange ** 2) * 2) return this.target; // this range is inaccurate i think
+                const targetDistSq = (this.target.positionData.values.x - rootPos.x) ** 2 + (this.target.positionData.values.y - rootPos.y) ** 2;
+                if (this.targetFilter(this.target.positionData.values) && targetDistSq < (this.viewRange ** 2) * 2) return this.target; // this range is inaccurate i think
 
             }
         }
 
         // const entities = this.game.entities.inner.slice(0, this.game.entities.lastId);
-        const root = this.owner.rootParent === this.owner && this.owner.relations.values.owner instanceof ObjectEntity ? this.owner.relations.values.owner : this.owner.rootParent;
-        const entities = this.viewRange === Infinity ? this.game.entities.inner.slice(0, this.game.entities.lastId) : this.game.entities.collisionManager.retrieve(root.position.values.x, root.position.values.y, this.viewRange, this.viewRange);
+        const root = this.owner.rootParent === this.owner && this.owner.relationsData.values.owner instanceof ObjectEntity ? this.owner.relationsData.values.owner : this.owner.rootParent;
+        const entities = this.viewRange === Infinity ? this.game.entities.inner.slice(0, this.game.entities.lastId) : this.game.entities.collisionManager.retrieve(root.positionData.values.x, root.positionData.values.y, this.viewRange, this.viewRange);
 
         let closestEntity = null;
         let closestDistSq = this.viewRange ** 2;
@@ -157,24 +158,24 @@ export class AI {
 
             if (!(entity instanceof LivingEntity)) continue; // Check if the target is living
 
-            if (entity.physics.values.objectFlags & ObjectFlags.base) continue; // Check if the target is a base
+            if (entity.physicsData.values.flags & PhysicsFlags.isBase) continue; // Check if the target is a base
 
-            if (!(entity.relations.values.owner === null || !(entity.relations.values.owner instanceof ObjectEntity))) continue; // Don't target entities who have an object owner
+            if (!(entity.relationsData.values.owner === null || !(entity.relationsData.values.owner instanceof ObjectEntity))) continue; // Don't target entities who have an object owner
 
-            if (entity.relations.values.team === team || entity.physics.values.sides === 0) continue;
+            if (entity.relationsData.values.team === team || entity.physicsData.values.sides === 0) continue;
 
-            if (!this.targetFilter(entity.position.values)) continue; // Custom check
+            if (!this.targetFilter(entity.positionData.values)) continue; // Custom check
 
             // TODO(ABC): Find out why this was put here
             if (entity instanceof TankBody) {
                 if (!(closestEntity instanceof TankBody)) {
                     closestEntity = entity;
-                    closestDistSq = (entity.position.values.x - rootPos.x) ** 2 + (entity.position.values.y - rootPos.y) ** 2;
+                    closestDistSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
                     continue;
                 }
             } else if (closestEntity instanceof TankBody) continue;
 
-            const distSq = (entity.position.values.x - rootPos.x) ** 2 + (entity.position.values.y - rootPos.y) ** 2;
+            const distSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
 
             if (distSq < closestDistSq) {
                 closestEntity = entity;
@@ -192,8 +193,8 @@ export class AI {
         const ownerPos = this.owner.getWorldPosition();
 
         const pos = {
-            x: target.position.values.x,
-            y: target.position.values.y,
+            x: target.positionData.values.x,
+            y: target.positionData.values.y,
         }
 
         if (movementSpeed <= 0.001) { // Pls no weirdness
