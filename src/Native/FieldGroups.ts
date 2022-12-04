@@ -297,7 +297,6 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     }
 }
 
-
  /* <template> auto-generated */ 
  /* <template> auto-generated */ 
 export class RelationsGroup {

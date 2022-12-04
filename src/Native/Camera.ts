@@ -286,12 +286,12 @@ export default class ClientCamera extends CameraEntity {
 
     /** Entity creation compiler function... Run! */
     private compileCreation(w: Writer, entity: Entity) {
-        compileCreation(w, entity);
+        compileCreation(this, w, entity);
     }
 
     /** Entity update compiler function... Run! */
     private compileUpdate(w: Writer, entity: Entity) {
-        compileUpdate(w, entity);
+        compileUpdate(this, w, entity);
     }
 
     public tick(tick: number) {

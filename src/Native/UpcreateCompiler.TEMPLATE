@@ -19,10 +19,12 @@
 */
 
 import Writer from "../Coder/Writer";
+import { Color } from "../Const/Enums";
+import { CameraEntity } from "./Camera";
 import { Entity } from "./Entity";
 
 /** Entity creation compiler function... Run! */
-export const compileCreation = (w: Writer, entity: Entity) => {
+export const compileCreation = (camera: CameraEntity, w: Writer, entity: Entity) => {
     w.entid(entity).u8(1);
 
 # for every field group, define if its set on the entity
@@ -48,8 +50,8 @@ FIELD_ORDER.map(([group, name], idx) => {
     const g = EXISTANT_FIELD_GROUPS.find(e => e[0] === group);
     if (!g) return '';
     const field = g[1].find(f => f.name === name);
-    if (field.type === "color") {
-        return `\n    if (has${group}) w.${field.encType}(entity.${group.toLowerCase()}Data.values.${name} === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (this.cameraData.values.player && this.cameraData.values.player.relationsData && this.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.${group.toLowerCase()}Data.values.${name});`
+    if (field.name === "color") {
+        return `\n    if (has${group}) w.${field.encType}(entity.${group.toLowerCase()}Data.values.${name} === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (camera.cameraData.values.player && camera.cameraData.values.player.relationsData && camera.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.${group.toLowerCase()}Data.values.${name});`
     }
     if (!field.amount) return `\n    if (has${group}) w.${field.encType}(entity.${group.toLowerCase()}Data.values.${name});`
     else {
@@ -60,7 +62,7 @@ FIELD_ORDER.map(([group, name], idx) => {
 };
 
 /** Entity update compiler function... Run! */
-export const compileUpdate = (w: Writer, entity: Entity) => {
+export const compileUpdate = (camera: Camera, w: Writer, entity: Entity) => {
     w.entid(entity).raw(0, 1);
 
 # define variables that store if a field group exists
@@ -79,8 +81,8 @@ FIELD_ORDER.map(([group, name], idx) => {
     const id = g[1].findIndex(f => f.name === name);
     const field = g[1][id];
     let encType = name === "scoreboardScores" ? "vi" : field.encType;
-    if (field.type === "color") {
-        return `\n    if (has${group}) if (entity.${group.toLowerCase()}Data.state[${id}]) { w.u8((${idx} - at) ^ 1); at = ${idx}; w.${encType}(entity.${group.toLowerCase()}Data.values.${name} === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (this.cameraData.values.player && this.cameraData.values.player.relationsData && this.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.${group.toLowerCase()}Data.values.${name});};`
+    if (field.name === "color") {
+        return `\n    if (has${group}) if (entity.${group.toLowerCase()}Data.state[${id}]) { w.u8((${idx} - at) ^ 1); at = ${idx}; w.${encType}(entity.${group.toLowerCase()}Data.values.${name} === Color.Tank && !(entity.relationsData && entity.relationsData.values.team === (camera.cameraData.values.player && camera.cameraData.values.player.relationsData && camera.cameraData.values.player.relationsData.values.team)) ? Color.EnemyTank : entity.${group.toLowerCase()}Data.values.${name});};`
     }
     if (!field.amount) return `\n    if (has${group}) if (entity.${group.toLowerCase()}Data.state[${id}]) {w.u8((${idx} - at) ^ 1); at = ${idx}; w.${encType}(entity.${group.toLowerCase()}Data.values.${name});};`
     else {
