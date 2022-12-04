@@ -66,6 +66,9 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 	public shapeScoreRewardMultiplier: number = 1;
 
+	/** Enable or disable natural boss spawning */
+	public allowBoss: boolean = true;
+
 	/** The current boss spawned into the game */
 	public boss: AbstractBoss | null = null;
 
@@ -208,7 +211,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	public tick(tick: number) {
 		this.shapes.tick();
 
-		if (this.game.tick >= 1 && (this.game.tick % bossSpawningInterval) === 0 && !this.boss) {
+		if (this.allowBoss && this.game.tick >= 1 && (this.game.tick % bossSpawningInterval) === 0 && !this.boss) {
 			this.spawnBoss();
 		}
 
