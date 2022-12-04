@@ -46,6 +46,7 @@ export default class MazeArena extends ArenaEntity {
     public constructor(a: any) {
         super(a);
         this.updateBounds(ARENA_SIZE, ARENA_SIZE);
+        this.allowBoss = false;
         this._buildMaze();
     }
     /** Creates a maze wall from cell coords */
