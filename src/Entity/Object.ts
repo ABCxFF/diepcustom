@@ -168,11 +168,9 @@ export default class ObjectEntity extends Entity {
     /** Internal physics method used for calculating the current position of the object. */
     public applyPhysics() {
         if (!this.isViewed) {
-            this.velocity.setPosition(this.positionData.values);
             this.accel.set(new Vector(0, 0));
             return;
         }
-        this.velocity.setPosition(this.positionData.values);
 
         // apply friction opposite of current velocity
         this.addAcceleration(this.velocity.angle, this.velocity.magnitude * -0.1);
@@ -221,7 +219,7 @@ export default class ObjectEntity extends Entity {
 
         if ((entity.physicsData.values.flags & PhysicsFlags.isSolidWall || entity.physicsData.values.flags & PhysicsFlags.isBase) && !(this.positionData.values.flags & PositionFlags.canMoveThroughWalls))  {
             this.accel.magnitude *= 0.3;
-            // this.velocity.magnitude *= 0.3;
+            this.velocity.magnitude *= 0.3;
             kbMagnitude /= 0.3;
         }
         if (entity.physicsData.values.sides === 2) {
@@ -234,8 +232,8 @@ export default class ObjectEntity extends Entity {
                 this.destroy(true) // Kills off bullets etc
                 return;
             } else {
-                const relA = Math.cos(kbAngle) / entity.physicsData.values.size;
-                const relB = Math.sin(kbAngle) / entity.physicsData.values.width;
+                const relA = Math.cos(kbAngle + entity.positionData.values.angle) / entity.physicsData.values.size;
+                const relB = Math.sin(kbAngle + entity.positionData.values.angle) / entity.physicsData.values.width;
                 if (Math.abs(relA) <= Math.abs(relB)) {
                     if (relB < 0) {
                         this.addAcceleration(Math.PI * 3 / 2, kbMagnitude);
@@ -336,6 +334,7 @@ export default class ObjectEntity extends Entity {
     }
 
     public tick(tick: number) {
+        this.velocity.setPosition(this.positionData.values);
         this.deletionAnimation?.tick();
 
         if (this.isPhysical && !(this.deletionAnimation)) {
