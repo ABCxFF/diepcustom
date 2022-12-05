@@ -154,6 +154,11 @@ Module.loadGamemodeButtons = () => {
     const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
     if(vec.start) vec.destroy(); // remove old arenas
     // map server response to memory struct
+    vec.push(...[[
+        { offset: 0, type: "cstr", value: "maze" }, 
+        { offset: 12, type: "cstr", value: "" }, 
+        { offset: 24, type: "i32", value: 1 }
+    ]]);
     vec.push(...Module.servers.map(server => ([
         { offset: 0, type: "cstr", value: server.gamemode }, 
         { offset: 12, type: "cstr", value: server.name }, 
@@ -298,7 +303,7 @@ Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
 };
 
 const wasmImports = {
-    assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + UTF8ToString(condition) + ", at: " + [filename ? UTF8ToString(filename) : "unknown filename", line, func ? UTF8ToString(func) : "unknown function"]),
+    assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + Module.UTF8ToString(condition) + ", at: " + [filename ? Module.UTF8ToString(filename) : "unknown filename", line, func ? Module.UTF8ToString(func) : "unknown function"]),
     mapFile: () => -1, // unused
     sysMunmap: (addr, len) => addr === -1 || !len ? -28 : 0, // not really used
     abort: Module.abort,
