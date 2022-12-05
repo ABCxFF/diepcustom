@@ -27,7 +27,7 @@ import Live from "../Live";
 import TankBody from "../Tank/TankBody";
 import { TeamEntity } from "./TeamEntity";
 
-const POSSESSION_TIMER = tps * 60 * 10;
+const POSSESSION_TIMER = tps * 60 * 5;
 
 /**
  * Mothership Entity
