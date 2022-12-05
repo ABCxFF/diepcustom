@@ -125,7 +125,7 @@ export class AI {
     public findTarget(tick: number) {
         // If there's a target interval, wait a cycle till looking for new target
         if (this._findTargetInterval !== 0 && ((tick + this._creationTick) % this._findTargetInterval) !== 1)  {
-            return this.target || null;
+            return Entity.exists(this.target) ? this.target : (this.target=null);
         }
 
         const rootPos = this.owner.rootParent.positionData.values;
