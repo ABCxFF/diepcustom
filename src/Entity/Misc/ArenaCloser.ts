@@ -19,7 +19,7 @@
 import GameServer from "../../Game";
 import TankBody from "../Tank/TankBody";
 
-import { Color, HealthFlags, PhysicsFlags, PositionFlags, Stat, Tank } from "../../Const/Enums";
+import { Color, PhysicsFlags, PositionFlags, Stat, Tank } from "../../Const/Enums";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
 

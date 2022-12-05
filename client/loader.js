@@ -154,8 +154,9 @@ Module.loadGamemodeButtons = () => {
     const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
     if(vec.start) vec.destroy(); // remove old arenas
     // map server response to memory struct
-    vec.push(...[[
-        { offset: 0, type: "cstr", value: "maze" }, 
+    const needsGamemode = !Module.servers.find(e => Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES.includes(e.gamemode))
+    if (needsGamemode) vec.push(...[[
+        { offset: 0, type: "cstr", value: "tag" }, 
         { offset: 12, type: "cstr", value: "" }, 
         { offset: 24, type: "i32", value: 1 }
     ]]);
@@ -166,7 +167,7 @@ Module.loadGamemodeButtons = () => {
     ])));
     $(MOD_CONFIG.memory.gamemodeDisabledText).utf8 = 'This game mode is disabled';
     // placeholders to prevent single/no gamemode bugs
-    if (!Module.servers.find(e => Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES.includes(e.gamemode))) {
+    if (needsGamemode) {
         vec.push(...[[
             { offset: 0, type: "cstr", value: "survival" }, 
             { offset: 12, type: "cstr", value: "" }, 

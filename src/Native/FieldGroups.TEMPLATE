@@ -43,6 +43,10 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
         this.owner = owner;
     }
 
+    public wipe() {
+        this.state.fill(0);
+    }
+
     get [0]() {
         return this.values[0];
     }
@@ -163,15 +167,6 @@ export class ScoreboardTable<ValueType> implements Record<ValidScoreboardIndex, 
         this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
-    
-
-    findUpdate(): number[] {
-        return this.state.reduce((out: number[], v, i) => {
-            if (v) out.push(i);
-
-            return out;
-        }, []);
-    }
 }
 
 export class CameraTable<ValueType> implements Record<Stat, ValueType> {
@@ -185,6 +180,10 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
         this.values = Array(8).fill(defaultValue);
         this.fieldId = fieldId;
         this.owner = owner;
+    }
+
+    public wipe() {
+        this.state.fill(0);
     }
 
     get [0]() {
@@ -283,14 +282,6 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
         this.owner.state[this.fieldId] |= 1;
         this.owner.entity.entityState |= 1;
     }
-    
-    findUpdate(): number[] {
-        return this.state.reduce((out: number[], v, i) => {
-            if (v) out.push(i);
-
-            return out;
-        }, []);
-    }
 }
 
 # First fill out the default field value if its unset
@@ -322,7 +313,7 @@ export class CameraTable<ValueType> implements Record<Stat, ValueType> {
     };
 
     constructor(entity: Entity) { this.entity = entity; }
-    wipe() { this.state.fill(0); }${
+    wipe() { this.state.fill(0); ${group[1].filter(f=>f.amount).map(f => "this.values." + f.name + ".wipe(); ").join("")}}${
         `${group[1].map(f => "\n    get " + f.name + "() { return this.values." + f.name + "; }").join("")}`
         +
         `${group[1]

@@ -218,8 +218,10 @@ export default class ObjectEntity extends Entity {
         else kbAngle = Math.atan2(diffY, diffX);
 
         if ((entity.physicsData.values.flags & PhysicsFlags.isSolidWall || entity.physicsData.values.flags & PhysicsFlags.isBase) && !(this.positionData.values.flags & PositionFlags.canMoveThroughWalls))  {
-            this.accel.magnitude *= 0.3;
-            this.velocity.magnitude *= 0.3;
+            if (entity.physicsData.values.flags & PhysicsFlags.isSolidWall) {
+                this.accel.magnitude *= 0.3;
+                this.velocity.magnitude *= 0.3;
+            }
             kbMagnitude /= 0.3;
         }
         if (entity.physicsData.values.sides === 2) {
