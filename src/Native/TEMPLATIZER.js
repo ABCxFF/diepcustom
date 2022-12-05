@@ -198,7 +198,7 @@ const FIELD_GROUPS = [
                 "amount": 10,
                 "name": "scoreboardColors",
                 "encType": "vu",
-                "type": "number"
+                "type": "Color"
             },
             {
                 "amount": 10,

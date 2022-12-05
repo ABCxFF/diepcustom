@@ -387,7 +387,7 @@ export class HealthGroup {
 export class ArenaGroup {
     entity: Entity;
     state: Uint8Array = new Uint8Array(15);
-    values: { flags: number, leftX: number, topY: number, rightX: number, bottomY: number, scoreboardAmount: number, scoreboardNames: ScoreboardTable<string>, scoreboardScores: ScoreboardTable<number>, scoreboardColors: ScoreboardTable<number>, scoreboardSuffixes: ScoreboardTable<string>, scoreboardTanks: ScoreboardTable<Tank | DevTank>, leaderX: number, leaderY: number, playersNeeded: number, ticksUntilStart: number } = {
+    values: { flags: number, leftX: number, topY: number, rightX: number, bottomY: number, scoreboardAmount: number, scoreboardNames: ScoreboardTable<string>, scoreboardScores: ScoreboardTable<number>, scoreboardColors: ScoreboardTable<Color>, scoreboardSuffixes: ScoreboardTable<string>, scoreboardTanks: ScoreboardTable<Tank | DevTank>, leaderX: number, leaderY: number, playersNeeded: number, ticksUntilStart: number } = {
         flags: 2,
         leftX: 0,
         topY: 0,
