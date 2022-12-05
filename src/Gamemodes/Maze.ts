@@ -53,8 +53,8 @@ export default class MazeArena extends ArenaEntity {
     private _buildWallFromGridCoord(gridX: number, gridY: number, gridW: number, gridH: number) {
         const scaledW = gridW * CELL_SIZE;
         const scaledH = gridH * CELL_SIZE;
-        const scaledX = gridX * CELL_SIZE - (gridW + ARENA_SIZE) / 2 + (scaledW / 2);
-        const scaledY = gridY * CELL_SIZE - (gridH + ARENA_SIZE) / 2 + (scaledH / 2);
+        const scaledX = gridX * CELL_SIZE - ARENA_SIZE / 2 + (scaledW / 2);
+        const scaledY = gridY * CELL_SIZE - ARENA_SIZE / 2 + (scaledH / 2);
         new MazeWall(this.game, scaledX, scaledY, scaledH, scaledW);
     }
     /** Allows for easier (x, y) based getting of maze cells */
