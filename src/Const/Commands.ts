@@ -313,6 +313,6 @@ export const executeCommand = (client: Client, cmd: string, args: string[]) => {
 
     const response = commandCallbacks[cmd as CommandID](client, ...args);
     if (response) {
-        client.notify(response, 0x00ff00, 5000, `commandfallback_${commandDefinition.id}`);
+        client.notify(response, 0x00ff00, 5000, `cmd-callback${commandDefinition.id}`);
     }
 }
