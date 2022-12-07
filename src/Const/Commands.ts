@@ -237,7 +237,7 @@ export const commandCallbacks = {
         }
 
         const godmodeState = player.isInvulnerable ? "ON" : "OFF";
-        return `Godmode: ${godmodeState}`;
+        return `God mode: ${godmodeState}`;
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
         const count = countArg ? parseInt(countArg) : 1;

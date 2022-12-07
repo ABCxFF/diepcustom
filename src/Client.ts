@@ -507,6 +507,7 @@ export default class Client {
         }
     }
 
+    /** Defines whether the player used cheats or not. This also defines whether the name is highlighted or not. */
     public setDevCheatsUsed(value: boolean) {
         const player = this.camera?.cameraData.values.player;
         if (player && player.nameData) {
@@ -517,6 +518,7 @@ export default class Client {
         this.devCheatsUsed = value;
     }
 
+    /** Exposes devCheatsUsed */
     public getDevCheats(): boolean {
         return this.devCheatsUsed;
     }
