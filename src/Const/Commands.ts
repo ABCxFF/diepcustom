@@ -309,7 +309,7 @@ export const executeCommand = (client: Client, cmd: string, args: string[]) => {
     }
 
     const commandDefinition = commandDefinitions[cmd as CommandID];
-    if (commandDefinition.isCheat) client.setDevCheatsUsed(true);
+    if (commandDefinition.isCheat) client.setHasCheated(true);
 
     const response = commandCallbacks[cmd as CommandID](client, ...args);
     if (response) {
