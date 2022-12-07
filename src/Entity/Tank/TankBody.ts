@@ -35,6 +35,7 @@ import { DevTank } from "../../Const/DevTankDefinitions";
 import { Inputs } from "../AI";
 import AbstractBoss from "../Boss/AbstractBoss";
 import { ArenaState } from "../../Native/Arena";
+import { maxPlayerLevel } from "../../config";
 
 /**
  * Abstract type of entity which barrels can connect to.
@@ -175,7 +176,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     public onKill(entity: LivingEntity) {
         this.scoreData.score = this.cameraEntity.cameraData.score += entity.scoreReward;
 
-        if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.cameraData.values.level, 45) - entity.cameraEntity.cameraData.values.level <= 20 || entity instanceof AbstractBoss) {
+        if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.cameraData.values.level, maxPlayerLevel) - entity.cameraEntity.cameraData.values.level <= 20 || entity instanceof AbstractBoss) {
             if (this.cameraEntity instanceof ClientCamera) this.cameraEntity.client.notify("You've killed " + (entity.nameData.values.name || "an unnamed tank"));
         }
 

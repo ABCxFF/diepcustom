@@ -101,3 +101,6 @@ export const defaultAccessLevel: AccessLevel = AccessLevel.BetaAccess;
 export const devTokens: Record<string, AccessLevel> = {
     "*": defaultAccessLevel
 }
+
+/** Maximum level that player tanks can have. Default: 45 */
+export const maxPlayerLevel = 45;
