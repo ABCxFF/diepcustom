@@ -563,10 +563,10 @@ export default class Client {
             for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statLimits[i as Stat] = ai.owner.cameraEntity.cameraData.statLimits.values[i];
             for (let i = 0; i < StatCount; ++i) this.camera.cameraData.statNames[i as Stat] = ai.owner.cameraEntity.cameraData.statNames.values[i];
 
-            this.camera.cameraData.FOV = 0.35;
+            this.camera.cameraData.FOV = ai.owner.cameraEntity.cameraData.FOV;
         } else if (ai.owner instanceof AbstractBoss) {
             this.camera.setLevel(75);
-            this.camera.cameraData.FOV = 0.25;
+            this.camera.cameraData.FOV = 0.35;
         } else {
             this.camera.setLevel(30);
         }
