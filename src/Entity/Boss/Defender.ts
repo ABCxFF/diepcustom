@@ -38,7 +38,7 @@ const MountedTurretDefinition: BarrelDefinition = {
         ...AutoTurretDefinition.bullet,
         speed: 2.3,
         damage: 0.75,
-        health: 12.5,
+        health: 5.75,
         color: Color.Neutral
     }
 };
