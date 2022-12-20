@@ -110,7 +110,7 @@ export class AI {
         this._creationTick = this.game.tick;
 
         this.inputs.mouse.set({
-            x: 20,
+            x: 0,
             y: 0
         });
 
