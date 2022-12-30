@@ -4,7 +4,8 @@
         "module": "CommonJS",
         "outDir": "./lib",
         "strict": true,
-        "removeComments": true
+        "removeComments": true,
+        "skipLibCheck": true
     },
     "include": [
         "src",
