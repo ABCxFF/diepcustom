@@ -43,6 +43,10 @@ export default class FallenBooster extends AbstractBoss {
         }
     }
 
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
+    }
+
     protected moveAroundMap() {
       const x = this.positionData.values.x,
       y = this.positionData.values.y
@@ -56,6 +60,5 @@ export default class FallenBooster extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
-        this.sizeFactor = this.physicsData.values.size / 50;
     }
 }
