@@ -61,8 +61,6 @@ export default class Skimmer extends Bullet implements BarrelBase {
     /** The skimmer's barrels */
     private skimmerBarrels: Barrel[];
 
-    /** The size ratio of the skimmer. */
-    public sizeFactor: number;
     /** The camera entity (used as team) of the skimmer. */
     public cameraEntity: Entity;
     /** The reload time of the skimmer's barrel. */
@@ -80,8 +78,6 @@ export default class Skimmer extends Bullet implements BarrelBase {
         this.rotationPerTick = direction;
 
         this.cameraEntity = tank.cameraEntity;
-
-        this.sizeFactor = this.physicsData.values.size / 50;
 
         const skimmerBarrels: Barrel[] = this.skimmerBarrels =[];
 
@@ -112,8 +108,11 @@ export default class Skimmer extends Bullet implements BarrelBase {
         this.inputs.flags |= InputFlags.leftclick;
     }
 
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
+    }
+
     public tick(tick: number) {
-        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
         this.positionData.angle += this.rotationPerTick;
         super.tick(tick);
