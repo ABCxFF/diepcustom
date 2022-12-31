@@ -45,6 +45,10 @@ export default class FallenMegaTrapper extends AbstractBoss {
 
     }
 
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
+    }
+
     protected moveAroundMap() {
         if (this.ai.state === AIState.idle) {
             this.positionData.angle += this.ai.passiveRotation;
