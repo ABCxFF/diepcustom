@@ -144,6 +144,8 @@ export default class AbstractBoss extends LivingEntity {
 
         this.sizeFactor = this.physicsData.values.size / 50;
         this.healthData.values.health = this.healthData.values.maxHealth = 3000;
+
+        this.hostile = true;
     }
 
     // For map wide movement

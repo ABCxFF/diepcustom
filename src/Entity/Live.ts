@@ -46,6 +46,8 @@ export default class LivingEntity extends ObjectEntity {
     protected lastDamageAnimationTick = -1;
     /** Damage reduction (mathematical health increase). */
     public damageReduction = 1;
+    /** Hostile to be attacked by AI */
+    public hostile: boolean = false;
 
     /** Extends ObjectEntity.destroy() - diminishes health as well. */
     public destroy(animate=true) {

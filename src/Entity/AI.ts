@@ -20,7 +20,6 @@ import GameServer from "../Game";
 import Vector, { VectorAbstract } from "../Physics/Vector";
 import LivingEntity from "./Live";
 import ObjectEntity from "./Object";
-import TankBody from "./Tank/TankBody";
 
 import { InputFlags, PhysicsFlags } from "../Const/Enums";
 import { Entity } from "../Native/Entity";
@@ -111,7 +110,7 @@ export class AI {
         this._creationTick = this.game.tick;
 
         this.inputs.mouse.set({
-            x: 20,
+            x: 0,
             y: 0
         });
 
@@ -166,14 +165,7 @@ export class AI {
 
             if (!this.targetFilter(entity.positionData.values)) continue; // Custom check
 
-            // TODO(ABC): Find out why this was put here
-            if (entity instanceof TankBody) {
-                if (!(closestEntity instanceof TankBody)) {
-                    closestEntity = entity;
-                    closestDistSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
-                    continue;
-                }
-            } else if (closestEntity instanceof TankBody) continue;
+            if (entity.hostile) return this.target = entity;
 
             const distSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
 

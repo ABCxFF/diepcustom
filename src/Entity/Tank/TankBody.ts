@@ -98,6 +98,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         this.damagePerTick = 20;
         this.setTank(Tank.Basic);
+
+        this.hostile = true;
     }
 
     /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
