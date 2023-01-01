@@ -61,13 +61,11 @@ export default class Minion extends Drone implements BarrelBase {
     /** The minion's barrel */
     private minionBarrel: Barrel;
 
-    /** The size ratio of the rocket. */
-    public sizeFactor: number;
-    /** The camera entity (used as team) of the rocket. */
+    /** The camera entity (used as team) of the minion. */
     public cameraEntity: Entity;
-    /** The reload time of the rocket's barrel. */
+    /** The reload time of the minion's barrel. */
     public reloadTime = 1;
-    /** The inputs for when to shoot or not. (Rocket) */
+    /** The inputs for when to shoot or not. */
     public inputs = new Inputs();
 
     public constructor(barrel: Barrel, tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
@@ -87,16 +85,18 @@ export default class Minion extends Drone implements BarrelBase {
 
         this.physicsData.values.flags |= PhysicsFlags.onlySameOwnerCollision;
 
-        this.sizeFactor = this.physicsData.values.size / 50;
         this.cameraEntity = tank.cameraEntity;
 
         this.minionBarrel = new Barrel(this, MinionBarrelDefinition);
         this.ai.movementSpeed = this.ai.aimSpeed = this.baseAccel;
     }
 
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
+    }
+
     /** This allows for factory to hook in before the entity moves. */
     protected tickMixin(tick: number) {
-        this.sizeFactor = this.physicsData.values.size / 50;
         this.reloadTime = this.tank.reloadTime;
 
         const usingAI = !this.canControlDrones || !this.tank.inputs.attemptingShot() && !this.tank.inputs.attemptingRepel();

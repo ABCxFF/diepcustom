@@ -65,9 +65,12 @@ export default class Guardian extends AbstractBoss {
         this.relationsData.values.team = this.game.arena;
         this.physicsData.values.size = GUARDIAN_SIZE * Math.SQRT1_2;
         this.physicsData.values.sides = 3;
-        this.sizeFactor = 1.0;
 
         this.barrels.push(new Barrel(this, GuardianSpawnerDefinition));
+    }
+
+    public get sizeFactor() {
+        return (this.physicsData.values.size / Math.SQRT1_2) / GUARDIAN_SIZE;
     }
 
     protected moveAroundMap() {
@@ -77,7 +80,5 @@ export default class Guardian extends AbstractBoss {
 
     public tick(tick: number) {
         super.tick(tick);
-        // Let it scale with the guardian
-        this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / GUARDIAN_SIZE;
     }
 }

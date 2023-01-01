@@ -69,7 +69,6 @@ export default class Summoner extends AbstractBoss {
         this.styleData.values.color = Color.EnemySquare;
         this.relationsData.values.team = this.game.arena;
         this.physicsData.values.size = SUMMONER_SIZE * Math.SQRT1_2;
-        this.sizeFactor = 1;
         this.physicsData.values.sides = 4;
 
         for (let i = 0; i < 4; ++i) {
@@ -78,13 +77,17 @@ export default class Summoner extends AbstractBoss {
                 angle: PI2 * ((i / 4) - 1 / 4)
             }));
 
+        }
     }
-}
+
+    public get sizeFactor() {
+        return (this.physicsData.values.size / Math.SQRT1_2) / SUMMONER_SIZE;
+    }
+
 
     public tick(tick: number) {
         super.tick(tick);
 
-        this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / SUMMONER_SIZE;
         if (this.ai.state !== AIState.possessed) {
             this.positionData.angle += this.ai.passiveRotation;
         }

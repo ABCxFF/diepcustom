@@ -31,11 +31,15 @@ export default class FallenAC extends AbstractBoss {
     public constructor(game: GameServer) {
         super(game);
 
-        this.nameData.values.name = 'Fallen AC';
+        this.nameData.values.name = 'Fallen Arena Closer';
         this.movementSpeed = 20;
         for (const barrelDefinition of TankDefinitions[Tank.ArenaCloser].barrels) {
             this.barrels.push(new Barrel(this, barrelDefinition));
         }
+    }
+
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
     }
 
     protected moveAroundMap() {

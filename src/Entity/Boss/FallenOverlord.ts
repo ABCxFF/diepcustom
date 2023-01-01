@@ -41,10 +41,13 @@ export default class FallenOverlord extends AbstractBoss {
         }
     }
 
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
+    }
+
     public tick(tick: number) {
         super.tick(tick);
 
-        this.sizeFactor = this.physicsData.values.size / 50;
         if (this.ai.state !== AIState.possessed) {
             this.positionData.angle += this.ai.passiveRotation;
         }
