@@ -285,6 +285,14 @@ const CUSTOM_COMMANDS = [
             console.log("Hello World");
         }
     }, {
+        "id": "util_set_dev_password",
+        "usage": "[password]",
+        "description": "Sets the dev password (reconnect required)",
+        "callback": args => {
+            if(!args[0]) return;
+            window.localStorage.setItem("password", args[0]);
+        }
+    }, {
         "id": "util_reload_servers",
         "usage": "[?interval]",
         "description": "Sets the interval in which gamemodes are reloaded automatically (milliseconds, 'never' or 'connect') or reloads once if no interval is given",
