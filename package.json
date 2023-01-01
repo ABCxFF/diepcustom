@@ -20,7 +20,7 @@
     "docker": "npm run docker:build && npm run docker:start"
   },
   "engines": {
-    "node": "16.x"
+    "node": ">=16.3"
   },
   "dependencies": {
     "@types/node": "^16.4.0",
