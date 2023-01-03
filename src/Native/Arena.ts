@@ -215,27 +215,23 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			this.spawnBoss();
 		}
 
-        if (this.state === ArenaState.CLOSED) return;
-
-		const players: TankBody[] = [];
+        if (this.state === ArenaState.CLOSED || this.state === ArenaState.OVER) return;
 		
-		for (let id = 0; id <= this.game.entities.lastId; ++id) {
-			const entity = this.game.entities.inner[id];
-			
-			if (Entity.exists(entity) && entity instanceof TankBody && entity.cameraEntity instanceof ClientCamera && entity.cameraEntity.cameraData.values.player === entity) players.push(entity);
+		const players: TankBody[] = [];
+		for (const client of this.game.clients) {
+			if (!(client.camera instanceof ClientCamera) || !Entity.exists(client.camera.cameraData.player)) continue;
+			players.push(client.camera.cameraData.player);	
 		}
-
+		
 		// Sorts them too DONT FORGET
 		this.updateScoreboard(players);
 
-
-		if (players.length === 0 && this.state === ArenaState.CLOSING) {
+		if (!players.length && this.state === ArenaState.CLOSING) {
 			this.state = ArenaState.CLOSED;
-
 			setTimeout(() => {
+				if (this.state !== ArenaState.CLOSED) return;
 				this.game.end();
 			}, 10000);
-			return;
 		}
 	}
 
