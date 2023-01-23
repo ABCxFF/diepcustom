@@ -174,7 +174,7 @@ Module.loadGamemodeButtons = () => {
             { offset: 24, type: "i32", value: 1 }
         ]]);
     }
-    Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // not understood
+    Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // toggle vector memory guard
 };
 
 Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES = ['ffa', 'survival', 'teams', '4teams', 'dom', 'maze', 'tag'];
