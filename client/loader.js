@@ -67,6 +67,9 @@ Module.reloadServersInterval = 60000;
 Module.reloadTanksInterval = -1;
 Module.reloadCommandsInterval = -2;
 
+// Run frames via requestAnimationFrame or setTimeout
+Module.scheduler = window.requestAnimationFrame;
+
 // abort client
 Module.abort = cause => {
     Module.isAborted = true;
@@ -92,7 +95,7 @@ Module.runASMConst = (code, sigPtr, argbuf) => {
 Module.setLoop = func => {
     if(!Module.isRunning || Module.isAborted || Module.exception === "quit") return;
     Module.mainFunc = func;
-    window.requestAnimationFrame(Module.loop);
+    Module.scheduler.apply(null, [Module.loop]);
 };
 
 // process todo
@@ -112,12 +115,12 @@ Module.loop = () => {
     switch(Module.exception) {
         case null:
             Module.exports.dynCallV(Module.mainFunc);
-            return window.requestAnimationFrame(Module.loop);
+            return Module.scheduler.apply(null, [Module.loop]);
         case "quit":
             return;
         case "unwind":
             Module.exception = null;
-            return window.requestAnimationFrame(Module.loop);
+            return Module.scheduler.apply(null, [Module.loop]);
     }
 };
 

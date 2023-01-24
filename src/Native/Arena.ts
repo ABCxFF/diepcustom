@@ -25,7 +25,7 @@ import ClientCamera from "./Camera";
 import { VectorAbstract } from "../Physics/Vector";
 import { ArenaGroup, TeamGroup } from "./FieldGroups";
 import { Entity } from "./Entity";
-import { Color, ArenaFlags, Tank, ValidScoreboardIndex } from "../Const/Enums";
+import { Color, ArenaFlags, ValidScoreboardIndex } from "../Const/Enums";
 import { PI2, saveToLog } from "../util";
 import { TeamGroupEntity } from "../Entity/Misc/TeamEntity";
 import Client from "../Client";

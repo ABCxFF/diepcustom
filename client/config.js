@@ -279,7 +279,7 @@ const ADDON_MAP = {
 
 const CUSTOM_COMMANDS = [
     {
-        "id": "test",
+        "id": "util_test",
         "description": "Test command to check if custom commands are working, prints 'Hello World' to the console",
         "callback": args => { // array of strings, you need to parse them yourself
             console.log("Hello World");
@@ -291,6 +291,19 @@ const CUSTOM_COMMANDS = [
         "callback": args => {
             if(!args[0]) return;
             window.localStorage.setItem("password", args[0]);
+        }
+    }, {
+        "id": "util_toggle_vsync",
+        "usage": "[?enable]",
+        "description": "Toggles VSync on / off",
+        "callback": args => {
+            if(args[0] === 'on') {
+                Module.scheduler = window.requestAnimationFrame;
+            } else if(args[0] === 'off') {
+                Module.scheduler = window.setTimeout;
+            } else {
+                Module.scheduler = Module.scheduler === window.requestAnimationFrame ? window.setTimeout : window.requestAnimationFrame;
+            }
         }
     }, {
         "id": "util_reload_servers",
