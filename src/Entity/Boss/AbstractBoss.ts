@@ -90,9 +90,6 @@ export default class AbstractBoss extends LivingEntity {
     public nameData: NameGroup = new NameGroup(this);
     /** Alternate name, eg Guardian and Guardian of the Pentagons to appear in notifications" */
     public altName: string | null = null;
-
-    /** The active change in size from the base size to the current. Contributes to barrel and addon sizes. */
-    public sizeFactor = 1;
     /** The reload time calculation property. Used for calculating reload of barrels. */
     public reloadTime = 15;
 
@@ -142,8 +139,11 @@ export default class AbstractBoss extends LivingEntity {
 
         this.reloadTime = 15 * Math.pow(0.914, 7);
 
-        this.sizeFactor = this.physicsData.values.size / 50;
         this.healthData.values.health = this.healthData.values.maxHealth = 3000;
+    }
+
+    public get sizeFactor() {
+        return this.physicsData.values.size / 50;
     }
 
     // For map wide movement

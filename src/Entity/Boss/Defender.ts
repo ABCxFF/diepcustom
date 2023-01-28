@@ -91,7 +91,7 @@ export default class Defender extends AbstractBoss {
         this.relationsData.values.team = this.game.arena;
         this.physicsData.values.size = DEFENDER_SIZE * Math.SQRT1_2;
         this.ai.viewRange = 0;
-        this.sizeFactor = 1;
+
         this.physicsData.values.sides = 3;
 
         for (let i = 0; i < 3; ++i) {
@@ -123,10 +123,13 @@ export default class Defender extends AbstractBoss {
         }
     }
 
+    public get sizeFactor() {
+        return (this.physicsData.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
+    }
+
     public tick(tick: number) {
        super.tick(tick);
 
-       this.sizeFactor = (this.physicsData.values.size / Math.SQRT1_2) / DEFENDER_SIZE;
         if (this.ai.state !== AIState.possessed) {
             this.positionData.angle += this.ai.passiveRotation * Math.PI * Math.SQRT1_2;
         }
