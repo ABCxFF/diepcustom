@@ -293,17 +293,12 @@ const CUSTOM_COMMANDS = [
             window.localStorage.setItem("password", args[0]);
         }
     }, {
-        "id": "util_toggle_vsync",
-        "usage": "[?enable]",
-        "description": "Toggles VSync on / off",
+        "id": "util_change_scheduler",
+        "usage": "[?scheduler]",
+        "description": "Changes the game's frame scheduler (default: requestAnimationFrame)",
         "callback": args => {
-            if(args[0] === 'on') {
-                Module.scheduler = window.requestAnimationFrame;
-            } else if(args[0] === 'off') {
-                Module.scheduler = window.setTimeout;
-            } else {
-                Module.scheduler = Module.scheduler === window.requestAnimationFrame ? window.setTimeout : window.requestAnimationFrame;
-            }
+            // possible alternative would be setTimeout eg.
+            Module.scheduler = typeof window[args[0]] === "function" ? window[args[0]] : window.requestAnimationFrame;
         }
     }, {
         "id": "util_reload_servers",
