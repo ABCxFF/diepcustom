@@ -18,7 +18,7 @@
 
 import DevTankDefinitions, { DevTank } from "./DevTankDefinitions";
 import { Tank, Color } from "./Enums";
-import _TankDefinitions from "./Tankdefinitions.json";
+import _TankDefinitions from "./TankDefinitions.json";
 
 /** The types of post addons that exist in the game, by their id. */
 export type postAddonId = "dompronounced" | "auto5" | "auto3" | "autosmasher" | "spike" | "pronounced" | "smasher" | "landmine" | "autoturret" | "weirdspike" | "auto2" | "auto7" | "autorocket" | "spiesk"
