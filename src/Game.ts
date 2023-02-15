@@ -185,10 +185,8 @@ export default class GameServer {
         const onConnect = this._listeners.connection[0] = (ws: WebSocket, request: IncomingMessage) => {
             // shouldHandle takes care of this for us
             const endpoint: DiepGamemodeID = (request.url || "").slice((request.url || "").indexOf("-") + 1) as DiepGamemodeID;
-        
+
             if (this.gamemode !== endpoint) {
-                try { ws.terminate(); } catch {}
-                try { request.destroy(); } catch {}
                 return;
             }
 
