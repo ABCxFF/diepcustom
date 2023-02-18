@@ -25,6 +25,8 @@ import { saveToVLog } from "../util";
 import { Stat, StatCount, StyleFlags, Tank } from "./Enums";
 import { getTankByName } from "./TankDefinitions"
 
+const RELATIVE_POS_REGEX = new RegExp(/~(-?\d+)?/);
+
 export const enum CommandID {
     gameSetTank = "game_set_tank",
     gameSetLevel = "game_set_level",
@@ -195,8 +197,8 @@ export const commandCallbacks = {
     game_teleport: (client: Client, xArg: string, yArg: string) => {
         const player = client.camera?.cameraData.player;
         if (!Entity.exists(player) || !(player instanceof ObjectEntity)) return;
-        const x = xArg.match(/~(-?\d+)?/) ? player.positionData.x + parseInt(xArg.slice(1) || "0") : parseInt(xArg);
-        const y = yArg.match(/~(-?\d+)?/) ? player.positionData.y + parseInt(yArg.slice(1) || "0") : parseInt(yArg);
+        const x = xArg.match(RELATIVE_POS_REGEX) ? player.positionData.x + parseInt(xArg.slice(1) || "0") : parseInt(xArg);
+        const y = yArg.match(RELATIVE_POS_REGEX) ? player.positionData.y + parseInt(yArg.slice(1) || "0") : parseInt(yArg);
         if (isNaN(x) || isNaN(y)) return;
         player.positionData.x = x;
         player.positionData.y = y;
@@ -242,16 +244,16 @@ export const commandCallbacks = {
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
         const count = countArg ? parseInt(countArg) : 1;
-        let x = parseInt(xArg || "0");
-        let y = parseInt(yArg || "0");
+        let x = parseInt(xArg || "0", 10);
+        let y = parseInt(yArg || "0", 10);
 
         const player = client.camera?.cameraData.player;
         if (Entity.exists(player) && player instanceof ObjectEntity) {
-            if (xArg && xArg.match(/~(-?\d+)?/)) {
-                x = player.positionData.x + parseInt(xArg.slice(1) || "0");
+            if (xArg && xArg.match(RELATIVE_POS_REGEX)) {
+                x = player.positionData.x + parseInt(xArg.slice(1) || "0", 10);
             }
-            if (yArg && yArg.match(/~(-?\d+)?/)) {
-                y = player.positionData.y + parseInt(yArg.slice(1) || "0");
+            if (yArg && yArg.match(RELATIVE_POS_REGEX)) {
+                y = player.positionData.y + parseInt(yArg.slice(1) || "0", 10);
             }
         }
 
