@@ -193,10 +193,11 @@ export const commandCallbacks = {
         camera.statsAvailable += points;
     },
     game_teleport: (client: Client, xArg: string, yArg: string) => {
-        const x = parseInt(xArg);
-        const y = parseInt(yArg);
         const player = client.camera?.cameraData.player;
-        if (isNaN(x) || isNaN(y) || !Entity.exists(player) || !(player instanceof TankBody)) return;
+        if (!Entity.exists(player) || !(player instanceof ObjectEntity)) return;
+        const x = xArg.match(/~(-?\d+)?/) ? player.positionData.x + parseInt(xArg.slice(1) || "0") : parseInt(xArg);
+        const y = yArg.match(/~(-?\d+)?/) ? player.positionData.y + parseInt(yArg.slice(1) || "0") : parseInt(yArg);
+        if (isNaN(x) || isNaN(y)) return;
         player.positionData.x = x;
         player.positionData.y = y;
         player.setVelocity(0, 0);
@@ -241,8 +242,19 @@ export const commandCallbacks = {
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
         const count = countArg ? parseInt(countArg) : 1;
-        const x = parseInt(xArg || "");
-        const y = parseInt(yArg || "");
+        let x = parseInt(xArg || "0");
+        let y = parseInt(yArg || "0");
+
+        const player = client.camera?.cameraData.player;
+        if (Entity.exists(player) && player instanceof ObjectEntity) {
+            if (xArg && xArg.match(/~(-?\d+)?/)) {
+                x = player.positionData.x + parseInt(xArg.slice(1) || "0");
+            }
+            if (yArg && yArg.match(/~(-?\d+)?/)) {
+                y = player.positionData.y + parseInt(yArg.slice(1) || "0");
+            }
+        }
+
         const game = client.camera?.game;
         const TEntity = new Map([
             ["Defender", Defender],
