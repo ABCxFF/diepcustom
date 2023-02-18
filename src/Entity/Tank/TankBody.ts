@@ -35,7 +35,7 @@ import { DevTank } from "../../Const/DevTankDefinitions";
 import { Inputs } from "../AI";
 import AbstractBoss from "../Boss/AbstractBoss";
 import { ArenaState } from "../../Native/Arena";
-import { maxPlayerLevel } from "../../config";
+import { AccessLevel, maxPlayerLevel } from "../../config";
 
 /**
  * Abstract type of entity which barrels can connect to.
@@ -251,7 +251,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         if (this.isInvulnerable) {
             if (this.game.clients.size !== 1 || this.game.arena.state !== ArenaState.OPEN) {
                 // not for ACs
-                if (this.cameraEntity instanceof ClientCamera) this.setInvulnerability(false);
+                if (this.cameraEntity instanceof ClientCamera && this.cameraEntity.client.accessLevel < AccessLevel.FullAccess) this.setInvulnerability(false);
             }
         }
         if (!this.deletionAnimation && !this.inputs.deleted) this.physicsData.size = this.baseSize * this.cameraEntity.sizeFactor;
