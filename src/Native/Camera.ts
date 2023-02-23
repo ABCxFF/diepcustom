@@ -163,12 +163,6 @@ export default class ClientCamera extends CameraEntity {
         const updates: Entity[] = [];
         const creations: Entity[] = [];
 
-        // Yeah.
-        if (this.view.length === 0) {
-            creations.push(this.game.arena, this);
-            this.view.push(this.game.arena, this);
-        }
-
         const fov = this.cameraData.values.FOV;
         const width = (1920 / fov) / 1.5;
         const height = (1080 / fov) / 1.5;
@@ -232,6 +226,12 @@ export default class ClientCamera extends CameraEntity {
             if (!deletes[i].noDelete) this.removeFromView(deletes[i].id);
         }
 
+        // Yeah.
+        if (this.view.length === 0) {
+            creations.push(this.game.arena, this);
+            this.view.push(this.game.arena, this);
+        }
+        
         const entities = this.game.entities;
         for (const id of this.game.entities.otherEntities) {
             // TODO(speed)
