@@ -44,7 +44,7 @@ export default class Writer {
     //
     // TEMP FIX 2 - 2022/11/13:
     //   OUTPUT_BUFFER gets sent out in chunks (see Client.ts for more info)
-    protected static OUTPUT_BUFFER = Buffer.alloc(50);
+    protected static OUTPUT_BUFFER = Buffer.alloc(writtenBufferChunkSize);
     protected _at: number = 0;
 
     protected get at() {
