@@ -25,6 +25,8 @@ import { saveToVLog } from "../util";
 import { Stat, StatCount, StyleFlags, Tank } from "./Enums";
 import { getTankByName } from "./TankDefinitions"
 
+const RELATIVE_POS_REGEX = new RegExp(/~(-?\d+)?/);
+
 export const enum CommandID {
     gameSetTank = "game_set_tank",
     gameSetLevel = "game_set_level",
@@ -193,10 +195,11 @@ export const commandCallbacks = {
         camera.statsAvailable += points;
     },
     game_teleport: (client: Client, xArg: string, yArg: string) => {
-        const x = parseInt(xArg);
-        const y = parseInt(yArg);
         const player = client.camera?.cameraData.player;
-        if (isNaN(x) || isNaN(y) || !Entity.exists(player) || !(player instanceof TankBody)) return;
+        if (!Entity.exists(player) || !(player instanceof ObjectEntity)) return;
+        const x = xArg.match(RELATIVE_POS_REGEX) ? player.positionData.x + parseInt(xArg.slice(1) || "0", 10) : parseInt(xArg, 10);
+        const y = yArg.match(RELATIVE_POS_REGEX) ? player.positionData.y + parseInt(yArg.slice(1) || "0", 10) : parseInt(yArg, 10);
+        if (isNaN(x) || isNaN(y)) return;
         player.positionData.x = x;
         player.positionData.y = y;
         player.setVelocity(0, 0);
@@ -241,8 +244,19 @@ export const commandCallbacks = {
     },
     admin_summon: (client: Client, entityArg: string, countArg?: string, xArg?: string, yArg?: string) => {
         const count = countArg ? parseInt(countArg) : 1;
-        const x = parseInt(xArg || "");
-        const y = parseInt(yArg || "");
+        let x = parseInt(xArg || "0", 10);
+        let y = parseInt(yArg || "0", 10);
+
+        const player = client.camera?.cameraData.player;
+        if (Entity.exists(player) && player instanceof ObjectEntity) {
+            if (xArg && xArg.match(RELATIVE_POS_REGEX)) {
+                x = player.positionData.x + parseInt(xArg.slice(1) || "0", 10);
+            }
+            if (yArg && yArg.match(RELATIVE_POS_REGEX)) {
+                y = player.positionData.y + parseInt(yArg.slice(1) || "0", 10);
+            }
+        }
+
         const game = client.camera?.game;
         const TEntity = new Map([
             ["Defender", Defender],
