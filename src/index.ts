@@ -25,6 +25,7 @@ import GameServer from "./Game";
 import auth from "./Auth";
 import TankDefinitions from "./Const/TankDefinitions";
 import { commandDefinitions } from "./Const/Commands";
+import { ColorsHexCode } from "./Const/Enums";
 
 const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
@@ -58,6 +59,9 @@ const server = http.createServer((req, res) => {
             case "/commands":
                 res.writeHead(200);
                 return res.end(JSON.stringify(config.enableCommands ? Object.values(commandDefinitions) : []));
+            case "/colors":
+                res.writeHead(200);
+                return res.end(JSON.stringify(ColorsHexCode));
         }
     }
 
