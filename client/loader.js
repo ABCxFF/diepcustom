@@ -569,7 +569,7 @@ Module.todo.push([() => {
 
     const reloadTanksInterval = () => setTimeout(() => {
         reloadTanksInterval();
-        if(Module.reloadCommandsInterval < 0) return;
+        if(Module.reloadTanksInterval < 0) return;
         Game.reloadTanks();
     }, Module.reloadTanksInterval);
     reloadTanksInterval();
