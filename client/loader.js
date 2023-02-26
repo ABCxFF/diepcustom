@@ -46,6 +46,9 @@ window.input = null;
 // arenas
 Module.servers = null;
 
+// colors
+Module.colors = null;
+
 // tanks
 Module.tankDefinitions = null;
 Module.tankDefinitionsTable = null;
@@ -64,8 +67,9 @@ Module.permissionLevel = -1;
 
 // (polling) intervals, can be a number (ms), -1 aka never or -2 aka whenever a new connection is initiated  
 Module.reloadServersInterval = 60000;
-Module.reloadTanksInterval = -1;
+Module.reloadTanksInterval = -2;
 Module.reloadCommandsInterval = -2;
+Module.reloadColorsInterval = -2;
 
 // Run frames via requestAnimationFrame or setTimeout
 Module.scheduler = window.requestAnimationFrame;
@@ -168,7 +172,7 @@ Module.loadGamemodeButtons = () => {
         { offset: 12, type: "cstr", value: server.name }, 
         { offset: 24, type: "i32", value: 0 }
     ])));
-    $(MOD_CONFIG.memory.gamemodeDisabledText).utf8 = 'This game mode is disabled';
+    $(MOD_CONFIG.memory.gamemodeDisabledText).utf8 = "This game mode is disabled";
     // placeholders to prevent single/no gamemode bugs
     if (needsGamemode) {
         vec.push(...[[
@@ -180,7 +184,7 @@ Module.loadGamemodeButtons = () => {
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // toggle vector memory guard
 };
 
-Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES = ['ffa', 'survival', 'teams', '4teams', 'dom', 'maze', 'tag'];
+Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES = ["ffa", "survival", "teams", "4teams", "dom", "maze", "tag"];
 
 // Refreshes UI Components
 Module.loadChangelog = (changelog) => {
@@ -188,6 +192,15 @@ Module.loadChangelog = (changelog) => {
     if(vec.start) vec.destroy(); // remove old changelog
     vec.push(...(changelog || CHANGELOG)); // either load custom or default
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1; // not understood
+};
+
+// Replaces current colors with serverside ones
+Module.loadColors = () => {
+    if(!window.input || !Module.colors) return;
+    for(const [idx, color] of Object.entries(Module.colors)) {
+        console.log(`net_replace_color ${idx} ${color}`)
+        window.input.execute(`net_replace_color ${idx} ${color}`);
+    }
 };
 
 // Ignore Hashtable, instead read from custom table
@@ -435,8 +448,49 @@ Module.todo.push([(dependency, servers, tanks) => {
         kind: "func"
     });
     
+    const findConsecutiveSequenceIndex = (array, sequence) => {
+        const indexes = [];
+        for(let i = 0; i < array.length - sequence.length + 1; i++) {
+            let found = true;
+            for(let j = 0; j < sequence.length; j++) {
+                if(array[i + j] !== sequence[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if(found) {
+                indexes.push(i);
+            }
+        }
+        return indexes;
+    }
+    
     // parses & modifies code function by function
     parser.addCodeElementParser(null, function({ index, bytes }) {
+        const ptrPattern = VarUint32ToArray(MOD_CONFIG.memory.netColorTable);
+        const geuPattern = [OP_I32_CONST, 19, OP_I32_GE_U];
+        const ltuPattern = [OP_I32_CONST, 19, OP_I32_LT_U]
+        for(const idx of findConsecutiveSequenceIndex(bytes, ptrPattern)) {
+            const arr = Array.from(bytes); // convert to normal array for splicing
+            arr.splice(idx, ptrPattern.length, ...VarUint32ToArray(DYNAMIC_TOP_PTR + 4)); // using "empty" space
+            bytes = new Uint8Array(arr); // convert back to u8[]
+            let check = findConsecutiveSequenceIndex(bytes, geuPattern); // <= kMaxColors
+            if(!check.length) {
+                check = findConsecutiveSequenceIndex(bytes, ltuPattern); // invert, > kMaxColors
+                for(const idx of check) {
+                    const arr = Array.from(bytes);
+                    arr.splice(idx, ltuPattern.length, OP_I32_CONST, ...VarSint32ToArray(-2), OP_I32_NE); // color code -2 = kMaxColors
+                    bytes = new Uint8Array(arr);
+                }
+            } else {
+                for(const idx of check) {
+                    const arr = Array.from(bytes);
+                    arr.splice(idx, geuPattern.length, OP_I32_CONST, ...VarSint32ToArray(-2), OP_I32_EQ); // color code -2 = kMaxColors
+                    bytes = new Uint8Array(arr);
+                }
+            }
+        }
+        
         switch(index) {
             // modify load changelog function
             case originalLoadChangelog.i32(): // we only need the part where it checks if the changelog is already loaded to avoid too many import calls
@@ -477,7 +531,7 @@ Module.todo.push([(dependency, servers, tanks) => {
                 ]);
             // no interesting index
             default:
-                return false;
+                return bytes;
         }
     });
 
@@ -520,6 +574,10 @@ Module.todo.push([instance => {
 
 Module.todo.push([() => {
     window.Game = {
+        reloadColors: async () => {
+            Module.colors = await fetch(`${API_URL}colors`).then(res => res.json());
+            Module.loadColors();
+        },
         // refetches servers & resets gamemode buttons
         reloadServers: async () => {
             Module.servers = await fetch(`${API_URL}servers`).then(res => res.json());
@@ -580,6 +638,13 @@ Module.todo.push([() => {
         Game.reloadCommands();
     }, Module.reloadCommandsInterval);
     reloadCommandsInterval();
+    
+    const reloadColorsInterval = () => setTimeout(() => {
+        reloadColorsInterval();
+        if(Module.reloadColorsInterval < 0) return;
+        Game.reloadColors();
+    }, Module.reloadColorsInterval);
+    reloadColorsInterval();
 }, false]);
 
 
@@ -670,7 +735,7 @@ class ASMConsts {
     static getLocalStorage(key, length) {
         const keyStr = Module.UTF8ToString(key);
         let str = window.localStorage[keyStr] || "";
-        if(keyStr === 'gamemode' && !str && Module.servers && Module.servers.length) {
+        if(keyStr === "gamemode" && !str && Module.servers && Module.servers.length) {
             str = Module.servers[0].gamemode;
         }
         Module.HEAPU32[length >> 2] = str.length;
@@ -1185,6 +1250,7 @@ class ASMConsts {
         if(Module.reloadServersInterval === -2) Game.reloadServers();
         if(Module.reloadTanksInterval === -2) Game.reloadTanks(); 
         if(Module.reloadCommandsInterval === -2) Game.reloadCommands();
+        if(Module.reloadColorsInterval === -2) Game.reloadColors();
 
         Module.cp5.sockets.push(ws);
         return Module.cp5.sockets.length - 1;
