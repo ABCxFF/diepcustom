@@ -198,7 +198,6 @@ Module.loadChangelog = (changelog) => {
 Module.loadColors = () => {
     if(!window.input || !Module.colors) return;
     for(const [idx, color] of Object.entries(Module.colors)) {
-        console.log(`net_replace_color ${idx} ${color}`)
         window.input.execute(`net_replace_color ${idx} ${color}`);
     }
 };
