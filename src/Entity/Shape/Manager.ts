@@ -24,16 +24,20 @@ import Pentagon from "./Pentagon";
 import Triangle from "./Triangle";
 import Square from "./Square";
 import AbstractShape from "./AbstractShape";
+import { removeFast } from "../../util";
 
 /**
  * Used to balance out shape count in the arena, as well
  * as determines where each type of shape spawns around the arena.
  */
+
 export default class ShapeManager {
     /** Current game server */
     protected game: GameServer;
     /** Arena whose shapes are being managed */
     protected arena: ArenaEntity;
+    /** Stores all shapes */
+    protected shapes: AbstractShape[] = [];
 
     public constructor(arena: ArenaEntity) {
         this.arena = arena;
@@ -92,18 +96,13 @@ export default class ShapeManager {
         shape.scoreReward *= this.arena.shapeScoreRewardMultiplier;
 
         return shape;
-        // this.shapeCount += 1;
     }
 
     /** Kills all shapes in the arena */
     public killAll() {
-        const entities = this.game.entities.inner;
-        const lastId = this.game.entities.lastId;
-        for (let id = 0; id <= lastId; ++id) {
-            const entity = entities[id];
-            if (entity instanceof AbstractShape) entity.delete();
+        for(let i = 0; i < this.shapes.length; ++i) {
+            this.shapes[i]?.delete();
         }
-        // this.shapeCount = 0;
     }
 
     protected get wantedShapes() {
@@ -111,27 +110,10 @@ export default class ShapeManager {
     }
 
     public tick() {
-        const wantedShapes = this.wantedShapes;
-
-        let count = 0;
-        for (let id = 1; id <= this.game.entities.lastId; ++id) {
-            const entity = this.game.entities.inner[id];
-
-            if (entity instanceof AbstractShape) {
-                count += 1;
-            }
-        }
-
-        // // TODO(ABC):
-        // // Remove this once anti multiboxing starts / when 0x02 is built
-        // if (count >= wantedShapes * 10) {
-        //     count = 0;
-        //     this.killAll();
-        // }
-
-        while (count < wantedShapes) {
-            this.spawnShape();
-            count += 1;
+        for (let i = 0; i < this.wantedShapes; ++i) {
+            const shape = this.shapes[i];
+            if(!shape) this.shapes.push(this.spawnShape());
+            else if(shape.hash === 0) removeFast(this.shapes, i);
         }
     }
 }
