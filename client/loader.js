@@ -468,7 +468,7 @@ Module.todo.push([(dependency, servers, tanks) => {
     parser.addCodeElementParser(null, function({ index, bytes }) {
         const ptrPattern = VarUint32ToArray(MOD_CONFIG.memory.netColorTable);
         const geuPattern = [OP_I32_CONST, 19, OP_I32_GE_U];
-        const ltuPattern = [OP_I32_CONST, 19, OP_I32_LT_U]
+        const ltuPattern = [OP_I32_CONST, 19, OP_I32_LT_U];
         for(const idx of findConsecutiveSequenceIndex(bytes, ptrPattern)) {
             const arr = Array.from(bytes); // convert to normal array for splicing
             arr.splice(idx, ptrPattern.length, ...VarUint32ToArray(DYNAMIC_TOP_PTR + 4)); // using "empty" space
