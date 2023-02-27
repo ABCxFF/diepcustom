@@ -250,7 +250,8 @@ const MOD_CONFIG = {
         "changelogLoaded": 168632,
         "tankDefinitions": 166572,
         "tankDefinitionsCount": 166576,
-        "commandList": 53064
+        "commandList": 53064,
+        "netColorTable": 49584
     },
     "wasmFunctionHookOffset": {
         "gamemodeButtons": 33,
