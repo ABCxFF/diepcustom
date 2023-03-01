@@ -110,9 +110,10 @@ export default class ShapeManager {
     }
 
     public tick() {
-        for (let i = 0; i < this.wantedShapes; ++i) {
+        for (let i = this.wantedShapes; i --> 0;) {
             const shape = this.shapes[i];
-            if(!shape || shape.hash === 0) this.shapes.push(this.spawnShape());
+            // Alternatively, Entity.exists(shape), though this is probably faster
+            if (!shape || shape.hash === 0) this.shapes[i] = this.spawnShape();
         }
     }
 }
