@@ -112,8 +112,7 @@ export default class ShapeManager {
     public tick() {
         for (let i = 0; i < this.wantedShapes; ++i) {
             const shape = this.shapes[i];
-            if(!shape) this.shapes.push(this.spawnShape());
-            else if(shape.hash === 0) removeFast(this.shapes, i);
+            if(!shape || shape.hash === 0) this.shapes.push(this.spawnShape());
         }
     }
 }
