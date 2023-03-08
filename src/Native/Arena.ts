@@ -62,7 +62,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	/** Cached height of the arena. Not sent to the client directly. */
 	public height: number;
 	/** Whether or not the arena allows new players to spawn. */
-	public state: number = ArenaState.OPEN;
+	public state: ArenaState = ArenaState.OPEN;
 
 	public shapeScoreRewardMultiplier: number = 1;
 
