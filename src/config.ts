@@ -28,8 +28,8 @@ export const mspt: number = 40;
 /** Ticks per second in the game */
 export const tps: number = 1000 / mspt;
 
-/** Max connections per ip. -1 = no limit */
-export const connectionsPerIp: number = -1;
+/** Max connections per ip. Infinity = no limit */
+export const connectionsPerIp: number = Infinity;
 
 /** Max incoming packet size (HARD LIMIT), not the max read / write size */
 export const wssMaxMessageSize: number = 4096; // 4 kb
