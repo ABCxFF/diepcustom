@@ -39,13 +39,13 @@ const allClients = new Set<Client>();
 const app = App({});
 const games: GameServer[] = [];
 
-app.ws("/", {
+app.ws("/*", {
     compression: SHARED_COMPRESSOR,
     sendPingsAutomatically: true,
     maxPayloadLength: config.wssMaxMessageSize,
     idleTimeout: 10,
     upgrade: (res, req, context) => {
-        res.upgrade({ client: null, ipAddress: "" } as ClientWrapper,
+        res.upgrade({ client: null, ipAddress: "", gamemode: req.getUrl().slice(1) } as ClientWrapper,
             req.getHeader('sec-websocket-key'),
             req.getHeader('sec-websocket-protocol'),
             req.getHeader('sec-websocket-extensions'),
@@ -59,7 +59,11 @@ app.ws("/", {
             return ws.close();
         }
         connections.set(ipAddress, conns + 1);
-        const client = new Client(ws, games[0]);
+        const game = games.find(({ gamemode }) => gamemode === ws.getUserData().gamemode);
+        if (!game) {
+            return ws.close();
+        }
+        const client = new Client(ws, game);
         allClients.add(client);
         ws.getUserData().ipAddress = ipAddress;
         ws.getUserData().client = client;
@@ -148,14 +152,14 @@ app.listen(PORT, (success) => {
     // RULES(0): No two game servers should share the same endpoint
     //
     // NOTES(0): As of now, both servers run on the same process (and thread) here
-    const ffa = new GameServer(wss, "ffa", "FFA");
-    const sbx = new GameServer(wss, "sandbox", "Sandbox");
+    const ffa = new GameServer("ffa", "FFA");
+    const sbx = new GameServer("sandbox", "Sandbox");
     
     games.push(ffa, sbx);
 
     util.saveToLog("Servers up", "All servers booted up.", 0x37F554);
     util.log("Dumping endpoint -> gamemode routing table");
-    for (const game of games) console.log("> " + `localhost:${config.serverPort}/game/diepio-${game.gamemode}`.padEnd(40, " ") + " -> " + game.name);
+    for (const game of games) console.log("> " + `localhost:${config.serverPort}/${game.gamemode}`.padEnd(40, " ") + " -> " + game.name);
 });
 
 process.on("uncaughtException", (error) => {
