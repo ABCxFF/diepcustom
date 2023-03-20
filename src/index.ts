@@ -16,13 +16,12 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import * as http from "http";
 import * as fs from "fs";
-import * as WebSocket from "ws";
+import { App, SHARED_COMPRESSOR, WebSocket, WebSocketBehavior } from "uWebSockets.js";
+import Client, { ClientWrapper } from "./Client";
 import * as config from "./config"
 import * as util from "./util";
 import GameServer from "./Game";
-import auth from "./Auth";
 import TankDefinitions from "./Const/TankDefinitions";
 import { commandDefinitions } from "./Const/Commands";
 import { ColorsHexCode } from "./Const/Enums";
@@ -34,33 +33,71 @@ const ENABLE_CLIENT = config.enableClient && config.clientLocation && fs.existsS
 if (ENABLE_API) util.log(`Rest API hosting is enabled and is now being hosted at /${config.apiLocation}`);
 if (ENABLE_CLIENT) util.log(`Client hosting is enabled and is now being hosted from ${config.clientLocation}`);
 
+export const bannedClients = new Set<string>();
+const connections = new Map<string, number>();
+const allClients = new Set<Client>();
+const app = App({});
 const games: GameServer[] = [];
 
-const server = http.createServer((req, res) => {
-    util.saveToVLog("Incoming request to " + req.url);
+app.ws("/", {
+    compression: SHARED_COMPRESSOR,
+    sendPingsAutomatically: true,
+    maxPayloadLength: config.wssMaxMessageSize,
+    idleTimeout: 10,
+    upgrade: (res, req, context) => {
+        res.upgrade({ client: null, ipAddress: "" } as ClientWrapper,
+            req.getHeader('sec-websocket-key'),
+            req.getHeader('sec-websocket-protocol'),
+            req.getHeader('sec-websocket-extensions'),
+            context);
+    },
+    open: (ws: WebSocket<ClientWrapper>) => {
+        const ipAddress = Buffer.from(ws.getRemoteAddressAsText()).toString();
+        let conns = 0;
+        if (connections.has(ipAddress)) conns = connections.get(ipAddress) as number;
+        if (conns >= config.connectionsPerIp || bannedClients.has(ipAddress)) {
+            return ws.close();
+        }
+        connections.set(ipAddress, conns + 1);
+        const client = new Client(ws, games[0]);
+        allClients.add(client);
+        ws.getUserData().ipAddress = ipAddress;
+        ws.getUserData().client = client;
+    },
+    message: (ws: WebSocket<ClientWrapper>, message, isBinary) => {
+        const {client} = ws.getUserData();
+        if (!client) throw new Error("Unexistant client for websocket");
+        client.onMessage(message, isBinary);
+    },
+    close: (ws: WebSocket<ClientWrapper>, code, message) => {
+        const {client, ipAddress} = ws.getUserData();
+        if (client) {
+            connections.set(ipAddress, connections.get(ipAddress) as number - 1);
+            client.onClose(code, message);
+            allClients.delete(client);
+        }
+    }
+} as WebSocketBehavior<ClientWrapper>);
 
-    res.setHeader("Server", "github.com/ABCxFF/diepcustom");
-
-    if (ENABLE_API && req.url?.startsWith(`/${config.apiLocation}`)) {
-        switch (req.url.slice(config.apiLocation.length + 1)) {
+app.get("/*", (res, req) => {
+    util.saveToVLog("Incoming request to " + req.getUrl());
+    res.onAborted(() => {});
+    if (ENABLE_API && req.getUrl().startsWith(`/${config.apiLocation}`)) {
+        switch (req.getUrl().slice(config.apiLocation.length + 1)) {
             case "/":
-                res.writeHead(200);
+                res.writeStatus("200 OK");
                 return res.end();
-            case "/interactions": // discord interaction
-                if (!auth) return;
-                util.saveToVLog("Authentication attempt");
-                return auth.handleInteraction(req, res);
             case "/tanks":
-                res.writeHead(200);
+                res.writeStatus("200 OK");
                 return res.end(JSON.stringify(TankDefinitions));
             case "/servers":
-                res.writeHead(200);
+                res.writeStatus("200 OK");
                 return res.end(JSON.stringify(games.map(({ gamemode, name }) => ({ gamemode, name }))));
             case "/commands":
-                res.writeHead(200);
+                res.writeStatus("200 OK");
                 return res.end(JSON.stringify(config.enableCommands ? Object.values(commandDefinitions) : []));
             case "/colors":
-                res.writeHead(200);
+                res.writeStatus("200 OK");
                 return res.end(JSON.stringify(ColorsHexCode));
         }
     }
@@ -68,7 +105,7 @@ const server = http.createServer((req, res) => {
     if (ENABLE_CLIENT) {
         let file: string | null = null;
         let contentType = "text/html"
-        switch (req.url) {
+        switch (req.getUrl()) {
             case "/":
                 file = config.clientLocation + "/index.html";
                 contentType = "text/html";
@@ -91,34 +128,21 @@ const server = http.createServer((req, res) => {
                 break;
         }
 
-        res.setHeader("Content-Type", contentType + "; charset=utf-8");
+        res.writeHeader("Content-Type", contentType + "; charset=utf-8");
 
         if (file && fs.existsSync(file)) {
-            res.writeHead(200);
+            res.writeStatus("200 OK");
             return res.end(fs.readFileSync(file));
         }
 
-        res.writeHead(404);
+        res.writeStatus("404 Not Found");
         return res.end(fs.readFileSync(config.clientLocation + "/404.html"));
     } 
 });
 
-const wss = new WebSocket.Server({
-    server,
-    maxPayload: config.wssMaxMessageSize,
-});
+app.listen(PORT, (success) => {
+    if (!success) throw new Error("Server failed");
 
-const endpointMatch = /\/game\/diepio-.+/;
-// We are override this to allow for checking gamemodes
-wss.shouldHandle = function(request: http.IncomingMessage) {
-    const url = (request.url || "/");
-
-    if (url.length > 100) return false;
-
-    return endpointMatch.test(url);
-}
-
-server.listen(PORT, () => {
     util.log(`Listening on port ${PORT}`);
 
     // RULES(0): No two game servers should share the same endpoint
@@ -126,7 +150,7 @@ server.listen(PORT, () => {
     // NOTES(0): As of now, both servers run on the same process (and thread) here
     const ffa = new GameServer(wss, "ffa", "FFA");
     const sbx = new GameServer(wss, "sandbox", "Sandbox");
-
+    
     games.push(ffa, sbx);
 
     util.saveToLog("Servers up", "All servers booted up.", 0x37F554);
