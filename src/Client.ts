@@ -35,8 +35,6 @@ import { CameraFlags, ClientBound, ArenaFlags, InputFlags, ServerBound, Stat, St
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
-import InventoryManager from "./Items/InventoryManager";
-import { DroneSpawner } from "./Items/ItemUtils";
 import { bannedClients } from ".";
 
 /** XORed onto the tank id in the Tank Upgrade packet. */
@@ -81,6 +79,7 @@ export class ClientInputs extends Inputs {
 export interface ClientWrapper {
     client: Client | null;
     ipAddress: string;
+    gamemode: string;
 }
 
 export default class Client {
@@ -228,6 +227,8 @@ export default class Client {
                 util.saveToVLog("Possibly unknown, client terminated due to lack of authentication:: " + this.toString());
                 return this.terminate();
             }
+
+            this.acceptClient();
 
             return;
         }
