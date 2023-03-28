@@ -134,8 +134,6 @@ export default class Client {
     private devCheatsUsed: boolean = false;
     /** Wether or not the player is in godmode. */
     public isInvulnerable: boolean = false;
-    /** Used to restore the damage reduction value on the tankbody after godmode is toggled off. */
-    public damageReductionCache: number = 1;
 
     /** Returns a new writer stream connected to the socket. */
     public write() {
