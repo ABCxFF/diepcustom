@@ -1,4 +1,4 @@
-run = "npm run server"
+run = "yarn run server"
 
 [languages.typescript]
 pattern = "**/{*.ts,*.js,*.tsx,*.jsx}"
