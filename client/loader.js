@@ -1216,9 +1216,10 @@ class ASMConsts {
             ws.events.push([3, 0, 0]);
             Module.exports.checkWS();
         };
-        ws.onclose = function() {
+        ws.onclose = function({ reason }) {
             ws.events.push([4, 0, 0]);
             Module.exports.checkWS();
+            if(reason) console.log("WebSocket closed due to:", reason);
         };
         ws.onmessage = function(e) {
             const view = new Uint8Array(e.data);
