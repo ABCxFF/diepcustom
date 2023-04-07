@@ -18,20 +18,14 @@
 
 import * as config from "./config";
 import * as util from "./util";
-import { Server } from "ws";
-
 import Writer from "./Coder/Writer";
 import EntityManager from "./Native/Manager";
 import Client from "./Client";
-
-import ArenaEntity, { ArenaState } from "./Native/Arena";
+import ArenaEntity from "./Native/Arena";
 import FFAArena from "./Gamemodes/FFA";
 import Teams2Arena from "./Gamemodes/Team2";
 import SandboxArena from "./Gamemodes/Sandbox";
-
 import { ClientBound } from "./Const/Enums";
-import { IncomingMessage } from "http";
-import WebSocket = require("ws");
 import Teams4Arena from "./Gamemodes/Team4";
 import DominationArena from "./Gamemodes/Domination";
 import MothershipArena from "./Gamemodes/Mothership";
@@ -58,7 +52,7 @@ class WSSWriterStream extends Writer {
         const bytes = this.write();
 
         for (let client of this.game.clients) {
-            client.ws.send(bytes);
+            client.send(bytes);
         }
     }
 }
@@ -87,38 +81,17 @@ const GamemodeToArenaClass: Record<DiepGamemodeID, (typeof ArenaEntity) | null> 
 /**
  * Used for determining which endpoints go to the default.
  */
-
-
 export default class GameServer {
-    /**
-     * Stores total player count.
-     */
+    /** Stores total player count. */
     public static globalPlayerCount = 0;
-
     /** Whether or not the game server is running. */
     public running = true;
     /** The gamemode the game is running. */
     public gamemode: DiepGamemodeID;
-    /** The arena's display name */
+    /** The arena's display name. */
     public name: string;
-
     /** Whether or not to put players on the map. */
     public playersOnMap: boolean = false;
-
-    /** Inner WebSocket Server. */
-    private wss: Server;
-
-
-    /** Info on limits
-     * The server caps players per IP to 4
-     * The server caps players per discord account to 2
-     */
-
-    /** Contains count of each ip. */
-    public ipCache: Record<string, number> = {}
-    /** Contains count of each discord acc. */
-    public discordCache: Record<string, number> = {}
-
     /** All clients connected. */
     public clients: Set<Client>;
     /** Entity manager of the game. */
@@ -127,20 +100,13 @@ export default class GameServer {
     public tick: number;
     /** The game's arena entity. */
     public arena: ArenaEntity;
-
-    /** All listeners the function opened */
-    private _listeners: Record<string, ((ws: WebSocket, req: IncomingMessage) => void)[]> = {};
-
     /** The interval timer of the tick loop. */
     private _tickInterval: NodeJS.Timeout;
 
-    public constructor(wss: Server, gamemode: DiepGamemodeID, name: string | "*") {
+    public constructor(gamemode: DiepGamemodeID, name: string | "*") {
         this.gamemode = gamemode;
         this.name = name;
 
-        this.wss = wss;
-
-        this.listen();
         this.clients = new Set();
         // Keeps player count updating per addition
         const _add = this.clients.add;
@@ -178,51 +144,6 @@ export default class GameServer {
         }, config.mspt);
     }
 
-    /** Sets up listeners */
-    private listen() {
-
-        this._listeners["connection"] = [];
-        const onConnect = this._listeners.connection[0] = (ws: WebSocket, request: IncomingMessage) => {
-            // shouldHandle takes care of this for us
-            const endpoint: DiepGamemodeID = (request.url || "").slice((request.url || "").indexOf("-") + 1) as DiepGamemodeID;
-
-            if (this.gamemode !== endpoint) {
-                return;
-            }
-
-            util.log("Incoming client");
-            if (this.arena.state !== ArenaState.OPEN) {
-                util.log("Arena is not open: Closing client");
-                return  ws.terminate();
-            }
-
-            const ipPossible = request.headers['x-forwarded-for'] || request.socket.remoteAddress || "";
-            const ipList = Array.isArray(ipPossible) ? ipPossible : ipPossible.split(',').map(c => c.trim());
-            const ip = ipList[ipList.length - 1] || ""
-            
-            if ((ip !== ipList[0] || !ip) && config.mode !== "development") return request.destroy(new Error("Client ips dont match."));
-            
-            if (!this.ipCache[ip]) this.ipCache[ip] = 1;
-            // When the player is banned, ipCache[ip] is boosted to infinity
-            else if (this.ipCache[ip] === Infinity) return request.destroy();
-            else {
-                this.ipCache[ip] += 1;
-
-                if (config.connectionsPerIp !== -1 && this.ipCache[ip] > config.connectionsPerIp) {
-                    this.ipCache[ip] -= 1;
-                    return request.destroy();
-                }
-            }
-
-            // The rest of the parsing is taken care of in index.ts, so we can be sure there is a proper url here
-            this.clients.add(new Client(this, ws, ip));
-        }
-
-        this.wss.on("connection", onConnect);
-
-        util.saveToLog("Game Deploying", "Game now deploying gamemode `" + this.gamemode + "` at endpoint `" + this.gamemode + "`.", 0x1FE0C4);
-    }
-
     /** Returns a WebSocketServer Writer Broadcast Stream. */
     public broadcast() {
         return new WSSWriterStream(this);
@@ -239,8 +160,6 @@ export default class GameServer {
 
         clearInterval(this._tickInterval);
 
-        for (const event in this._listeners) for (const listener of this._listeners[event]) this.wss.off(event, listener);
-
         for (const client of this.clients) {
             client.terminate()
         }
@@ -249,8 +168,6 @@ export default class GameServer {
         this.clients.clear();
         this.entities.clear();
 
-        this.ipCache = {};
-
         this.running = false;
         this.onEnd();
     }
@@ -258,7 +175,6 @@ export default class GameServer {
     /** Can be overwritten to call things when the game is over */
     public onEnd() {
         util.log("Game instance is now over");
-
         this.start();
     }
 
@@ -268,7 +184,6 @@ export default class GameServer {
 
         util.log("New game instance booting up")
 
-        this.listen();
         this.clients.clear();
 
         this.entities = new EntityManager(this);

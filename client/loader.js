@@ -1188,9 +1188,11 @@ class ASMConsts {
     }
 
     static m28nReply(requestId, endpoint) {
-        const id = Module.allocateUTF8(Module.UTF8ToString(endpoint));
-        const ipv4 = Module.allocateUTF8(Module.UTF8ToString(endpoint));
-        const ipv6 = Module.allocateUTF8(Module.UTF8ToString(endpoint));
+        if(!Module.servers || !Module.servers.length) return console.warn("No Servers Found");
+        const server = Module.servers.find(({ gamemode }) => gamemode === Module.UTF8ToString(endpoint).slice(7)) || Module.servers[0];
+        const id = Module.allocateUTF8(server.gamemode);
+        const ipv4 = Module.allocateUTF8(server.gamemode);
+        const ipv6 = Module.allocateUTF8(server.gamemode);
         Module.exports.restReply(requestId, id, ipv4, ipv6);
         Module.exports.free(id);
         Module.exports.free(ipv4);
@@ -1198,16 +1200,12 @@ class ASMConsts {
     }
 
     static isSSL() {
-        return window.location.protocol === "https:";
+        return false;
     }
 
-    static createWebSocket(url) {
-        url = Module.UTF8ToString(url);
-        if (url.split(".").length === 4) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.indexOf("."))}`;
-        else if (url.endsWith(":443")) url = `ws${location.protocol.slice(4)}//${location.host}/game/${url.slice(url.indexOf("//") + 2, url.length - 4)}`
-        else return prompt("Error loading into game. Take a picture of this then send to our support server (github.com/ABCxFF/diepcustom)", url);
-    
-        const ws = new WebSocket(url);
+    static createWebSocket(urlPtr) {
+        const url = Module.UTF8ToString(urlPtr);
+        const ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}/${url.slice(5, url.length - 4)}`);
         ws.binaryType = "arraybuffer";
         ws.events = [];
         ws.onopen = function() {

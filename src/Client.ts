@@ -19,71 +19,47 @@
 import * as config from "./config";
 import * as util from "./util";
 import { createHash } from "crypto";
-
-import WebSocket = require("ws");
-import auth from "./Auth";
+import { WebSocket } from "uWebSockets.js";
 import Reader from "./Coder/Reader";
 import Writer from "./Coder/Writer";
-
 import GameServer from "./Game";
 import ClientCamera from "./Native/Camera";
 import { ArenaState } from "./Native/Arena";
 import ObjectEntity from "./Entity/Object";
-
 import TankDefinitions, { getTankById, TankCount } from "./Const/TankDefinitions";
 import DevTankDefinitions, { DevTank } from "./Const/DevTankDefinitions";
 import TankBody from "./Entity/Tank/TankBody";
-
 import Vector, { VectorAbstract } from "./Physics/Vector";
 import { Entity, EntityStateFlags } from "./Native/Entity";
-import { CameraFlags, ClientBound, ArenaFlags, InputFlags, NameFlags, ServerBound, Stat, StatCount, StyleFlags, Tank } from "./Const/Enums";
+import { CameraFlags, ClientBound, ArenaFlags, InputFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
-import LivingEntity from "./Entity/Live";
+import { bannedClients } from ".";
 
 /** XORed onto the tank id in the Tank Upgrade packet. */
 const TANK_XOR = config.magicNum % TankCount;
-/** XORed onto the stat id in the Stat Upgrade packet.  */
+/** XORed onto the stat id in the Stat Upgrade packet. */
 const STAT_XOR = config.magicNum % StatCount;
 /** Cached ping packet */
 const PING_PACKET = new Uint8Array([ClientBound.Ping]);
 
-/**
- * Used to write data in Writer class form to the socket.
- */
+/** Used to write data in Writer class form to the socket. */
 class WSWriterStream extends Writer {
-    private ws: WebSocket;
+    private client: Client;
 
-    public constructor(ws: WebSocket) {
+    public constructor(client: Client) {
         super();
 
-        this.ws = ws;
-    }
-
-    protected _at: number = 0;
-
-    protected get at() {
-        return this._at;
-    }
-
-    protected set at(v) {
-        // TODO(speed):
-        // Either rethink this, recode this, redo this, or undo this
-        if (v + 5 >= Writer.OUTPUT_BUFFER.length) {
-            this.ws.send(Writer.OUTPUT_BUFFER.subarray(0, v), {fin: false});
-            this._at = 0;
-        } else this._at = v;
+        this.client = client;
     }
 
     public send() {
-        this.ws.send(this.write());
+        this.client.send(this.write());
     }
 }
 
-/**
- * Used to store flags and apply once a tick.
- */
+/** Used to store flags and apply once a tick. */
 export class ClientInputs extends Inputs {
     /** Used to store flags and apply once a tick. */
     public cachedFlags = 0;
@@ -100,35 +76,33 @@ export class ClientInputs extends Inputs {
     }
 }
 
+export interface ClientWrapper {
+    client: Client | null;
+    ipAddress: string;
+    gamemode: string;
+}
+
 export default class Client {
     /** Set to true if the client socket has been terminated. */
-    private terminated = false;
+    public terminated = false;
     /** The game tick at which the client connected. */
     private connectTick: number;
     /** The last tick that the client received a ping. */
     private lastPingTick: number;
     /** The client's access level. */
-    public accessLevel: config.AccessLevel = config.devTokens["*"];
+    public accessLevel: config.AccessLevel = config.AccessLevel.NoAccess;
 
     /** Cache of all incoming packets of the current tick. */
-    private incomingCache: Uint8Array[][] = Array(ServerBound.TakeTank + 1).fill(null).map(() => []);
+    private incomingCache: Uint8Array[][] = [];
     /** The parsed input data from the socket. */
     public inputs: ClientInputs = new ClientInputs(this);
 
     /** Current game server. */
-    private game: GameServer;
+    public game: GameServer;
     /** Inner websocket connection. */
-    public ws: WebSocket;
+    public ws: WebSocket<ClientWrapper> | null;
     /** Client's camera entity. */
     public camera: ClientCamera | null = null;
-
-    /** The client's discord id if available. */
-    public discordId: string | null = null;
-
-    /** The client's IP Address */
-    public ipAddress: string;
-    /** The client's IP Address, hashed */
-    public ipAddressHash: string;
 
     /** Whether or not the player has used in game dev cheats before (such as level up or godmode). */
     private devCheatsUsed: boolean = false;
@@ -137,56 +111,79 @@ export default class Client {
 
     /** Returns a new writer stream connected to the socket. */
     public write() {
-        return new WSWriterStream(this.ws);
+        return new WSWriterStream(this);
     }
 
-    public constructor(game: GameServer, ws: WebSocket, ipAddress: string) {
+    public constructor(ws: WebSocket<ClientWrapper>, game: GameServer) {
         this.game = game;
+        this.game.clients.add(this);
         this.ws = ws;
-        this.ipAddress = ipAddress;
-        this.ipAddressHash = createHash('sha256').update(ipAddress + __dirname).digest('hex').slice(0, 8);
-
         this.lastPingTick = this.connectTick = game.tick;
+    }
 
-        ws.binaryType = "arraybuffer";
-        ws.on("close", () => {
-            util.log("WS Closed");
-            this.terminate();
-        });
-        ws.on("error", console.log.bind(void 0, "ws error"));
-        ws.on("message", (buffer: ArrayBufferLike) => {
-            // TODO(speed):
-            // Can someone confirm that buffer is not an arraybuffer, and instead if is a buffer
-            // In which case this is unnecessary
-            // maybe change ws.binaryType = "buffer"
-            const data = new Uint8Array(buffer);
+    /** Accepts the client and creates a camera for it. */
+    private acceptClient() {
+        this.write().u8(ClientBound.ServerInfo).stringNT(this.game.gamemode).stringNT(config.host).send();
+        this.write().u8(ClientBound.PlayerCount).vu(GameServer.globalPlayerCount).send();
+        this.write().u8(ClientBound.Accept).vi(this.accessLevel).send();
+        this.camera = new ClientCamera(this.game, this);
+    }
 
-            if (data[0] === 0x00 && data.byteLength === 1) return this.terminate(); // We do not host ping servers.
-            const header = data[0];
-            if (header === ServerBound.Ping) {
-                this.lastPingTick = this.game.tick;
+    /** Sends data to client. */
+    public send(data: Uint8Array) {
+        const ws = this.ws;
+        if (!ws) throw new Error("Can't write to a closed websocket - shouldn't be referencing a closed client");
+        ws.send(data, true);
+    }
 
-                this.ws.send(PING_PACKET);
-            } else if (header >= ServerBound.Init && header <= ServerBound.TakeTank) {
-                if (this.incomingCache[header].length) {
-                    if (header === ServerBound.Input) {
-                        // Otherwise store the flags
-                        const r = new Reader(data);
-                        r.at = 1;
+    /** Handles close event. */
+    public onClose(code: number, message: ArrayBuffer) {
+        this.ws = null;
 
-                        const flags = r.vu();
-                        this.inputs.cachedFlags |= flags & 0b110111100001; // WASD and gamepad are not stored.
-                    } else if (header === ServerBound.StatUpgrade) {
-                        this.incomingCache[header].push(data);
-                    }
-                    return;
+        this.terminate();
+    }
+
+    /** Terminates the connection and related things. */
+    public terminate() {
+        // if there's still a ws connected, close it - onclose handler will then terminate for us
+        if (this.terminated) return;
+        if (this.ws) return this.ws.close();
+
+        this.terminated = true;
+        this.game.clients.delete(this);
+
+        this.inputs.deleted = true;
+        this.inputs.movement.magnitude = 0;
+
+        if (Entity.exists(this.camera)) this.camera.delete();
+    }
+
+    /** Handles to incoming messages. */
+    public onMessage(buffer: ArrayBuffer, isBinary: boolean) {
+        if (!isBinary) return this.terminate();
+        const data = new Uint8Array(buffer).slice();
+        if (data[0] === 0x00 && data.byteLength === 1) return this.terminate(); // We do not host ping servers.
+        const header = data[0];
+        if (header === ServerBound.Ping) {
+            this.lastPingTick = this.game.tick;
+            this.send(PING_PACKET);
+        } else {
+            if(!this.incomingCache[header]) this.incomingCache[header] = [];
+            if (this.incomingCache[header].length) {
+                if (header === ServerBound.Input) {
+                    // Otherwise store the flags
+                    const r = new Reader(data);
+                    r.at = 1;
+
+                    const flags = r.vu();
+                    this.inputs.cachedFlags |= flags & 0b110111100001; // WASD and gamepad are not stored.
+                } else if (header === ServerBound.StatUpgrade) {
+                    this.incomingCache[header].push(data);
                 }
-                this.incomingCache[header][0] = data;
-            } else {
-                util.log("Suspicious activies have been avoided");
-                return this.ban();
+                return;
             }
-        });
+            this.incomingCache[header][0] = data;
+        }
     }
 
     /** Parses incoming packets. */
@@ -197,6 +194,7 @@ export default class Client {
         r.at = 1;
 
         const camera = this.camera;
+
         if (header === ServerBound.Init) {
             if (camera) return this.terminate(); // only one connection;
 
@@ -214,55 +212,28 @@ export default class Client {
                 setTimeout(() => this.terminate(), 100);
                 return;
             }
+
             // Hardcoded dev password
-            if (config.devPasswordHash && createHash('sha256').update(pw).digest('hex') === config.devPasswordHash) {
+            if (config.devPasswordHash && createHash("sha256").update(pw).digest("hex") === config.devPasswordHash) {
                 this.accessLevel = config.AccessLevel.FullAccess;
                 util.saveToLog("Developer Connected", "A client connected to the server (`" + this.game.gamemode + "`) with `full` access.", 0x5A65EA);
-            } else if (auth && pw) {
-                if (!auth.verifyCode(pw)) return this.terminate();
-
-                const [id, perm] = pw.split('v');
-                this.discordId = id;
-                this.accessLevel = config.devTokens[id] ?? parseInt(perm) ?? config.devTokens["*"];
-
-                util.saveToLog("Client Connected", this.toString() + " connected to the server (`" + this.game.gamemode + "`) with a level " + this.accessLevel + " access.", 0x5FF7B9);
-
-                // Enforce 2 clients per account id
-                if (!this.game.discordCache[id]) this.game.discordCache[id] = 1;
-                else this.game.discordCache[id] += 1;
-
-                util.saveToVLog(`${this.toString()} client connecting. ip: ` + this.ipAddressHash);
-
-                if (this.game.discordCache[id] > 2) {
-                    util.saveToVLog(`${this.toString()} too many accounts!. ip: ` + this.ipAddressHash);
-                    util.saveToLog("Client Kicked", this.toString() + " client count maximum reached at `" + this.game.gamemode + "`.", 0xEE326A);
-                    this.terminate();
-                }
-            } else if (auth) {
-                util.saveToLog("Client Terminated", "Unknown client terminated due to lack of authentication:: " + this.toString(), 0x6AEE32);
-                return this.terminate();
             } else {
                 this.accessLevel = config.defaultAccessLevel;
             }
 
             if (this.accessLevel === config.AccessLevel.NoAccess) {
-                util.saveToLog("Client Terminated 2", "Possibly unknown, client terminated due to lack of authentication:: " + this.toString(), 0x6EAE23);
+                util.saveToVLog("Possibly unknown, client terminated due to lack of authentication:: " + this.toString());
                 return this.terminate();
             }
 
-            // Finish handshake
-            this.write().u8(ClientBound.Accept).vi(this.accessLevel).send();
-            this.write().u8(ClientBound.ServerInfo).stringNT(this.game.gamemode).stringNT(config.host).send();
-            this.write().u8(ClientBound.PlayerCount).vu(GameServer.globalPlayerCount).send();
-            this.camera = new ClientCamera(this.game, this);
+            this.acceptClient();
+
             return;
         }
 
         if (!Entity.exists(camera)) return;
 
         switch (header) {
-            case ServerBound.Init: throw new Error('0x0::How?');
-            case ServerBound.Ping: throw new Error('0x5::How?');
             case ServerBound.Input: {
                 // Beware, this code gets less readable as you scroll
                 const previousFlags = this.inputs.flags;
@@ -278,17 +249,11 @@ export default class Client {
                     y: 0
                 };
 
-                if (flags & InputFlags.gamepad) {
-                    movement.x = r.vf();
-                    movement.y = r.vf();
-
-                    if (!Vector.isFinite(movement)) return;
-                } else {
-                    if (flags & InputFlags.up) movement.y -= 1;
-                    if (flags & InputFlags.down) movement.y += 1;
-                    if (flags & InputFlags.right) movement.x += 1;
-                    if (flags & InputFlags.left) movement.x -= 1;
-                }
+                if (flags & InputFlags.up) movement.y -= 1;
+                if (flags & InputFlags.down) movement.y += 1;
+                if (flags & InputFlags.right) movement.x += 1;
+                if (flags & InputFlags.left) movement.x -= 1;
+                
                 if (movement.x || movement.y) {
                     const angle = Math.atan2(movement.y, movement.x);
 
@@ -309,8 +274,7 @@ export default class Client {
                         this.setHasCheated(true);
                         player.setTank(player.currentTank < 0 ? Tank.Basic : DevTank.Developer);
                     } else if (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats) {
-                        // only allow devs to go into godmode when players > 1
-                        if (this.accessLevel === config.AccessLevel.FullAccess || (this.game.clients.size === 1 && this.game.arena.state === ArenaState.OPEN)) {
+                        if (this.game.clients.size === 1 && this.game.arena.state === ArenaState.OPEN) {
                             this.setHasCheated(true);
 
                             player.setInvulnerability(!player.isInvulnerable);
@@ -320,12 +284,13 @@ export default class Client {
                     }
                 }
 
-                if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && player.currentTank === DevTank.Developer) {
+                if ((flags & InputFlags.rightclick) && !(previousFlags & InputFlags.rightclick) && (player.currentTank === DevTank.Developer || player.currentTank === DevTank.Spectator)) {
                     player.positionData.x = this.inputs.mouse.x;
                     player.positionData.y = this.inputs.mouse.y;
                     player.setVelocity(0, 0);
                     player.entityState |= EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 }
+
                 if ((flags & InputFlags.switchtank) && !(previousFlags & InputFlags.switchtank)) {
                     if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats)) {
                         this.setHasCheated(true);
@@ -351,6 +316,7 @@ export default class Client {
                         player.setTank(tank);
                     }
                 }
+
                 if (flags & InputFlags.levelup) {
                     // If full access, or if the game allows cheating and lvl is < maxLevel, or if the player is a BT access level and lvl is < maxLevel
                     if ((this.accessLevel === config.AccessLevel.FullAccess) || (camera.cameraData.values.level < config.maxPlayerLevel && ((this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats) || (this.accessLevel === config.AccessLevel.BetaAccess)))) {
@@ -359,7 +325,8 @@ export default class Client {
                         camera.setLevel(camera.cameraData.values.level + 1);
                     }
                 }
-                if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation)) {
+
+                if ((flags & InputFlags.suicide) && (!player.deletionAnimation || !player.deletionAnimation) && !this.inputs.isPossessing) {
                     if (this.accessLevel >= config.AccessLevel.BetaAccess || (this.game.arena.arenaData.values.flags & ArenaFlags.canUseCheats)) {
                         this.setHasCheated(true);
                         
@@ -368,12 +335,14 @@ export default class Client {
                         player.destroy();
                     }
                 }
+                
                 return;
             }
             case ServerBound.Spawn: {
                 util.log("Client wants to spawn");
 
-                if (Entity.exists(camera.cameraData.values.player) || (this.game.arena.state >= ArenaState.CLOSING)) return;
+                if ((this.game.arena.state >= ArenaState.CLOSING)) return;
+                if (Entity.exists(camera.cameraData.values.player)) return this.terminate();
 
                 camera.cameraData.values.statsAvailable = 0;
                 camera.cameraData.values.level = 1;
@@ -388,38 +357,39 @@ export default class Client {
                 tank.setTank(Tank.Basic);
                 this.game.arena.spawnPlayer(tank, this);
                 camera.setLevel(camera.cameraData.values.respawnLevel);
-
                 tank.nameData.values.name = name;
+
                 if (this.hasCheated()) this.setHasCheated(true);
 
                 // Force-send a creation to the client - Only if it is not new
                 camera.entityState = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
+
                 return;
             }
             case ServerBound.StatUpgrade: {
                 if (camera.cameraData.statsAvailable <= 0) return;
 
-                const tank = camera.cameraData.values.player;
-                if (!Entity.exists(tank) || !(tank instanceof TankBody)) return;
+                const player = camera.cameraData.values.player;
+                if (!Entity.exists(player) || !(player instanceof TankBody)) return;
                 // No AI
                 if (this.inputs.isPossessing) return;
 
-                const definition = getTankById(tank.currentTank);
+                const definition = getTankById(player.currentTank);
                 if (!definition || !definition.stats.length) return;
 
                 const statId: Stat = r.vi() ^ STAT_XOR;
 
                 if (statId < 0 || statId >= StatCount) return;
 
-                // const chosenLimit = r.vi();
                 const statLimit = camera.cameraData.values.statLimits.values[statId];
 
                 if (camera.cameraData.values.statLevels.values[statId] >= statLimit) return;
 
                 camera.cameraData.statLevels[statId] += 1;
                 camera.cameraData.statsAvailable -= 1;
+
                 return;
             }
             case ServerBound.TankUpgrade: {
@@ -434,39 +404,27 @@ export default class Client {
                 if (!definition || !definition.upgrades.includes(tankId) || !tankDefinition || tankDefinition.levelRequirement > camera.cameraData.values.level) return;
 
                 player.setTank(tankId);
+
                 return;
             }
-            case ServerBound.ExtensionFound:
+            case ServerBound.ExtensionFound: {
                 util.log("Someone is cheating");
-                return this.ban();
-            case ServerBound.ToRespawn:
+                this.ban();
+
+                return;
+            }
+            case ServerBound.ToRespawn: {
                 // Doesn't matter if the player is alive or not in real diep.
                 camera.cameraData.flags &= ~CameraFlags.showingDeathStats;
-                // if (this.game.arena.arenaState !== ArenaState.OPEN) return this.terminate();
-                return;
-            case ServerBound.TakeTank: {
-                /* AS OF NOVEMBER 9, THE FOLLOWING IS ONLY COMMENTED CODE
-                    // AS OF OCTOBER 18
-                    // This packet now will allow players to switch teams.
-                    // if (Entity.exists(camera.camera.values.player)) this.notify("Someone has already taken that tank", 0x000000, 5000, "cant_claim_info");
-                    const player = camera.camera.values.player;
-                    if (!Entity.exists(player) || !player.relations || !player.style) return;
 
-                    if (player.relations.team === this.game.arena) {
-                        player.relations.team = camera;
-                        player.style.color = Colors.Tank;
-                        this.notify("Team switched to camera");
-                    } else {
-                        player.relations.team = this.game.arena;
-                        player.style.color = Colors.Neutral;
-                        this.notify("Team switched to arena");
-                    }
-                */
-                if (!Entity.exists(camera.cameraData.values.player)) return;
+                return;
+            }
+            case ServerBound.TakeTank: {
+                if (!Entity.exists(camera.cameraData.player)) return;
                 if (!this.game.entities.AIs.length) return this.notify("Someone has already taken that tank", 0x000000, 5000, "cant_claim_info");
                 if (!this.inputs.isPossessing) {
-                    const x = camera.cameraData.values.player.positionData?.values.x || 0;
-                    const y = camera.cameraData.values.player.positionData?.values.y || 0;
+                    const x = camera.cameraData.player.positionData?.values.x || 0;
+                    const y = camera.cameraData.player.positionData?.values.y || 0;
                     const AIs = Array.from(this.game.entities.AIs);
                     AIs.sort((a: AI, b: AI) => {
                         const {x: x1, y: y1} = a.owner.getWorldPosition();
@@ -487,6 +445,7 @@ export default class Client {
                 } else {
                     this.inputs.deleted = true;
                 }
+
                 return;
             }
             case ServerBound.TCPInit:
@@ -507,12 +466,6 @@ export default class Client {
 
     /** Defines whether the player used cheats or not. This also defines whether the name is highlighted or not. */
     public setHasCheated(value: boolean) {
-        const player = this.camera?.cameraData.values.player;
-        if (player && player.nameData) {
-            if (value) player.nameData.flags |= NameFlags.highlightedName;
-            else player.nameData.flags &= ~NameFlags.highlightedName;
-        }
-
         this.devCheatsUsed = value;
     }
 
@@ -521,7 +474,6 @@ export default class Client {
         return this.devCheatsUsed;
     }
 
-    
     /** Attempts possession of an AI */
     public possess(ai: AI) {
         if (!this.camera?.cameraData || ai.state === AIState.possessed) return false;
@@ -579,53 +531,31 @@ export default class Client {
         this.write().u8(ClientBound.Notification).stringNT(text).u32(color).float(time).stringNT(id).send();
     }
 
-    /** Terminates the connection and related things. */
-    public terminate() {
-        if (this.terminated) return;
-
-        this.ws.terminate();
-        this.game.clients.delete(this);
-        this.inputs.deleted = true;
-        this.inputs.movement.magnitude = 0;
-        this.terminated = true;
-
-        this.game.ipCache[this.ipAddress] -= 1;
-        if (this.discordId && this.game.discordCache[this.discordId]) {
-            this.game.discordCache[this.discordId] -= 1;
-            util.saveToVLog(`${this.toString()} terminated. ip: ` + this.ipAddressHash);
-        }
-
-        if (Entity.exists(this.camera)) this.camera.delete();
-    }
-
     /** Bans the ip from all servers until restart. */
     public ban() {
-        util.saveToLog("IP Banned", "Banned ||`" + JSON.stringify(this.ipAddress) + "`|| (<@" + this.discordId + ">) across all servers... " + this.toString(true), 0xEE326A);
+        if(!this.ws) return;
+        util.saveToLog("IP Banned", "Banned " + this.ws.getUserData().ipAddress + this.toString(true), 0xEE326A);
         if (this.accessLevel >= config.unbannableLevelMinimum) {
-            util.saveToLog("IP Ban Cancelled", "Cancelled ban on ||`" + JSON.stringify(this.ipAddress) + "`|| (<@" + this.discordId + ">) across all servers." + this.toString(true), 0x6A32EE);
+            util.saveToLog("IP Ban Cancelled", "Cancelled ban on " + this.ws.getUserData().ipAddress + this.toString(true), 0x6A32EE);
             return;
         }
-        // Lol
-        this.game.ipCache[this.ipAddress] = Infinity;
-        if (this.discordId) this.game.discordCache[this.discordId] = Infinity;
 
-        for (let client of this.game.clients) {
-            if (client.ipAddress === this.ipAddress) {
-                client.terminate();
-            }
+        bannedClients.add(this.ws.getUserData().ipAddress)
+
+        for (const client of this.game.clients) {
+            if(client.ws?.getUserData().ipAddress === this.ws.getUserData().ipAddress) client.terminate();
         }
     }
 
     public tick(tick: number) {
-        for (let header = ServerBound.Init; header <= ServerBound.TakeTank; ++header) {
+        for (let header = 0; header <= this.incomingCache.length; ++header) {
             if (header === ServerBound.Ping) continue;
 
-            if (this.incomingCache[header].length === 1) this.handleIncoming(header, this.incomingCache[header][0]);
-            else if (this.incomingCache[header].length > 1) {
+            if (this.incomingCache[header]?.length === 1) this.handleIncoming(header, this.incomingCache[header][0]);
+            else if (this.incomingCache[header]?.length > 1) {
                 for (let i = 0, len = this.incomingCache[header].length; i < len; ++i) this.handleIncoming(header, this.incomingCache[header][i]);
             } else continue;
-
-            this.incomingCache[header].length = 0;
+            this.incomingCache[header] = [];
         }
 
         if (!this.camera) {
@@ -647,10 +577,9 @@ export default class Client {
     public toString(verbose: boolean = false): string {
         const tokens: string[] = [];
 
-        if (this.discordId) tokens.push("disc=<@" + this.discordId + ">");
         if (this.camera?.cameraData?.player?.nameData?.name) tokens.push("name=" + JSON.stringify(this.camera?.cameraData?.player?.nameData?.name));
         if (verbose) {
-            if (this.ipAddress) tokens.push("ip=" + this.ipAddress);
+            if (this.ws) tokens.push("ip=" + this.ws.getUserData().ipAddress);
             if (this.game.gamemode) tokens.push("game.gamemode=" + this.game.gamemode);
         }
         if (this.terminated) tokens.push("(terminated)");

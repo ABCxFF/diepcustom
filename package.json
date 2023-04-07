@@ -15,7 +15,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node index",
-    "server": "npm run build && npm run start",
+    "server": "yarn run build && yarn run start",
     "docker:build": "docker build --tag diepcustom .",
     "docker:start": "docker run --pull never --rm --publish ${PORT:-8080}:8080 --env PORT=8080 --env DEV_PASSWORD_HASH --env SERVER_INFO --env NODE_ENV --init --interactive --tty diepcustom",
     "docker": "npm run docker:build && npm run docker:start"
@@ -26,11 +26,10 @@
   "dependencies": {
     "chalk": "^4.1.1",
     "tweetnacl": "^1.0.3",
-    "ws": "^8.0.0"
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v20.19.0"
   },
   "devDependencies": {
     "@types/node": "^16.4.0",
-    "@types/ws": "^8.0.0",
     "typescript": "^4.8.2"
   }
 }

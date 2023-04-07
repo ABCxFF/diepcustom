@@ -28,8 +28,8 @@ export const mspt: number = 40;
 /** Ticks per second in the game */
 export const tps: number = 1000 / mspt;
 
-/** Max connections per ip. -1 = no limit */
-export const connectionsPerIp: number = -1;
+/** Max connections per ip. Infinity = no limit */
+export const connectionsPerIp: number = Infinity;
 
 /** Max incoming packet size (HARD LIMIT), not the max read / write size */
 export const wssMaxMessageSize: number = 4096; // 4 kb
@@ -96,11 +96,6 @@ export const unbannableLevelMinimum: AccessLevel = AccessLevel.FullAccess;
 
 /** Default access level, client's without valid password's will get set to this */
 export const defaultAccessLevel: AccessLevel = AccessLevel.BetaAccess;
-
-/** The developer tokens by role (UNNECESSARY UNLESS DISCORD INTEGRATION) */
-export const devTokens: Record<string, AccessLevel> = {
-    "*": defaultAccessLevel
-}
 
 /** Maximum level that player tanks can have. Default: 45 */
 export const maxPlayerLevel = 45;
