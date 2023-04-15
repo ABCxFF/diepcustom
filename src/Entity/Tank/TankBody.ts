@@ -144,9 +144,10 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         // Size ratios
         this.baseSize = tank.sides === 4 ? Math.SQRT2 * 32.5 : tank.sides === 16 ? Math.SQRT2 * 25 : 50;
+        if (tank.baseSizeOverride !== undefined) this.baseSize = tank.baseSizeOverride;
         this.physicsData.absorbtionFactor = this.isInvulnerable ? 0 : tank.absorbtionFactor;
         if (tank.absorbtionFactor === 0) this.positionData.flags |= PositionFlags.canMoveThroughWalls;
-        else if (this.positionData.flags & PositionFlags.canMoveThroughWalls) this.positionData.flags ^= PositionFlags.canMoveThroughWalls
+        else if (this.positionData.flags & PositionFlags.canMoveThroughWalls) this.positionData.flags ^= PositionFlags.canMoveThroughWalls;
 
         camera.cameraData.tank = this._currentTank = id;
         if (tank.upgradeMessage && camera instanceof ClientCamera) camera.client.notify(tank.upgradeMessage);
@@ -325,6 +326,16 @@ export default class TankBody extends LivingEntity implements BarrelBase {
             // Dont worry about invulnerability here - not gonna be invulnerable while flashing ever (see setInvulnerability)
             this.damageReduction = 1.0;
         }
+
+        if (this.definition.colorOverride !== undefined) this.styleData.color = this.definition.colorOverride;
+        if (this.definition.sides === 2) {
+            if (this.definition.widthRatio !== undefined) {
+                this.physicsData.width = this.physicsData.size * this.definition.widthRatio;
+            } else {
+                this.physicsData.width = this.physicsData.size;
+            }
+            if (this.definition.flags.displayAsTrapezoid === true) this.physicsData.flags |= PhysicsFlags.isTrapezoid;
+        } else if (this.definition.flags.displayAsStar === true) this.styleData.flags |= StyleFlags.isStar;
 
         this.accel.add({
             x: this.inputs.movement.x * this.cameraEntity.cameraData.values.movementSpeed,
