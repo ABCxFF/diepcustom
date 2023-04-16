@@ -118,7 +118,7 @@ export default class Barrel extends ObjectEntity {
         this.definition = barrelDefinition;
 
         // Begin Loading Definition
-        this.styleData.values.color = Color.Barrel;
+        this.styleData.values.color = this.definition.color ?? Color.Barrel;
         this.physicsData.values.sides = 2;
         if (barrelDefinition.isTrapezoid) this.physicsData.values.flags |= PhysicsFlags.isTrapezoid;
 
