@@ -95,6 +95,8 @@ export interface BarrelDefinition {
     canControlDrones?: boolean;
     /** Whether or not the barrel should always shoot (Trapper Dominator, Defender). */
     forceFire?: boolean;
+    /** Barrel color - by default this is set to the 'Barrel' color id. */
+    color?: Color;
     /** The definition of the bullet that is shot from the barrel. */
     bullet: BulletDefinition;
 }
