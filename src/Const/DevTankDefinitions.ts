@@ -37,7 +37,7 @@ export const enum DevTank {
     Spectator = -12,
     TheCroc = -13,
     Railgun = -14,
-    Nightmare = -15
+    Commander = -15
 };
 
 /**
@@ -1688,7 +1688,7 @@ const DevTankDefinitions: TankDefinition[] = [
                 }
             },
             {
-                angle: Math.PI * (-1 / 36),
+                angle: PI2 - Math.PI * (1 / 36),
                 offset: -20,
                 size: 150,
                 width: 21,
@@ -1768,8 +1768,8 @@ const DevTankDefinitions: TankDefinition[] = [
         ]
     },
     {
-        id: DevTank.Nightmare,
-        name: "Nightmare",
+        id: DevTank.Commander,
+        name: "Commander",
         upgradeMessage: "",
         levelRequirement: 45,
         upgrades: [],
