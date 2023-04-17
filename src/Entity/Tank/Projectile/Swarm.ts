@@ -16,6 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+import { PhysicsFlags } from "../../../Const/Enums";
 import { TankDefinition } from "../../../Const/TankDefinitions";
 import Barrel from "../Barrel";
 import { BarrelBase } from "../TankBody";
@@ -28,6 +29,7 @@ export class Swarm extends Drone {
     public constructor(barrel: Barrel,  tank: BarrelBase, tankDefinition: TankDefinition | null, shootAngle: number) {
         super(barrel, tank, tankDefinition, shootAngle);
         this.ai.viewRange = 850 * tank.sizeFactor * 2;
+        this.physicsData.values.flags |= PhysicsFlags.canEscapeArena;
     }
 
     // TODO:
