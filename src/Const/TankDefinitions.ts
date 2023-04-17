@@ -71,6 +71,8 @@ export interface BarrelDefinition {
     angle: number;
     /** The x offset of the barrel (think of Twin's barrels for example) at base radius (50).  */
     offset: number;
+    /** The y offset of the barrel (distance from the tanks main body) at base radius (50). Will have no effect on clientside tankrendering.*/
+    distance?: number;
     /** The size of the barrel. Think of Sniper, the longer side is the size.  */
     size: number;
     /** The width of the barrel. Think of Sniper, the shorter side is the width. Width is used to determine bullet size */
@@ -93,6 +95,8 @@ export interface BarrelDefinition {
     canControlDrones?: boolean;
     /** Whether or not the barrel should always shoot (Trapper Dominator, Defender). */
     forceFire?: boolean;
+    /** Barrel color - by default this is set to the 'Barrel' color id. */
+    color?: Color;
     /** The definition of the bullet that is shot from the barrel. */
     bullet: BulletDefinition;
 }
@@ -123,26 +127,30 @@ export interface TankDefinition {
     flags: {
         /** If the tank can go invisible. */
         invisibility: boolean;
-        /** If the tank has a Predator-like zoom ability */
+        /** If the tank has a Predator-like zoom ability. */
         zoomAbility: boolean;
-        /** If the tank can claim squares by killing them (necro) */
+        /** If the tank can claim squares by killing them (necro). */
         canClaimSquares?: boolean;
         /** If the tank requires devmode to access (unused). */
         devOnly: boolean;
+        /** If the tank should be rendered as a star (eg. traps are stars with 3 sides). */
+        displayAsStar?: boolean;
+        /** If the tank should be rendered as a trapezoid (eg. drone barrels are trapezoids), sides needs to be set to 2 for this to take effect. */
+        displayAsTrapezoid?: boolean;
     },
-    /** How much the opacity increases per tick while shooting */
+    /** How much the opacity increases per tick while shooting. */
     visibilityRateShooting: number;
-    /** How much the opacity increases per tick while moving */
+    /** How much the opacity increases per tick while moving. */
     visibilityRateMoving: number;
-    /** How much does the opacity decrease per tick */
+    /** How much does the opacity decrease per tick. */
     invisibilityRate: number;
     /** Used to determine the FOV of a tank. */
     fieldFactor: number;
-    /** The speed of the tank */
+    /** The speed of the tank. */
     speed: number;
-    /** The absorbtionFactor (field) of the tank */
+    /** The absorbtionFactor (field) of the tank. */
     absorbtionFactor: number;
-    /** The base max health of the tank */
+    /** The base max health of the tank. */
     maxHealth: number;
     /** The addon, if not empty, which is built before the barrels. */
     preAddon: addonId | null;
@@ -150,8 +158,14 @@ export interface TankDefinition {
     postAddon: addonId | null;
     /** The sides of the tank's body. */
     sides: number;
+    /** The ratio used for size to width calculation, only takes effect when sides is 2 (rectangle). */
+    widthRatio?: number;
     /** The border width of the tank's body. */
     borderWidth: number;
+    /** Can be used to override the tank's body color. */
+    colorOverride?: Color;
+    /** Can be used to override the tank body's base size. */
+    baseSizeOverride?: number;
     /** The tank's barrels. */
     barrels: BarrelDefinition[];
     /** The tank's stat names and limits. */
