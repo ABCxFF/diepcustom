@@ -73,6 +73,8 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     public reloadTime = 15;
     /** The current tank definition / tank id. */
     private _currentTank: Tank | DevTank = Tank.Basic;
+    /** Caches the tanks color for future use. */
+    private _currentColor: Color = Color.Tank;
     /** Sets tanks to be invulnerable - example, godmode, or AC */
     public isInvulnerable: boolean = false;
 
@@ -147,6 +149,15 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         this.physicsData.absorbtionFactor = this.isInvulnerable ? 0 : tank.absorbtionFactor;
         if (tank.absorbtionFactor === 0) this.positionData.flags |= PositionFlags.canMoveThroughWalls;
         else if (this.positionData.flags & PositionFlags.canMoveThroughWalls) this.positionData.flags ^= PositionFlags.canMoveThroughWalls;
+
+        if (this.definition.colorOverride !== undefined) {
+            if (this.styleData.values.color !== this.definition.colorOverride) {
+                this._currentColor = this.styleData.values.color;
+                this.styleData.color = this.definition.colorOverride;
+            }
+        } else if (this.styleData.values.color !== this._currentColor) {
+            this.styleData.color = this._currentColor;
+        }
 
         camera.cameraData.tank = this._currentTank = id;
         if (tank.upgradeMessage && camera instanceof ClientCamera) camera.client.notify(tank.upgradeMessage);
@@ -325,7 +336,6 @@ export default class TankBody extends LivingEntity implements BarrelBase {
             this.damageReduction = 1.0;
         }
 
-        if (this.definition.colorOverride !== undefined) this.styleData.color = this.definition.colorOverride;
         if (this.definition.sides === 2) {
             this.physicsData.width = this.physicsData.size * (this.definition.widthRatio ?? 1);
             if (this.definition.flags.displayAsTrapezoid === true) this.physicsData.flags |= PhysicsFlags.isTrapezoid;
