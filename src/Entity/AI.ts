@@ -166,15 +166,6 @@ export class AI {
 
             if (!this.targetFilter(entity.positionData.values)) continue; // Custom check
 
-            // TODO(ABC): Find out why this was put here
-            if (entity instanceof TankBody) {
-                if (!(closestEntity instanceof TankBody)) {
-                    closestEntity = entity;
-                    closestDistSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
-                    continue;
-                }
-            } else if (closestEntity instanceof TankBody) continue;
-
             const distSq = (entity.positionData.values.x - rootPos.x) ** 2 + (entity.positionData.values.y - rootPos.y) ** 2;
 
             if (distSq < closestDistSq) {

@@ -92,6 +92,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
 
         this.cameraEntity.cameraData.spawnTick = game.tick;
         this.cameraEntity.cameraData.flags |= CameraFlags.showingDeathStats;
+        this.cameraEntity.cameraData.killedBy = "";
 
         // spawn protection
         this.styleData.values.flags |= StyleFlags.isFlashing;
@@ -185,7 +186,7 @@ export default class TankBody extends LivingEntity implements BarrelBase {
     }
     /** See LivingEntity.onKill */
     public onKill(entity: LivingEntity) {
-        this.scoreData.score = this.cameraEntity.cameraData.score += entity.scoreReward;
+        if (Entity.exists(this.cameraEntity.cameraData.values.player)) this.scoreData.score = this.cameraEntity.cameraData.score += entity.scoreReward;
 
         if (entity instanceof TankBody && entity.scoreReward && Math.max(this.cameraEntity.cameraData.values.level, maxPlayerLevel) - entity.cameraEntity.cameraData.values.level <= 20 || entity instanceof AbstractBoss) {
             if (this.cameraEntity instanceof ClientCamera) this.cameraEntity.client.notify("You've killed " + (entity.nameData.values.name || "an unnamed tank"));
@@ -235,7 +236,6 @@ export default class TankBody extends LivingEntity implements BarrelBase {
         if (!(this.cameraEntity instanceof ClientCamera)) return this.cameraEntity.delete();
         if (!(this.cameraEntity.cameraData.player === this)) return;
         this.cameraEntity.spectatee = killer;
-        this.cameraEntity.cameraData.FOV = 0.4;
         this.cameraEntity.cameraData.killedBy = (killer.nameData && killer.nameData.values.name) || "";
     }
 
@@ -253,6 +253,11 @@ export default class TankBody extends LivingEntity implements BarrelBase {
             this.addons = [];
         }
         super.destroy(animate);
+    }
+
+    public delete() {
+        if (this.cameraEntity.cameraData.values.player === this) this.cameraEntity.cameraData.FOV = 0.4;
+        super.delete();
     }
 
     public tick(tick: number) {
