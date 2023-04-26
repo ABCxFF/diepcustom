@@ -162,8 +162,6 @@ export interface TankDefinition {
     widthRatio?: number;
     /** The border width of the tank's body. */
     borderWidth: number;
-    /** Can be used to override the tank's body color. */
-    colorOverride?: Color;
     /** Can be used to override the tank body's base size. */
     baseSizeOverride?: number;
     /** The tank's barrels. */
