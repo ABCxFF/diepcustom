@@ -31,7 +31,7 @@ import DevTankDefinitions, { DevTank } from "./Const/DevTankDefinitions";
 import TankBody from "./Entity/Tank/TankBody";
 import Vector, { VectorAbstract } from "./Physics/Vector";
 import { Entity, EntityStateFlags } from "./Native/Entity";
-import { CameraFlags, ClientBound, ArenaFlags, InputFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
+import { CameraFlags, ClientBound, ArenaFlags, InputFlags, NameFlags, ServerBound, Stat, StatCount, Tank } from "./Const/Enums";
 import { AI, AIState, Inputs } from "./Entity/AI";
 import AbstractBoss from "./Entity/Boss/AbstractBoss";
 import { executeCommand } from "./Const/Commands";
@@ -466,6 +466,12 @@ export default class Client {
 
     /** Defines whether the player used cheats or not. This also defines whether the name is highlighted or not. */
     public setHasCheated(value: boolean) {
+        const player = this.camera?.cameraData.values.player;
+        if (player && player.nameData) {
+            if (value) player.nameData.flags |= NameFlags.highlightedName;
+            else player.nameData.flags &= ~NameFlags.highlightedName;
+        }
+
         this.devCheatsUsed = value;
     }
 
