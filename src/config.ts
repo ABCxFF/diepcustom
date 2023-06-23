@@ -76,6 +76,9 @@ export const spatialHashingCellSize: number = 7;
 /** Amount of TICKs before the next boss spawn attempt */
 export const bossSpawningInterval = 45 * 60 * tps;
 
+/** Amount of TICKs before the scoreboard update */
+export const scoreboardUpdateInterval = 0.5 * tps;
+
 /** Hashed (sha256) dev password */
 export const devPasswordHash: string | undefined = process.env.DEV_PASSWORD_HASH;
 
