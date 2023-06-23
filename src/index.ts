@@ -22,9 +22,10 @@ import Client, { ClientWrapper } from "./Client";
 import * as config from "./config"
 import * as util from "./util";
 import GameServer from "./Game";
-import TankDefinitions from "./Const/TankDefinitions";
+import TankDefinitions from "./Const/TankDefinition";
 import { commandDefinitions } from "./Const/Commands";
 import { ColorsHexCode } from "./Const/Enums";
+import AddonRenderDefinitions from "./Const/AddonRenderDefinitions";
 
 const PORT = config.serverPort;
 const ENABLE_API = config.enableApi && config.apiLocation;
@@ -103,6 +104,9 @@ app.get("/*", (res, req) => {
             case "/colors":
                 res.writeStatus("200 OK");
                 return res.end(JSON.stringify(ColorsHexCode));
+            case "/addons":
+                res.writeStatus("200 OK");
+                return res.end(JSON.stringify(AddonRenderDefinitions));
         }
     }
 
