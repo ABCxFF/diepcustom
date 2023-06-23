@@ -25,6 +25,7 @@ import { AI, AIState, Inputs } from "../AI";
 import { NameGroup } from "../../Native/FieldGroups";
 import LivingEntity from "../Live";
 import TankBody from "../Tank/TankBody";
+import { CameraEntity } from "../../Native/Camera";
 
 
 /**
@@ -99,7 +100,7 @@ export default class AbstractBoss extends LivingEntity {
     public inputs: Inputs;
 
     /** The boss's "camera entity" */
-    public cameraEntity = this;
+    public cameraEntity: CameraEntity = this as unknown as CameraEntity;
 
     /** Whether or not the broadcast message was sent "The ___ has spawned!" */
     private hasBeenWelcomed = false;
