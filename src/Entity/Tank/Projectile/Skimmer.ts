@@ -21,9 +21,9 @@ import Bullet from "./Bullet";
 
 import { InputFlags } from "../../../Const/Enums";
 import { BarrelDefinition, TankDefinition } from "../../../Const/TankDefinitions";
-import { Entity } from "../../../Native/Entity";
 import { Inputs } from "../../AI";
 import { BarrelBase } from "../TankBody";
+import { CameraEntity } from "../../../Native/Camera";
 
 /**
  * Barrel definition for the skimmer skimmer's barrel.
@@ -62,7 +62,7 @@ export default class Skimmer extends Bullet implements BarrelBase {
     private skimmerBarrels: Barrel[];
 
     /** The camera entity (used as team) of the skimmer. */
-    public cameraEntity: Entity;
+    public cameraEntity: CameraEntity;
     /** The reload time of the skimmer's barrel. */
     public reloadTime = 15;
     /** The inputs for when to shoot or not. (skimmer) */
