@@ -99,16 +99,12 @@ export default class MothershipArena extends ArenaEntity {
     }
     public updateScoreboard(scoreboardPlayers: TankBody[]) {
         this.motherships.sort((m1, m2) => m2.healthData.values.health - m1.healthData.values.health);
+
         const length = Math.min(10, this.motherships.length);
         for (let i = 0; i < length; ++i) {
             const mothership = this.motherships[i];
             const team = mothership.relationsData.values.team;
             const isTeamATeam = team instanceof TeamEntity;
-            if (isTeamATeam) {
-                team.teamData.mothershipX = mothership.positionData.values.x;
-                team.teamData.mothershipY = mothership.positionData.values.y;
-                team.teamData.flags |= TeamFlags.hasMothership;
-            }
             if (mothership.styleData.values.color === Color.Tank) this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = Color.ScoreboardBar;
             else this.arenaData.values.scoreboardColors[i as ValidScoreboardIndex] = mothership.styleData.values.color;
             this.arenaData.values.scoreboardNames[i as ValidScoreboardIndex] = isTeamATeam ? team.teamName : `Mothership ${i+1}`;
@@ -121,6 +117,18 @@ export default class MothershipArena extends ArenaEntity {
         this.arenaData.scoreboardAmount = length;
     }
     public tick(tick: number) {
+        const length = Math.min(10, this.motherships.length);
+        for (let i = 0; i < length; ++i) {
+            const mothership = this.motherships[i];
+            const team = mothership.relationsData.values.team;
+            const isTeamATeam = team instanceof TeamEntity;
+            if (isTeamATeam) {
+                team.teamData.mothershipX = mothership.positionData.values.x;
+                team.teamData.mothershipY = mothership.positionData.values.y;
+                team.teamData.flags |= TeamFlags.hasMothership;
+            }
+        }
+
         // backwards to preserve
         for (let i = this.motherships.length; i --> 0;) {
             const mot = this.motherships[i];
