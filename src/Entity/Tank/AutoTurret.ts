@@ -106,7 +106,7 @@ export default class AutoTurret extends ObjectEntity {
         this.nameData.values.flags |= NameFlags.hiddenName;
 
         this.turret = new Barrel(this, turretDefinition);
-        this.turret.physicsData.values.flags |= PhysicsFlags._unknown;
+        this.turret.physicsData.values.flags |= PhysicsFlags.doChildrenCollision;
     }
     
     /**
