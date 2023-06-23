@@ -21,9 +21,9 @@ import Drone from "./Drone";
 
 import { InputFlags, PhysicsFlags } from "../../../Const/Enums";
 import { BarrelDefinition, TankDefinition } from "../../../Const/TankDefinitions";
-import { Entity } from "../../../Native/Entity";
 import { AIState, Inputs } from "../../AI";
 import { BarrelBase } from "../TankBody";
+import { CameraEntity } from "../../../Native/Camera";
 
 /**
  * Barrel definition for the factory minion's barrel.
@@ -62,7 +62,7 @@ export default class Minion extends Drone implements BarrelBase {
     private minionBarrel: Barrel;
 
     /** The camera entity (used as team) of the minion. */
-    public cameraEntity: Entity;
+    public cameraEntity: CameraEntity;
     /** The reload time of the minion's barrel. */
     public reloadTime = 1;
     /** The inputs for when to shoot or not. */
