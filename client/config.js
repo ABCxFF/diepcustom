@@ -241,7 +241,9 @@ const MOD_CONFIG = {
         "loadChangelog": 447,
         "loadTankDefinitions": 277,
         "getTankDefinition": 101,
-        "findCommand": 496
+        "findCommand": 496,
+        "decodeComponentList": 221,
+        "createEntityAtIndex": 114
     },
     "memory": {
         "gamemodeDisabledText": 16420,
@@ -260,22 +262,18 @@ const MOD_CONFIG = {
 };
 
 const ADDON_MAP = {
-    "barrelAddons": {
-        "trapLauncher": 147
-    },
-    "tankAddons": {
-        "auto3": 148,
-        "smasher": 149,
-        "pronounced": 150,
-        "landmine": 151,
-        "auto5": 153,
-        "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
-        "autosmasher": 155,
-        "spike": 156,
-        "launcher": 157, // Skimmer (157) & Rocketeer (158)
-        "dombase": 159,
-        "dompronounced": 160, // Dom1 (160) & Dom2 (161) 
-    }
+    "trapLauncher": 147,
+    "auto3": 148,
+    "smasher": 149,
+    "pronounced": 150,
+    "landmine": 151,
+    "auto5": 153,
+    "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
+    "autosmasher": 155,
+    "spike": 156,
+    "launcher": 157, // Skimmer (157) & Rocketeer (158)
+    "dombase": 159,
+    "dompronounced": 160 // Dom1 (160) & Dom2 (161) 
 };
 
 const CUSTOM_COMMANDS = [
@@ -392,4 +390,42 @@ const DYNAMIC_TOP_PTR = 183072; // points to start of dynamic memory
 const WASM_MEMORY = {
     "initial": INITIAL_MEMORY / WASM_PAGE_SIZE,
     "maximum": INITIAL_MEMORY / WASM_PAGE_SIZE
+};
+
+const FIELD_OFFSETS = {
+    basic: {
+        owner: 20,
+        parent: 32
+    },
+    position: {
+        y: 8,
+        x: 40,
+        angle: 72,
+        flags: 104
+    },
+    collidable: {
+        size: 16,
+        sides: 48,
+        width: 64,
+        flags: 104
+    },
+    renderable: {
+        color: 12,
+        flags: 20,
+        borderWidth: 32,
+        opacity: 64
+    },
+    cannon: {
+        shootingAngle: 8
+    }
+};
+
+const FLAGS = {
+    absoluteRotation: 1 << 0,
+    isTrapezoid: 1 << 0,
+    isVisible: 1 << 0,
+    renderFirst: 1 << 3,
+    isStar: 1 << 4,
+    isCachable: 1 << 5,
+    showsAboveParent: 1 << 6
 };
