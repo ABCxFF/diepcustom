@@ -35,7 +35,7 @@ import Summoner from "../Entity/Boss/Summoner";
 import FallenOverlord from "../Entity/Boss/FallenOverlord";
 import FallenBooster from "../Entity/Boss/FallenBooster";
 import Defender from "../Entity/Boss/Defender";
-import { bossSpawningInterval } from "../config";
+import { bossSpawningInterval, scoreboardUpdateInterval } from "../config";
 
 export const enum ArenaState {
 	/** Alive, open */
@@ -56,7 +56,6 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	public arenaData: ArenaGroup = new ArenaGroup(this);
 	/** Always existant team field group. Present in all (or maybe just ffa) arenas. */
 	public teamData: TeamGroup = new TeamGroup(this);
-
 	/** Cached width of the arena. Not sent to the client directly. */
 	public width: number;
 	/** Cached height of the arena. Not sent to the client directly. */
@@ -71,6 +70,9 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 	/** The current boss spawned into the game */
 	public boss: AbstractBoss | null = null;
+
+	/** Scoreboard leader */
+	public leader: TankBody | null = null;
 
 	/** Controller of all shapes in the arena. */
 	protected shapes = new ShapeManager(this);
@@ -125,15 +127,9 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 	 */
 	protected updateScoreboard(scoreboardPlayers: TankBody[]) {
 
-
 		const scoreboardCount = this.arenaData.scoreboardAmount = (this.arenaData.values.flags & ArenaFlags.hiddenScores) ? 0 : Math.min(scoreboardPlayers.length, 10);
 
 		if (scoreboardCount) {
-			scoreboardPlayers.sort((p1, p2) => p2.scoreData.values.score - p1.scoreData.values.score);
-
-			const leader = scoreboardPlayers[0];
-			this.arenaData.leaderX = leader.positionData.values.x;
-			this.arenaData.leaderY = leader.positionData.values.y;
 			this.arenaData.flags |= ArenaFlags.showsLeaderArrow;
 			let i;
 			for (i = 0; i < scoreboardCount; ++i) {
@@ -223,11 +219,17 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 			const entity = this.game.entities.inner[id];
 			
 			if (Entity.exists(entity) && entity instanceof TankBody && entity.cameraEntity instanceof ClientCamera && entity.cameraEntity.cameraData.values.player === entity) players.push(entity);
+
+			players.sort((p1, p2) => p2.scoreData.values.score - p1.scoreData.values.score);
+			this.leader = players[0];
+			if (this.leader) {
+				this.arenaData.leaderX = this.leader.positionData.values.x;
+				this.arenaData.leaderY = this.leader.positionData.values.y;
+			}
 		}
 
 		// Sorts them too DONT FORGET
-		this.updateScoreboard(players);
-
+		if ((this.game.tick % scoreboardUpdateInterval) === 0) this.updateScoreboard(players);
 
 		if (players.length === 0 && this.state === ArenaState.CLOSING) {
 			this.state = ArenaState.CLOSED;
