@@ -26,6 +26,7 @@ import { AI, AIState, Inputs } from "../AI";
 import { Entity } from "../../Native/Entity";
 import { NameGroup } from "../../Native/FieldGroups";
 import LivingEntity from "../Live";
+import { CameraEntity } from "../../Native/Camera";
 
 export const AutoTurretDefinition: BarrelDefinition = {
     angle: 0,
@@ -68,7 +69,7 @@ export default class AutoTurret extends ObjectEntity {
     /** The AI's inputs, for determining whether to shoot or not. */
     public inputs: Inputs;
     /** Camera entity / team of the turret. */
-    public cameraEntity: Entity;
+    public cameraEntity: CameraEntity;
 
     /** If set to true, (auto 5 auto 3), player can influence auto turret's */
     public influencedByOwnerInputs: boolean = false;
