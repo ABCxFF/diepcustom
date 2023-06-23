@@ -57,7 +57,7 @@ export class TrapLauncher extends ObjectEntity {
         this.barrelEntity = barrel;
         this.setParent(barrel);
         this.relationsData.values.team = barrel;
-        this.physicsData.values.flags = PhysicsFlags.isTrapezoid | PhysicsFlags._unknown;
+        this.physicsData.values.flags = PhysicsFlags.isTrapezoid | PhysicsFlags.doChildrenCollision;
         this.styleData.values.color = Color.Barrel;
 
         this.physicsData.values.sides = 2;
