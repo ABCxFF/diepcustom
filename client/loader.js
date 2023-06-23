@@ -49,6 +49,10 @@ Module.servers = null;
 // colors
 Module.colors = null;
 
+// addons
+Module.addonDefinitions = null;
+Module.addonCallbackMap = {};
+
 // tanks
 Module.tankDefinitions = null;
 Module.tankDefinitionsTable = null;
@@ -226,7 +230,7 @@ Module.loadTankDefinitions = () => {
                 { offset: 56, type: "f32", value: barrel.bullet.sizeRatio },
                 { offset: 60, type: "f32", value: barrel.trapezoidDirection },
                 { offset: 64, type: "f32", value: barrel.reload },
-                { offset: 96, type: "u32", value: ADDON_MAP.barrelAddons[barrel.addon] || 0 }
+                { offset: 96, type: "u32", value: ADDON_MAP[barrel.addon] || 0 }
             ];
         }) : [];
 
@@ -241,8 +245,8 @@ Module.loadTankDefinitions = () => {
             { offset: 64, type: "u32", value: tank.levelRequirement || 0 },
             { offset: 76, type: "u8", value: Number(tank.sides === 4) },
             { offset: 93, type: "u8", value: Number(tank.sides === 16) },
-            { offset: 96, type: "u32", value: ADDON_MAP.tankAddons[tank.preAddon] || 0 },
-            { offset: 100, type: "u32", value: ADDON_MAP.tankAddons[tank.postAddon] || 0 },
+            { offset: 96, type: "u32", value: ADDON_MAP[tank.preAddon] || 0 },
+            { offset: 100, type: "u32", value: ADDON_MAP[tank.postAddon] || 0 },
         ];
 
         $.writeStruct(ptr, fields);
@@ -318,6 +322,129 @@ Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
     }
 };
 
+
+Module.traverseAddonTree = (parent, definition) => {
+    const entity = $.entity.create(parent + 48);
+    if(!entity) throw "Out of entityIds";
+    const componentList = $.entity.createComponentList({
+        createBasic: true,
+        createCollidable: true,
+        createPosition: true,
+        createRenderable: true,
+        createCannon: Boolean(definition.barrel)
+    });
+    Module.rawExports.decodeComponentList(entity, componentList);
+    Module.exports.free($(componentList)[0].i32);
+    Module.exports.free(componentList);
+
+    const basic = $.entity.getComponent(entity, "Basic");
+    if(!basic) throw "Invalid Component";
+    $(basic)[FIELD_OFFSETS.basic.parent].u32 = $(parent)[52].u32;
+    $(basic)[FIELD_OFFSETS.basic.parent][4].u16 = $(parent)[56].u16;
+    $(basic)[FIELD_OFFSETS.basic.owner].u32 = $(parent)[52].u32;
+    $(basic)[FIELD_OFFSETS.basic.owner][4].u16 = $(parent)[56].u16;
+
+    const position = $.entity.getComponent(entity, "Position");
+    if(!position) throw "Invalid Component";
+    $(position)[FIELD_OFFSETS.position.x].f32 = definition?.position?.xOffset || 0;
+    $(position)[FIELD_OFFSETS.position.y].f32 = definition?.position?.yOffset || 0;
+    $(position)[FIELD_OFFSETS.position.angle].f32 = definition?.position?.angle || 0;
+    if(definition?.position?.isAngleAbsolute) $(position)[FIELD_OFFSETS.position.flags].u32 |= FLAGS.absoluteRotation;
+
+    const collidable = $.entity.getComponent(entity, "Collidable");
+    if(!collidable) throw "Invalid Component";
+    $(collidable)[FIELD_OFFSETS.collidable.sides].u32 = definition?.physics?.sides || 1;
+    $(collidable)[FIELD_OFFSETS.collidable.size].f32 = definition?.physics?.size || 0;
+    $(collidable)[FIELD_OFFSETS.collidable.width].f32 = definition?.physics?.width || 0;
+    if(definition?.physics?.isTrapezoid) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 |= FLAGS.isTrapezoid;
+
+    const renderable = $.entity.getComponent(entity, "Renderable");
+    if(!renderable) throw "Invalid Component";
+    $(renderable)[FIELD_OFFSETS.renderable.color].u32 = definition?.style?.color || 0;
+    $(renderable)[FIELD_OFFSETS.renderable.borderWidth].f32 = definition?.style?.borderWidth || 7.5;
+    $(renderable)[FIELD_OFFSETS.renderable.opacity].f32 = definition?.style?.opacity || 1;
+    if(definition?.style?.isVisible !== false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isVisible;
+    if(definition?.style?.renderFirst) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.renderFirst;
+    if(definition?.style?.isStar) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isStar;
+    if(definition?.style?.isCachable !== false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isCachable;
+    if(definition?.style?.showsAboveParent) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.showsAboveParent;
+
+    const cannon = $.entity.getComponent(entity, "Cannon");
+    if(cannon) $(cannon)[FIELD_OFFSETS.cannon.shootingAngle].f32 = definition?.cannon?.trapezoidDirection || 0;
+
+    if(definition.children) {
+        for(const childDefinition of definition.children) {
+            Module.traverseAddonTree(entity, childDefinition);
+        }
+    }
+}
+
+Module.createAddonCallback = (definition) => {
+    return function(input_ptr) {
+        // we received an invalid pointer
+        if(!input_ptr || !$(input_ptr).i32) return;
+        
+        // we received a component pointer
+        if($(input_ptr).i32 !== input_ptr) {
+            input_ptr = $(input_ptr).i32;
+        }
+
+        if(definition.position) {
+            const position = $.entity.getComponent(input_ptr, "Position");
+            if(position) {
+                if(definition.position.xOffset) $(position)[FIELD_OFFSETS.position.x].f32 += definition.position.xOffset;
+                if(definition.position.yOffset) $(position)[FIELD_OFFSETS.position.y].f32 += definition.position.yOffset;
+                if(definition.position.angle) $(position)[FIELD_OFFSETS.position.angle].f32 = definition.position.angle;
+                if(definition.position.isAngleAbsolute === true) $(position)[FIELD_OFFSETS.position.flags].u32 |= FLAGS.absoluteRotation;
+                else if(definition.position.isAngleAbsolute === false) $(position)[FIELD_OFFSETS.position.flags].u32 &= !FLAGS.absoluteRotation;
+            }
+        }
+
+        if(definition.physics) {
+            const collidable = $.entity.getComponent(input_ptr, "Collidable");
+            if(collidable) {
+                if(definition.physics.sides) $(collidable)[FIELD_OFFSETS.collidable.sides].u32 = definition.physics.sides;
+                if(definition.physics.size) $(collidable)[FIELD_OFFSETS.collidable.size].f32 = definition.physics.size;
+                if(definition.physics.width) $(collidable)[FIELD_OFFSETS.collidable.width].f32 = definition.physics.width;
+                if(definition.physics.isTrapezoid === true) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 |= FLAGS.isTrapezoid;
+                else if(definition.physics.isTrapezoid === false) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 &= !FLAGS.isTrapezoid;
+            }
+        }
+
+        if(definition.style) {
+            const renderable = $.entity.getComponent(input_ptr, "Renderable");
+            if(renderable) {
+                if(definition.style.color) $(renderable)[FIELD_OFFSETS.renderable.color].u32 = definition.style.color;
+                if(definition.style.borderWidth) $(renderable)[FIELD_OFFSETS.renderable.borderWidth].f32 = definition.style.borderWidth;
+                if(definition.style.opacity) $(renderable)[FIELD_OFFSETS.renderable.opacity].f32 = definition.style.opacity;
+                if(definition.style.isVisible === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isVisible;
+                else if(definition.style.isVisible === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isVisible;
+                if(definition.style.renderFirst === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.renderFirst;
+                else if(definition.style.renderFirst === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.renderFirst;
+                if(definition.style.isStar === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isStar;
+                else if(definition.style.isStar === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isStar;
+                if(definition.style.isCachable === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isCachable;
+                else if(definition.style.isCachable === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isCachable;
+                if(definition.style.showsAboveParent === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.showsAboveParent;
+                else if(definition.style.showsAboveParent === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.showsAboveParent;
+            }
+        }
+
+        if(definition.barrel) {
+            const cannon = $.entity.getComponent(input_ptr, "Cannon");
+            if(cannon) {
+                if(definition.barrel.trapezoidDirection) $(cannon)[FIELD_OFFSETS.cannon.shootingAngle].f32 = definition.barrel.trapezoidDirection;
+            }
+        }
+
+        if(definition.children) {
+            for(const childDefinition of definition.children) {
+                Module.traverseAddonTree(input_ptr, childDefinition);
+            }
+        }
+    }
+}
+
 const wasmImports = {
     assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + Module.UTF8ToString(condition) + ", at: " + [filename ? Module.UTF8ToString(filename) : "unknown filename", line, func ? Module.UTF8ToString(func) : "unknown function"]),
     mapFile: () => -1, // unused
@@ -351,13 +478,19 @@ Module.todo.push([() => {
 Module.todo.push([() => {
     Module.status = "FETCH";
     // fetch necessary info and build
-    return [fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()), fetch(`${API_URL}servers`).then(res => res.json()), fetch(`${API_URL}tanks`).then(res => res.json())];
+    return [
+        fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()),
+        fetch(`${API_URL}servers`).then(res => res.json()),
+        fetch(`${API_URL}tanks`).then(res => res.json()),
+        fetch(`${API_URL}addons`).then(res => res.json())
+    ];
 }, true]);
 
-Module.todo.push([(dependency, servers, tanks) => {
+Module.todo.push([(dependency, servers, tanks, addons) => {
     Module.status = "INSTANTIATE";
     Module.servers = servers;
     Module.tankDefinitions = tanks;
+    Module.addonDefinitions = addons;
     
     const parser = new WailParser(new Uint8Array(dependency));
     
@@ -368,7 +501,9 @@ Module.todo.push([(dependency, servers, tanks) => {
     const originalLoadTankDefs = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.loadTankDefinitions);
     const originalGetTankDef = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.getTankDefinition);
     const originalFindCommand = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.findCommand);
-    
+    const originalDecodeComponentList = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.decodeComponentList);
+    const originalCreateEntityAtIndex = parser.getFunctionIndex(MOD_CONFIG.wasmFunctions.createEntityAtIndex);
+
     // function types
     const types = {
         // void []
@@ -423,10 +558,8 @@ Module.todo.push([(dependency, servers, tanks) => {
             kind: "func",
             type: types.vi
         })
-    }
+    };
 
-
-    // Modded imports, see above
     Module.imports.mods = {
         loadGamemodeButtons: Module.loadGamemodeButtons,
         loadChangelog: Module.loadChangelog,
@@ -435,18 +568,42 @@ Module.todo.push([(dependency, servers, tanks) => {
         executeCommand: Module.executeCommand
     };
 
-    // export to be able to add as a function table element
+    for(const [addonId, addonDefinition] of Object.entries(Module.addonDefinitions)) {
+        imports["_addon_" + addonId] = parser.addImportEntry({
+            moduleStr: "mods",
+            fieldStr: "_addon_" + addonId,
+            kind: "func",
+            type: types.vi
+        });
+
+        parser.addExportEntry(imports["_addon_" + addonId], {
+            fieldStr: "_addon_" + addonId,
+            kind: "func"
+        });
+
+        Module.addonCallbackMap[addonId] = Module.imports.mods["_addon_" + addonId] = Module.createAddonCallback(addonDefinition);
+    }
+
     parser.addExportEntry(imports.executeCommand, {
         fieldStr: "executeCommand",
         kind: "func"
     });
 
-    // not understood entirely
     parser.addExportEntry(originalVectorDone, {
         fieldStr: "loadVectorDone",
         kind: "func"
     });
     
+    parser.addExportEntry(originalCreateEntityAtIndex, {
+        fieldStr: "createEntityAtIndex",
+        kind: "func"
+    });
+
+    parser.addExportEntry(originalDecodeComponentList, {
+        fieldStr: "decodeComponentList",
+        kind: "func"
+    });
+
     const findConsecutiveSequenceIndex = (array, sequence) => {
         const indexes = [];
         for(let i = 0; i < array.length - sequence.length + 1; i++) {
@@ -608,7 +765,13 @@ Module.todo.push([() => {
     // custom commands
     Module.executeCommandFunctionIndex = Module.imports.a.table.grow(1);
     Module.imports.a.table.set(Module.executeCommandFunctionIndex, Module.rawExports.executeCommand);
-    
+
+    // custom addons
+    for(const addonId of Object.keys(Module.addonDefinitions)) {
+        ADDON_MAP[addonId] = Module.imports.a.table.grow(1);
+        Module.imports.a.table.set(ADDON_MAP[addonId],  Module.rawExports["_addon_" + addonId]);
+    }
+
     Module.status = "START";
     // emscripten requirements
     Module.HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
