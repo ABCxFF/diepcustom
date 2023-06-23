@@ -21,9 +21,9 @@ import Bullet from "./Bullet";
 
 import { InputFlags } from "../../../Const/Enums";
 import { BarrelDefinition, TankDefinition } from "../../../Const/TankDefinitions";
-import { Entity } from "../../../Native/Entity";
 import { Inputs } from "../../AI";
 import { BarrelBase } from "../TankBody";
+import { CameraEntity } from "../../../Native/Camera";
 
 /**
  * Barrel definition for the rocketeer rocket's barrel.
@@ -59,7 +59,7 @@ export default class Rocket extends Bullet implements BarrelBase {
     private rocketBarrel: Barrel;
 
     /** The camera entity (used as team) of the rocket. */
-    public cameraEntity: Entity;
+    public cameraEntity: CameraEntity;
     /** The reload time of the rocket's barrel. */
     public reloadTime = 1;
     /** The inputs for when to shoot or not. (Rocket) */
