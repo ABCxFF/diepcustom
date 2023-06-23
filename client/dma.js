@@ -19,6 +19,84 @@
 // Disclaimer: WIP!!! Bugs can happen, please report then :)
 window.$ = () => { throw "DMA not ready yet" };
 
+const setupDMAEntityLib = () => {
+    $.entity = {
+        create: simulation => {
+            for(let i = 0; i < 16385; ++i) {                
+                if (!$(simulation).$[i][720].u8) {
+                    return Module.rawExports.createEntityAtIndex($(simulation).i32 + 12, i);
+                }
+            }
+            return 0;
+        },
+        getComponent: (entity, name) => {
+            // These offsets don't change over versions (unless the components are reordered)
+            switch (name) {
+                case "Basic": return $(entity)[0x10][0x20][0x18][0 * 4].i32;
+                case "CPUControllable": return $(entity)[0x10][0x20][0x18][1 * 4].i32;
+                case "Cannon": return $(entity)[0x10][0x20][0x18][2 * 4].i32;
+                case "Collidable": return $(entity)[0x10][0x20][0x18][3 * 4].i32;
+                case "Destroyable": return $(entity)[0x10][0x20][0x18][4 * 4].i32;
+                case "Dominator": return $(entity)[0x10][0x20][0x18][5 * 4].i32;
+                case "ExampleComponent": return $(entity)[0x10][0x20][0x18][6 * 4].i32;
+                case "MapInfo": return $(entity)[0x10][0x20][0x18][7 * 4].i32;
+                case "Namable": return $(entity)[0x10][0x20][0x18][8 * 4].i32;
+                case "PlayerInfo": return $(entity)[0x10][0x20][0x18][9 * 4].i32;
+                case "Position": return $(entity)[0x10][0x20][0x18][10 * 4].i32;
+                case "Renderable": return $(entity)[0x10][0x20][0x18][11 * 4].i32;
+                case "Tagged": return $(entity)[0x10][0x20][0x18][12 * 4].i32;
+                case "Tank": return $(entity)[0x10][0x20][0x18][13 * 4].i32;
+                case "TeamInfo": return $(entity)[0x10][0x20][0x18][14 * 4].i32;
+                default: return 0;
+            }
+        },
+        // you need to free the first offset and the pointer itself
+        createComponentList: ({
+            createBasic,
+            createCPUControllable,
+            createCannon,
+            createCollidable,
+            createDestroyable,
+            createDominator,
+            createExampleComponent,
+            createMapInfo,
+            createNamable,
+            createPlayerInfo,
+            createPosition,
+            createRenderable,
+            createTagged,
+            createTank,
+            createTeamInfo
+        }) => {
+            let at = -1;
+            const data = [];
+            if(createBasic) { data.push((0 - at) ^ 1); at = 0; }
+            if(createCPUControllable) { data.push((1 - at) ^ 1); at = 1; }
+            if(createCannon) { data.push((2 - at) ^ 1); at = 2; }
+            if(createCollidable) { data.push((3 - at) ^ 1); at = 3; }
+            if(createDestroyable) { data.push((4 - at) ^ 1); at = 4; }
+            if(createDominator) { data.push((5 - at) ^ 1); at = 5; }
+            if(createExampleComponent) { data.push((6 - at) ^ 1); at = 6; }
+            if(createMapInfo) { data.push((7 - at) ^ 1); at = 7; }
+            if(createNamable) { data.push((8 - at) ^ 1); at = 8; }
+            if(createPlayerInfo) { data.push((9 - at) ^ 1); at = 9; }
+            if(createPosition) { data.push((10 - at) ^ 1); at = 10; }
+            if(createRenderable) { data.push((11 - at) ^ 1); at = 11; }
+            if(createTank) { data.push((12 - at) ^ 1); at = 12; }
+            if(createTagged) { data.push((13 - at) ^ 1); at = 13; }
+            if(createTeamInfo) { data.push((14 - at) ^ 1); at = 14; }
+            data.push(1);
+            const binview = Module.exports.malloc(12);
+            $(binview)[0].i32 = Module.exports.malloc(data.length);
+            Module.HEAPU8.set(data, $(binview)[0].i32);
+            $(binview)[4].i32 = data.length;
+            $(binview)[8].i32 = 0;
+            return binview;   
+        }
+    };
+     
+}
+
 const setupDMAHelpers = () => {
     $.write = (ptr, type, value) => {
         switch(type) {
@@ -227,4 +305,5 @@ window.setupDMA = () => {
     window.$ = ptr => new Proxy({ ptr }, { get: getter, set: setter });
 
     setupDMAHelpers();
+    setupDMAEntityLib();
 }
