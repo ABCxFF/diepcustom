@@ -1,6 +1,6 @@
 import { PI2 } from "../util";
 import { Color } from "./Enums";
-import { addonId, barrelAddonId } from "./TankDefinition";
+import { addonId, barrelAddonId } from "./TankDefinitions";
 
 /**
  * The root AddonRenderDefinition will be applied on the tank render.
