@@ -134,6 +134,17 @@ const AddonRenderDefinitions: Partial<Record<(addonId | barrelAddonId), AddonRen
                 angle: Math.PI / 3
             }
         }]
+    },
+    "smallpentagontank": {
+        physics: {
+            sides: 5,
+            size: 25
+        }
+    },
+    "purplebarrel": {
+        style: {
+            color: Color.TeamPurple
+        }
     }
 };
 
