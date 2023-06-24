@@ -74,7 +74,6 @@ export default class Dominator extends TankBody {
         def.speed = camera.cameraData.values.movementSpeed = 0;
         this.nameData.values.name = "Dominator";
         this.nameData.values.flags |= NameFlags.hiddenName;
-        this.styleData.values.flags ^= StyleFlags.isFlashing;
         this.physicsData.values.absorbtionFactor = 0;
         
         this.positionData.values.x = base.positionData.values.x;
@@ -84,6 +83,11 @@ export default class Dominator extends TankBody {
         camera.cameraData.values.player = this;
 
         this.base = base;
+
+        if (this.styleData.values.flags & StyleFlags.isFlashing) { 
+            this.styleData.values.flags ^= StyleFlags.isFlashing;
+            this.damageReduction = 1.0;
+        }
     }
 
     public onDeath(killer: LivingEntity) {
