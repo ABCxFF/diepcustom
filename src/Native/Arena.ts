@@ -222,7 +222,7 @@ export default class ArenaEntity extends Entity implements TeamGroupEntity {
 
 			players.sort((p1, p2) => p2.scoreData.values.score - p1.scoreData.values.score);
 			this.leader = players[0];
-			if (this.leader) {
+			if (this.leader && this.arenaData.values.flags & ArenaFlags.showsLeaderArrow) {
 				this.arenaData.leaderX = this.leader.positionData.values.x;
 				this.arenaData.leaderY = this.leader.positionData.values.y;
 			}
