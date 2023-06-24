@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-import { Color, NameFlags, Tank } from "../../Const/Enums";
+import { Color, NameFlags, StyleFlags, Tank } from "../../Const/Enums";
 import ArenaEntity from "../../Native/Arena";
 import { CameraEntity } from "../../Native/Camera";
 import { AI, AIState, Inputs } from "../AI";
@@ -24,6 +24,7 @@ import LivingEntity from "../Live";
 import Bullet from "../Tank/Projectile/Bullet";
 import TankBody from "../Tank/TankBody";
 import TeamBase from "./TeamBase";
+import { TeamEntity } from "./TeamEntity";
 
 /**
  * Dominator Tank
@@ -73,6 +74,7 @@ export default class Dominator extends TankBody {
         def.speed = camera.cameraData.values.movementSpeed = 0;
         this.nameData.values.name = "Dominator";
         this.nameData.values.flags |= NameFlags.hiddenName;
+        this.styleData.values.flags ^= StyleFlags.isFlashing;
         this.physicsData.values.absorbtionFactor = 0;
         
         this.positionData.values.x = base.positionData.values.x;
@@ -85,7 +87,7 @@ export default class Dominator extends TankBody {
     }
 
     public onDeath(killer: LivingEntity) {
-        if (this.relationsData.values.team === this.game.arena && killer instanceof TankBody) {
+        if (this.relationsData.values.team === this.game.arena && killer.relationsData.values.team instanceof TeamEntity) {
             this.relationsData.team = killer.relationsData.values.team || this.game.arena;
             this.styleData.color = this.relationsData.team.teamData?.teamColor || killer.styleData.values.color;
         } else {
