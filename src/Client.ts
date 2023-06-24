@@ -365,6 +365,7 @@ export default class Client {
                 camera.entityState = EntityStateFlags.needsCreate | EntityStateFlags.needsDelete;
                 camera.spectatee = null;
                 this.inputs.isPossessing = false;
+                this.inputs.movement.magnitude = 0;
 
                 return;
             }
