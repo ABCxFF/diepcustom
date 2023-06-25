@@ -276,6 +276,46 @@ const ADDON_MAP = {
     "dompronounced": 160 // Dom1 (160) & Dom2 (161) 
 };
 
+const CUSTOM_ADDONS = {
+    "auto2": entity => {
+        if(!(entity instanceof $Entity)) return;
+                
+        const rotator = entity.createChild(false);
+        rotator.defaults();
+        rotator.physicsData.size = 5;
+        rotator.positionData.angle = 0.01;
+        rotator.positionData.isAngleAbsolute = true;
+        rotator.styleData.isVisible = false;
+
+        const count = 2;
+        for(let i = 0; i < count; ++i) {
+            const socket = rotator.createChild(false);
+            socket.defaults();
+            
+            socket.positionData.angle = i * Math.PI * 2 / count;
+            socket.positionData.x = Math.cos(socket.positionData.angle) * 40;
+            socket.positionData.y = Math.sin(socket.positionData.angle) * 40;
+            socket.physicsData.size = 25;
+            // Color.Barrel
+            socket.styleData.color = 1;
+
+            const barrel = socket.createChild(true);
+            barrel.defaults();
+            barrel.physicsData.size = 55;
+            barrel.physicsData.sides = 2;
+            barrel.physicsData.width = 0.7 * 42;
+            // angle + shootingAngle
+            barrel.positionData.angle = 0;
+            // Math.cos(angle) * (size / 2 + distance) - Math.sin(angle) * offset
+            barrel.positionData.x = Math.cos(0) * (barrel.physicsData.size / 2 + 0) - Math.sin(0) * 0;
+            // Math.sin(angle) * (size / 2 + distance) - Math.cos(angle) * offset
+            barrel.positionData.y = Math.sin(0) * (barrel.physicsData.size / 2 + 0) - Math.cos(0) * 0;
+            // Color.Barrel
+            barrel.styleData.color = 1;
+        }
+    }
+}
+
 const CUSTOM_COMMANDS = [
     {
         "id": "util_test",
