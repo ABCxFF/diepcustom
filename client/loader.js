@@ -49,10 +49,6 @@ Module.servers = null;
 // colors
 Module.colors = null;
 
-// addons
-Module.addonDefinitions = null;
-Module.addonCallbackMap = {};
-
 // tanks
 Module.tankDefinitions = null;
 Module.tankDefinitionsTable = null;
@@ -140,7 +136,7 @@ Module.exit = status => {
 };
 
 // read utf8 from memory
-Module.UTF8ToString = ptr => ptr ? new TextDecoder().decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr))) : "";
+Module.UTF8ToString = ptr => ptr ? Decoder.decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr))) : "";
 
 // i/o write used for console, not fully understood
 Module.fdWrite = (stream, ptr, count, res) => {
@@ -152,7 +148,7 @@ Module.fdWrite = (stream, ptr, count, res) => {
 // write utf8 to memory
 Module.allocateUTF8 = str => {
     if(!str) return 0;
-    const encoded = new TextEncoder().encode(str);
+    const encoded = Encoder.encode(str);
     const ptr = Module.exports.malloc(encoded.byteLength + 1); // stringNT aka *char[]
     if(!ptr) return;
     Module.HEAPU8.set(encoded, ptr);
@@ -162,37 +158,20 @@ Module.allocateUTF8 = str => {
 
 // Refreshes UI Components
 Module.loadGamemodeButtons = () => {
-    const vec = new $.Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
+    const vec = new $Vector(MOD_CONFIG.memory.gamemodeButtons, "struct", 28);
     if(vec.start) vec.destroy(); // remove old arenas
     // map server response to memory struct
-    const needsGamemode = !Module.servers.find(e => Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES.includes(e.gamemode))
-    if (needsGamemode) vec.push(...[[
-        { offset: 0, type: "cstr", value: "tag" }, 
-        { offset: 12, type: "cstr", value: "" }, 
-        { offset: 24, type: "i32", value: 1 }
-    ]]);
     vec.push(...Module.servers.map(server => ([
         { offset: 0, type: "cstr", value: server.gamemode }, 
         { offset: 12, type: "cstr", value: server.name }, 
         { offset: 24, type: "i32", value: 0 }
     ])));
-    $(MOD_CONFIG.memory.gamemodeDisabledText).utf8 = "This game mode is disabled";
-    // placeholders to prevent single/no gamemode bugs
-    if (needsGamemode) {
-        vec.push(...[[
-            { offset: 0, type: "cstr", value: "survival" }, 
-            { offset: 12, type: "cstr", value: "" }, 
-            { offset: 24, type: "i32", value: 1 }
-        ]]);
-    }
     Module.rawExports.loadVectorDone(MOD_CONFIG.memory.gamemodeButtons + 12); // toggle vector memory guard
 };
 
-Module.loadGamemodeButtons._DIEP_PREFERRED_GAMEMODES = ["ffa", "survival", "teams", "4teams", "dom", "maze", "tag"];
-
 // Refreshes UI Components
 Module.loadChangelog = (changelog) => {
-    const vec = new $.Vector(MOD_CONFIG.memory.changelog, "cstr", 12);
+    const vec = new $Vector(MOD_CONFIG.memory.changelog, "cstr", 12);
     if(vec.start) vec.destroy(); // remove old changelog
     vec.push(...(changelog || CHANGELOG)); // either load custom or default
     $(MOD_CONFIG.memory.changelogLoaded).i8 = 1; // not understood
@@ -252,7 +231,7 @@ Module.loadTankDefinitions = () => {
         $.writeStruct(ptr, fields);
     };
 
-    // TODO Rewrite with new $.List datastructure
+    // TODO Rewrite with new $LinkedList datastructure
     Module.tankDefinitionsTable = new Array(Module.tankDefinitions.length).fill(0); // clear memory
     let lastPtr = MOD_CONFIG.memory.tankDefinitions;
     for(const tank of Module.tankDefinitions) {
@@ -278,12 +257,11 @@ Module.executeCommand = execCtx => {
         if(!Module.commandDefinitions.find(({ id }) => id === tokens[0])) {
             throw `${Module.executionCallbackMap[tokens]} for command ${cmd} is an invalid callback`;
         }
-        const encoder = new TextEncoder();
         return Game.socket.send(new Uint8Array([
             6,
-            ...encoder.encode(tokens[0]), 0,
+            ...Encoder.encode(tokens[0]), 0,
             tokens.slice(1).length,
-            ...tokens.slice(1).flatMap(token => [...encoder.encode(token), 0])
+            ...tokens.slice(1).flatMap(token => [...Encoder.encode(token), 0])
         ]));
     }
 
@@ -296,7 +274,7 @@ Module.executeCommand = execCtx => {
     The execute command function will not check for validity of arguments, you need to do that on your own
 */
 Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
-    const cmdList = new $.List(MOD_CONFIG.memory.commandList, "struct", 24);
+    const cmdList = new $LinkedList(MOD_CONFIG.memory.commandList, "struct", 24);
     for(let { id, usage, description, callback, permissionLevel } of commands) {
         if(COMMANDS_LOOKUP[id] || permissionLevel > Module.permissionLevel) continue; // ignore duplicates
 
@@ -321,129 +299,6 @@ Module.loadCommands = (commands = CUSTOM_COMMANDS) => {
         ]);
     }
 };
-
-
-Module.traverseAddonTree = (parent, definition) => {
-    const entity = $.entity.create(parent + 48);
-    if(!entity) throw "Out of entityIds";
-    const componentList = $.entity.createComponentList({
-        createBasic: true,
-        createCollidable: true,
-        createPosition: true,
-        createRenderable: true,
-        createCannon: Boolean(definition.barrel)
-    });
-    Module.rawExports.decodeComponentList(entity, componentList);
-    Module.exports.free($(componentList)[0].i32);
-    Module.exports.free(componentList);
-
-    const basic = $.entity.getComponent(entity, "Basic");
-    if(!basic) throw "Invalid Component";
-    $(basic)[FIELD_OFFSETS.basic.parent].u32 = $(parent)[52].u32;
-    $(basic)[FIELD_OFFSETS.basic.parent][4].u16 = $(parent)[56].u16;
-    $(basic)[FIELD_OFFSETS.basic.owner].u32 = $(parent)[52].u32;
-    $(basic)[FIELD_OFFSETS.basic.owner][4].u16 = $(parent)[56].u16;
-
-    const position = $.entity.getComponent(entity, "Position");
-    if(!position) throw "Invalid Component";
-    $(position)[FIELD_OFFSETS.position.x].f32 = definition?.position?.xOffset || 0;
-    $(position)[FIELD_OFFSETS.position.y].f32 = definition?.position?.yOffset || 0;
-    $(position)[FIELD_OFFSETS.position.angle].f32 = definition?.position?.angle || 0;
-    if(definition?.position?.isAngleAbsolute) $(position)[FIELD_OFFSETS.position.flags].u32 |= FLAGS.absoluteRotation;
-
-    const collidable = $.entity.getComponent(entity, "Collidable");
-    if(!collidable) throw "Invalid Component";
-    $(collidable)[FIELD_OFFSETS.collidable.sides].u32 = definition?.physics?.sides || 1;
-    $(collidable)[FIELD_OFFSETS.collidable.size].f32 = definition?.physics?.size || 0;
-    $(collidable)[FIELD_OFFSETS.collidable.width].f32 = definition?.physics?.width || 0;
-    if(definition?.physics?.isTrapezoid) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 |= FLAGS.isTrapezoid;
-
-    const renderable = $.entity.getComponent(entity, "Renderable");
-    if(!renderable) throw "Invalid Component";
-    $(renderable)[FIELD_OFFSETS.renderable.color].u32 = definition?.style?.color || 0;
-    $(renderable)[FIELD_OFFSETS.renderable.borderWidth].f32 = definition?.style?.borderWidth || 7.5;
-    $(renderable)[FIELD_OFFSETS.renderable.opacity].f32 = definition?.style?.opacity || 1;
-    if(definition?.style?.isVisible !== false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isVisible;
-    if(definition?.style?.renderFirst) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.renderFirst;
-    if(definition?.style?.isStar) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isStar;
-    if(definition?.style?.isCachable !== false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isCachable;
-    if(definition?.style?.showsAboveParent) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.showsAboveParent;
-
-    const cannon = $.entity.getComponent(entity, "Cannon");
-    if(cannon) $(cannon)[FIELD_OFFSETS.cannon.shootingAngle].f32 = definition?.cannon?.trapezoidDirection || 0;
-
-    if(definition.children) {
-        for(const childDefinition of definition.children) {
-            Module.traverseAddonTree(entity, childDefinition);
-        }
-    }
-}
-
-Module.createAddonCallback = (definition) => {
-    return function(input_ptr) {
-        // we received an invalid pointer
-        if(!input_ptr || !$(input_ptr).i32) return;
-        
-        // we received a component pointer
-        if($(input_ptr).i32 !== input_ptr) {
-            input_ptr = $(input_ptr).i32;
-        }
-
-        if(definition.position) {
-            const position = $.entity.getComponent(input_ptr, "Position");
-            if(position) {
-                if(definition.position.xOffset) $(position)[FIELD_OFFSETS.position.x].f32 += definition.position.xOffset;
-                if(definition.position.yOffset) $(position)[FIELD_OFFSETS.position.y].f32 += definition.position.yOffset;
-                if(definition.position.angle) $(position)[FIELD_OFFSETS.position.angle].f32 = definition.position.angle;
-                if(definition.position.isAngleAbsolute === true) $(position)[FIELD_OFFSETS.position.flags].u32 |= FLAGS.absoluteRotation;
-                else if(definition.position.isAngleAbsolute === false) $(position)[FIELD_OFFSETS.position.flags].u32 &= !FLAGS.absoluteRotation;
-            }
-        }
-
-        if(definition.physics) {
-            const collidable = $.entity.getComponent(input_ptr, "Collidable");
-            if(collidable) {
-                if(definition.physics.sides) $(collidable)[FIELD_OFFSETS.collidable.sides].u32 = definition.physics.sides;
-                if(definition.physics.size) $(collidable)[FIELD_OFFSETS.collidable.size].f32 = definition.physics.size;
-                if(definition.physics.width) $(collidable)[FIELD_OFFSETS.collidable.width].f32 = definition.physics.width;
-                if(definition.physics.isTrapezoid === true) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 |= FLAGS.isTrapezoid;
-                else if(definition.physics.isTrapezoid === false) $(collidable)[FIELD_OFFSETS.collidable.flags].u32 &= !FLAGS.isTrapezoid;
-            }
-        }
-
-        if(definition.style) {
-            const renderable = $.entity.getComponent(input_ptr, "Renderable");
-            if(renderable) {
-                if(definition.style.color) $(renderable)[FIELD_OFFSETS.renderable.color].u32 = definition.style.color;
-                if(definition.style.borderWidth) $(renderable)[FIELD_OFFSETS.renderable.borderWidth].f32 = definition.style.borderWidth;
-                if(definition.style.opacity) $(renderable)[FIELD_OFFSETS.renderable.opacity].f32 = definition.style.opacity;
-                if(definition.style.isVisible === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isVisible;
-                else if(definition.style.isVisible === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isVisible;
-                if(definition.style.renderFirst === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.renderFirst;
-                else if(definition.style.renderFirst === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.renderFirst;
-                if(definition.style.isStar === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isStar;
-                else if(definition.style.isStar === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isStar;
-                if(definition.style.isCachable === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.isCachable;
-                else if(definition.style.isCachable === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.isCachable;
-                if(definition.style.showsAboveParent === true) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 |= FLAGS.showsAboveParent;
-                else if(definition.style.showsAboveParent === false) $(renderable)[FIELD_OFFSETS.renderable.flags].u32 &= !FLAGS.showsAboveParent;
-            }
-        }
-
-        if(definition.barrel) {
-            const cannon = $.entity.getComponent(input_ptr, "Cannon");
-            if(cannon) {
-                if(definition.barrel.trapezoidDirection) $(cannon)[FIELD_OFFSETS.cannon.shootingAngle].f32 = definition.barrel.trapezoidDirection;
-            }
-        }
-
-        if(definition.children) {
-            for(const childDefinition of definition.children) {
-                Module.traverseAddonTree(input_ptr, childDefinition);
-            }
-        }
-    }
-}
 
 const wasmImports = {
     assertFail: (condition, filename, line, func) => Module.abort("Assertion failed: " + Module.UTF8ToString(condition) + ", at: " + [filename ? Module.UTF8ToString(filename) : "unknown filename", line, func ? Module.UTF8ToString(func) : "unknown function"]),
@@ -481,16 +336,14 @@ Module.todo.push([() => {
     return [
         fetch(`${CDN}build_${BUILD}.wasm.wasm`).then(res => res.arrayBuffer()),
         fetch(`${API_URL}servers`).then(res => res.json()),
-        fetch(`${API_URL}tanks`).then(res => res.json()),
-        fetch(`${API_URL}addons`).then(res => res.json())
+        fetch(`${API_URL}tanks`).then(res => res.json())
     ];
 }, true]);
 
-Module.todo.push([(dependency, servers, tanks, addons) => {
+Module.todo.push([(dependency, servers, tanks) => {
     Module.status = "INSTANTIATE";
     Module.servers = servers;
     Module.tankDefinitions = tanks;
-    Module.addonDefinitions = addons;
     
     const parser = new WailParser(new Uint8Array(dependency));
     
@@ -568,7 +421,7 @@ Module.todo.push([(dependency, servers, tanks, addons) => {
         executeCommand: Module.executeCommand
     };
 
-    for(const [addonId, addonDefinition] of Object.entries(Module.addonDefinitions)) {
+    for(const addonId of Object.keys(CUSTOM_ADDONS)) {
         imports["_addon_" + addonId] = parser.addImportEntry({
             moduleStr: "mods",
             fieldStr: "_addon_" + addonId,
@@ -581,7 +434,11 @@ Module.todo.push([(dependency, servers, tanks, addons) => {
             kind: "func"
         });
 
-        Module.addonCallbackMap[addonId] = Module.imports.mods["_addon_" + addonId] = Module.createAddonCallback(addonDefinition);
+        Module.imports.mods["_addon_" + addonId] = (ptr) => {
+            const input = $(ptr);
+            if(!ptr || !input.i32) throw "Invalid pointer received on addon callback";
+            CUSTOM_ADDONS[addonId](new $Entity(input.i32 !== ptr ? input.$ : input));
+        };
     }
 
     parser.addExportEntry(imports.executeCommand, {
@@ -723,8 +580,6 @@ Module.todo.push([instance => {
     };
     // window.input & misc, see input.js
     window.setupInput();
-    // Diep Memory Analyzer, see dma.js
-    window.setupDMA();
     return [];
 }, false]);
 
@@ -742,7 +597,11 @@ Module.todo.push([() => {
         // refetches tankdefs & resets them
         reloadTanks: async () => {
             Module.tankDefinitions = await fetch(`${API_URL}tanks`).then(res => res.json());
-            for(const tankDef of Module.tankDefinitionsTable) Module.exports.free(tankDef);
+            if(Module.tankDefinitionsTable) {
+                for(const tankDef of Module.tankDefinitionsTable) {
+                    if(tankDef) Module.exports.free(tankDef);
+                }
+            }
             Module.loadTankDefinitions();
         },
         reloadCommands: async () => {
@@ -767,7 +626,7 @@ Module.todo.push([() => {
     Module.imports.a.table.set(Module.executeCommandFunctionIndex, Module.rawExports.executeCommand);
 
     // custom addons
-    for(const addonId of Object.keys(Module.addonDefinitions)) {
+    for(const addonId of Object.keys(CUSTOM_ADDONS)) {
         ADDON_MAP[addonId] = Module.imports.a.table.grow(1);
         Module.imports.a.table.set(ADDON_MAP[addonId],  Module.rawExports["_addon_" + addonId]);
     }
@@ -897,9 +756,12 @@ class ASMConsts {
     static getLocalStorage(key, length) {
         const keyStr = Module.UTF8ToString(key);
         let str = window.localStorage[keyStr] || "";
-        if(keyStr === "gamemode" && !str && Module.servers && Module.servers.length) {
-            str = Module.servers[0].gamemode;
-        }
+        if(
+            keyStr === "gamemode"
+            && Module.servers
+            && Module.servers.length
+            && !Module.servers.find(({ gamemode }) => window.localStorage[keyStr] === gamemode)
+        ) str = Module.servers[0].gamemode;
         Module.HEAPU32[length >> 2] = str.length;
         return Module.allocateUTF8(str);
     }
@@ -930,7 +792,7 @@ class ASMConsts {
     // 1 (ads)
 
     static setLocalStorage(key, valueStart, valueLength) {
-        window.localStorage[Module.UTF8ToString(key)] = new TextDecoder().decode(Module.HEAPU8.subarray(valueStart, valueStart + valueLength));
+        window.localStorage[Module.UTF8ToString(key)] = Decoder.decode(Module.HEAPU8.subarray(valueStart, valueStart + valueLength));
     }
 
     // 3 (ads)
