@@ -42,7 +42,7 @@ import { AccessLevel, maxPlayerLevel } from "../../config";
  * - `sizeFactor` is required and must be a `number`
  * - `cameraEntity` is required and must be a `Camera`
  */
-export type BarrelBase = ObjectEntity & { sizeFactor: number, cameraEntity: Entity, reloadTime: number, inputs: Inputs };
+export type BarrelBase = ObjectEntity & { sizeFactor: number, cameraEntity: CameraEntity, reloadTime: number, inputs: Inputs };
 
 /**
  * The Tank Body, which could also be called the Player class, converts defined

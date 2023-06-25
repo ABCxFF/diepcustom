@@ -52,10 +52,10 @@ export default class TeamBase extends LivingEntity {
         this.styleData.values.opacity = 0.1;
         this.styleData.values.borderWidth = 0;
         this.styleData.values.color = team.teamData.teamColor;
-        this.styleData.values.flags |= StyleFlags._minimap | StyleFlags.hasNoDmgIndicator;
+        this.styleData.values.flags |= StyleFlags.renderFirst | StyleFlags.hasNoDmgIndicator;
 
         this.healthData.flags |= HealthFlags.hiddenHealthbar
-        this.healthData.health = this.healthData.values.maxHealth = 0xABCFF;
+        this.healthData.health = this.healthData.values.maxHealth = 0xABCFF; // ;)
     }
 
     public tick(tick: number) {

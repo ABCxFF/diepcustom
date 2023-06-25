@@ -22,7 +22,6 @@ import _TankDefinitions from "./TankDefinitions.json";
 
 /** The types of post addons that exist in the game, by their id. */
 export type postAddonId = "dompronounced" | "auto5" | "auto3" | "autosmasher" | "spike" | "pronounced" | "smasher" | "landmine" | "autoturret" | "weirdspike" | "auto2" | "auto7" | "autorocket" | "spiesk"
-
 /** The types of post addons that exist in the game, by their id. */
 export type preAddonId = "dombase" | "launcher"
 /** A joint list of all post addon ids and pre addon ids. */
@@ -32,7 +31,7 @@ export type addonId = preAddonId | postAddonId;
 export type projectileId = "bullet" | "drone" | "trap" | "necrodrone" | "minion" | "skimmer" | "rocket" | "swarm" | "flame" | "wall" | "croc";
 
 /** The types of barrel addons that exist in the game */
-export type barrelAddonId = "trapLauncher";
+export type barrelAddonId = "trapLauncher" | "purplebarrel";
 
 /** Increase in opacity when taking damage. */
 export const visibilityRateDamage = 0.2;

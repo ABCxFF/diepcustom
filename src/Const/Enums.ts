@@ -234,7 +234,7 @@ export const enum StyleFlags {
     isVisible          = 1 << 0,
     hasBeenDamaged     = 1 << 1,
     isFlashing         = 1 << 2,
-    _minimap           = 1 << 3,
+    renderFirst        = 1 << 3,
     isStar             = 1 << 4,
     isTrap             = 1 << 5,
     showsAboveParent   = 1 << 6,
@@ -253,7 +253,7 @@ export const enum PositionFlags {
 export const enum PhysicsFlags {
     isTrapezoid             = 1 << 0,
     showsOnMap              = 1 << 1,
-    _unknown                = 1 << 2,
+    doChildrenCollision     = 1 << 2,
     noOwnTeamCollision      = 1 << 3,
     isSolidWall             = 1 << 4,
     onlySameOwnerCollision  = 1 << 5,

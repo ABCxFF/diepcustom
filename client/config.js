@@ -241,7 +241,9 @@ const MOD_CONFIG = {
         "loadChangelog": 447,
         "loadTankDefinitions": 277,
         "getTankDefinition": 101,
-        "findCommand": 496
+        "findCommand": 496,
+        "decodeComponentList": 221,
+        "createEntityAtIndex": 114
     },
     "memory": {
         "gamemodeDisabledText": 16420,
@@ -260,23 +262,116 @@ const MOD_CONFIG = {
 };
 
 const ADDON_MAP = {
-    "barrelAddons": {
-        "trapLauncher": 147
-    },
-    "tankAddons": {
-        "auto3": 148,
-        "smasher": 149,
-        "pronounced": 150,
-        "landmine": 151,
-        "auto5": 153,
-        "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
-        "autosmasher": 155,
-        "spike": 156,
-        "launcher": 157, // Skimmer (157) & Rocketeer (158)
-        "dombase": 159,
-        "dompronounced": 160, // Dom1 (160) & Dom2 (161) 
-    }
+    "trapLauncher": 147,
+    "auto3": 148,
+    "smasher": 149,
+    "pronounced": 150,
+    "landmine": 151,
+    "auto5": 153,
+    "autoturret": 154, // Auto Trapper (154) & Auto Gunner (152)
+    "autosmasher": 155,
+    "spike": 156,
+    "launcher": 157, // Skimmer (157) & Rocketeer (158)
+    "dombase": 159,
+    "dompronounced": 160 // Dom1 (160) & Dom2 (161) 
 };
+
+const CUSTOM_ADDONS = {
+    // This is a tutorial addon made for showcasing how custom addon renders are to be defined.
+    "tutorial": entity => {
+        // This if statement isnt totally necessary but might help your IDE recognize the type of "entity" which simplifies development later. It can be removed.
+        if(!(entity instanceof $Entity)) return;
+        
+        /*
+        We are currently on the root level meaning we can only access the "entity" the addon is placed upon. This means that "entity" is either a barrel or a tank.
+        It is possible to change its data even at the root level.
+
+        Each instance of "$Entity" has the following properties:
+        - positionData
+            -> Stores data about the entitie's position and angle, if the entity has a parent the x and y coordinates will be relative to the parents position.
+        - physicsData
+            -> Stores data about the entitie's collision properties (its size, sides, width, if it is a trapezoid).
+        - styleData
+            -> Stores data about how the entity is rendered, whether or not its visible, its color and so on.
+        - barrelData
+            -> This field is only defined if the entity actually is a barrel. It only has the shootingAngle property.
+        - parent
+            -> If this $Entity instance has been created via a createChild call, then this property stores a reference to its creator / parent. (ONLY DIRECT PARENT!)
+        - children
+            -> If this entity created children via createChild calls, then this property stores references to those children. (ONLY DIRECT CHILDREN!)
+        As well as the following methods:
+        - clone(source: $Entity)
+            -> Clones the sources position, physics, style and barrelData to the current entity.
+        - createChild(isBarrel: boolean)
+            -> Creates either a regular object entity or a barrel entity and sets its parent as this entity.
+        - defaults()
+            -> Sets the default values for position, physics, style and barrelData. Check out the default values in "./dma.js".
+        
+        Each of the "[...]Data" fields has similarly .clone(source: Self) and defaults() methods.
+        
+        You may not set the properties of $Entity manually. Instead use the "[...]Data" fields or .clone() / .defaults().
+        So don't do this: "someEntity.positionData = someOtherEntity.positionData;", but instead do this: "someEntity.positionData.clone(someOtherEntity.positionData);".
+        */
+    },
+    "auto2": entity => {
+        if(!(entity instanceof $Entity)) return;
+                
+        const rotator = entity.createChild(false);
+        rotator.defaults();
+        rotator.physicsData.size = 5;
+        rotator.positionData.angle = 0.01;
+        rotator.positionData.isAngleAbsolute = true;
+        rotator.styleData.isVisible = false;
+
+        const count = 2;
+        for(let i = 0; i < count; ++i) {
+            const socket = rotator.createChild(false);
+            socket.defaults();
+            
+            socket.positionData.angle = i * Math.PI * 2 / count;
+            socket.positionData.x = Math.cos(socket.positionData.angle) * 40;
+            socket.positionData.y = Math.sin(socket.positionData.angle) * 40;
+            socket.physicsData.size = 25;
+            // Color.Barrel
+            socket.styleData.color = 1;
+
+            const barrel = socket.createChild(true);
+            barrel.defaults();
+            barrel.physicsData.size = 55;
+            barrel.physicsData.sides = 2;
+            barrel.physicsData.width = 0.7 * 42;
+            // angle + shootingAngle
+            barrel.positionData.angle = 0;
+            // Math.cos(angle) * (size / 2 + distance) - Math.sin(angle) * offset
+            barrel.positionData.x = Math.cos(0) * (barrel.physicsData.size / 2 + 0) - Math.sin(0) * 0;
+            // Math.sin(angle) * (size / 2 + distance) - Math.cos(angle) * offset
+            barrel.positionData.y = Math.sin(0) * (barrel.physicsData.size / 2 + 0) - Math.cos(0) * 0;
+            // Color.Barrel
+            barrel.styleData.color = 1;
+        }
+    },
+    "arrasspawnerbarrel": entity => {
+        if(!(entity instanceof $Entity)) return;
+
+        const rect1 = entity.createChild(false);
+        rect1.defaults();
+        rect1.styleData.color = 1;
+        rect1.styleData.showsAboveParent = true;
+        rect1.physicsData.sides = 2;
+        rect1.physicsData.width = entity.physicsData.width * 1.25;
+        rect1.physicsData.size = entity.physicsData.size * (10 / 50);
+        rect1.positionData.x = (entity.physicsData.size - rect1.physicsData.size) / 2;
+
+        const rect2 = entity.createChild(false);
+        rect2.defaults();
+        rect2.styleData.color = 1;
+        rect2.styleData.showsAboveParent = true;
+        rect2.physicsData.sides = 2;
+        rect2.physicsData.width = entity.physicsData.width * 1.25;
+        rect2.physicsData.size = entity.physicsData.size * (35 / 50);
+        rect2.positionData.x = (-entity.physicsData.size + rect2.physicsData.size) / 2;
+    }
+}
 
 const CUSTOM_COMMANDS = [
     {
@@ -392,4 +487,42 @@ const DYNAMIC_TOP_PTR = 183072; // points to start of dynamic memory
 const WASM_MEMORY = {
     "initial": INITIAL_MEMORY / WASM_PAGE_SIZE,
     "maximum": INITIAL_MEMORY / WASM_PAGE_SIZE
+};
+
+const FIELD_OFFSETS = {
+    basic: {
+        owner: 20,
+        parent: 32
+    },
+    position: {
+        y: 8,
+        x: 40,
+        angle: 72,
+        flags: 104
+    },
+    collidable: {
+        size: 16,
+        sides: 48,
+        width: 64,
+        flags: 104
+    },
+    renderable: {
+        color: 12,
+        flags: 20,
+        borderWidth: 32,
+        opacity: 64
+    },
+    cannon: {
+        shootingAngle: 8
+    }
+};
+
+const FLAGS = {
+    absoluteRotation: 1 << 0,
+    isTrapezoid: 1 << 0,
+    isVisible: 1 << 0,
+    renderFirst: 1 << 3,
+    isStar: 1 << 4,
+    isCachable: 1 << 5,
+    showsAboveParent: 1 << 6
 };

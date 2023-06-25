@@ -57,7 +57,7 @@ export class TrapLauncher extends ObjectEntity {
         this.barrelEntity = barrel;
         this.setParent(barrel);
         this.relationsData.values.team = barrel;
-        this.physicsData.values.flags = PhysicsFlags.isTrapezoid | PhysicsFlags._unknown;
+        this.physicsData.values.flags = PhysicsFlags.isTrapezoid | PhysicsFlags.doChildrenCollision;
         this.styleData.values.color = Color.Barrel;
 
         this.physicsData.values.sides = 2;
@@ -93,9 +93,17 @@ export class TrapLauncherAddon extends BarrelAddon {
     }
 }
 
+export class PurpleBarrelAddon extends BarrelAddon {
+    public constructor(owner: Barrel) {
+        super(owner);
+        owner.styleData.color = Color.TeamPurple;
+    }
+}
+
 /**
  * All barrel addons in the game by their ID.
  */
  export const BarrelAddonById: Record<barrelAddonId, typeof BarrelAddon | null> = {
-    trapLauncher: TrapLauncherAddon
+    trapLauncher: TrapLauncherAddon,
+    purplebarrel: PurpleBarrelAddon
 }

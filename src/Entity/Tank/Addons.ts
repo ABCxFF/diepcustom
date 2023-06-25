@@ -24,9 +24,9 @@ import { Color, PositionFlags, PhysicsFlags, StyleFlags } from "../../Const/Enum
 import { BarrelBase } from "./TankBody";
 import { addonId, BarrelDefinition } from "../../Const/TankDefinitions";
 import { AI, AIState, Inputs } from "../AI";
-import { Entity } from "../../Native/Entity";
 import LivingEntity from "../Live";
 import { normalizeAngle, PI2 } from "../../util";
+import { CameraEntity } from "../../Native/Camera";
 
 /**
  * Abstract class to represent an addon in game.
@@ -144,7 +144,7 @@ const AutoTurretMiniDefinition: BarrelDefinition = {
 export class GuardObject extends ObjectEntity implements BarrelBase {
     /***** From BarrelBase *****/
     public inputs: Inputs;
-    public cameraEntity: Entity;
+    public cameraEntity: CameraEntity;
     public reloadTime: number;
 
     /** Helps the class determine size ratio as well as who is the owner */
@@ -439,7 +439,6 @@ class SpieskAddon extends Addon {
     }
 }
 
-
 /**
  * All addons in the game by their ID.
  */
@@ -460,5 +459,5 @@ export const AddonById: Record<addonId, typeof Addon | null> = {
     auto7: Auto7Addon,
     auto2: Auto2Addon,
     autorocket: AutoRocketAddon,
-    spiesk: SpieskAddon
+    spiesk: SpieskAddon,
 }
