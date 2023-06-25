@@ -633,7 +633,7 @@ const getter = ({ ptr }, prop) => {
     switch(prop) {
         case "at":
         case "ptr": return ptr;
-        case "u8": 
+        case "u8": return Module.HEAPU8[ptr];
         case "i8": return Module.HEAP8[ptr];
         case "u16": return Module.HEAPU16[ptr >> 1];
         case "i16": return Module.HEAP16[ptr >> 1];
@@ -719,7 +719,7 @@ const setter = ({ ptr }, prop, to) => {
         case "cstr": {
             const textBuf = Encoder.encode(to.toString());
             const len = textBuf.length;
-            if (Module.HEAPU8[ptr + 11] === 0x80) Module.exports.free(Module.HEAP32[ptr >> 2]);
+            if(Module.HEAPU8[(ptr + 11) >> 0] === 0x80 && Module.HEAP32[ptr >> 2] < Module.HEAPU8 && Module.HEAP32[ptr >> 2] > DYNAMIC_TOP_PTR) Module.exports.free(Module.HEAP32[ptr >> 2]);
             Module.HEAPU8.set(new Uint8Array(12), ptr);
             if(len < 11) {
                 Module.HEAPU8.set(textBuf, ptr);
@@ -746,6 +746,8 @@ $.write = (ptr, type, value) => {
             return $.writeStruct(ptr, value);
         case "vector":
             return new $Vector(ptr, value.type, value.typeSize).push(...value.entries);
+        case "cstr":
+            Module.HEAP32.set([0, 0, 0], )
         default:
             return $(ptr)[type] = value;
     }
