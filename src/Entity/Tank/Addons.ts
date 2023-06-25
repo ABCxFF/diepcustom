@@ -439,15 +439,6 @@ class SpieskAddon extends Addon {
     }
 }
 
-/** Small Pentagon Tank */
-class SmallPentagonTank extends Addon {
-    public constructor(owner: BarrelBase) {
-        super(owner);
-        owner.physicsData.sides = 5;
-        owner.physicsData.size *= 0.5;
-    } 
-}
-
 /**
  * All addons in the game by their ID.
  */
@@ -469,5 +460,4 @@ export const AddonById: Record<addonId, typeof Addon | null> = {
     auto2: Auto2Addon,
     autorocket: AutoRocketAddon,
     spiesk: SpieskAddon,
-    smallpentagontank: SmallPentagonTank
 }
