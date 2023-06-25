@@ -277,6 +277,42 @@ const ADDON_MAP = {
 };
 
 const CUSTOM_ADDONS = {
+    // This is a tutorial addon made for showcasing how custom addon renders are to be defined.
+    "tutorial": entity => {
+        // This if statement isnt totally necessary but might help your IDE recognize the type of "entity" which simplifies development later. It can be removed.
+        if(!(entity instanceof $Entity)) return;
+        
+        /*
+        We are currently on the root level meaning we can only access the "entity" the addon is placed upon. This means that "entity" is either a barrel or a tank.
+        It is possible to change its data even at the root level.
+
+        Each instance of "$Entity" has the following properties:
+        - positionData
+            -> Stores data about the entitie's position and angle, if the entity has a parent the x and y coordinates will be relative to the parents position.
+        - physicsData
+            -> Stores data about the entitie's collision properties (its size, sides, width, if it is a trapezoid).
+        - styleData
+            -> Stores data about how the entity is rendered, whether or not its visible, its color and so on.
+        - barrelData
+            -> This field is only defined if the entity actually is a barrel. It only has the shootingAngle property.
+        - parent
+            -> If this $Entity instance has been created via a createChild call, then this property stores a reference to its creator / parent. (ONLY DIRECT PARENT!)
+        - children
+            -> If this entity created children via createChild calls, then this property stores references to those children. (ONLY DIRECT CHILDREN!)
+        As well as the following methods:
+        - clone(source: $Entity)
+            -> Clones the sources position, physics, style and barrelData to the current entity.
+        - createChild(isBarrel: boolean)
+            -> Creates either a regular object entity or a barrel entity and sets its parent as this entity.
+        - defaults()
+            -> Sets the default values for position, physics, style and barrelData. Check out the default values in "./dma.js".
+        
+        Each of the "[...]Data" fields has similarly .clone(source: Self) and defaults() methods.
+        
+        You may not set the properties of $Entity manually. Instead use the "[...]Data" fields or .clone() / .defaults().
+        So don't do this: "someEntity.positionData = someOtherEntity.positionData;", but instead do this: "someEntity.positionData.clone(someOtherEntity.positionData);".
+        */
+    },
     "auto2": entity => {
         if(!(entity instanceof $Entity)) return;
                 
@@ -317,23 +353,23 @@ const CUSTOM_ADDONS = {
     "arrasspawnerbarrel": entity => {
         if(!(entity instanceof $Entity)) return;
 
-        const thing1 = entity.createChild(false);
-        thing1.defaults();
-        thing1.styleData.color = 1;
-        thing1.styleData.showsAboveParent = true;
-        thing1.physicsData.sides = 2;
-        thing1.physicsData.width = entity.physicsData.width * 1.25;
-        thing1.physicsData.size = entity.physicsData.size * (10 / 50);
-        thing1.positionData.x = (entity.physicsData.size - thing1.physicsData.size) / 2;
+        const rect1 = entity.createChild(false);
+        rect1.defaults();
+        rect1.styleData.color = 1;
+        rect1.styleData.showsAboveParent = true;
+        rect1.physicsData.sides = 2;
+        rect1.physicsData.width = entity.physicsData.width * 1.25;
+        rect1.physicsData.size = entity.physicsData.size * (10 / 50);
+        rect1.positionData.x = (entity.physicsData.size - rect1.physicsData.size) / 2;
 
-        const thing2 = entity.createChild(false);
-        thing2.defaults();
-        thing2.styleData.color = 1;
-        thing2.styleData.showsAboveParent = true;
-        thing2.physicsData.sides = 2;
-        thing2.physicsData.width = entity.physicsData.width * 1.25;
-        thing2.physicsData.size = entity.physicsData.size * (35 / 50);
-        thing2.positionData.x = (-entity.physicsData.size + thing2.physicsData.size) / 2;
+        const rect2 = entity.createChild(false);
+        rect2.defaults();
+        rect2.styleData.color = 1;
+        rect2.styleData.showsAboveParent = true;
+        rect2.physicsData.sides = 2;
+        rect2.physicsData.width = entity.physicsData.width * 1.25;
+        rect2.physicsData.size = entity.physicsData.size * (35 / 50);
+        rect2.positionData.x = (-entity.physicsData.size + rect2.physicsData.size) / 2;
     }
 }
 
