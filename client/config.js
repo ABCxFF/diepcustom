@@ -313,6 +313,27 @@ const CUSTOM_ADDONS = {
             // Color.Barrel
             barrel.styleData.color = 1;
         }
+    },
+    "arrasspawnerbarrel": entity => {
+        if(!(entity instanceof $Entity)) return;
+
+        const thing1 = entity.createChild(false);
+        thing1.defaults();
+        thing1.styleData.color = 1;
+        thing1.styleData.showsAboveParent = true;
+        thing1.physicsData.sides = 2;
+        thing1.physicsData.width = entity.physicsData.width * 1.25;
+        thing1.physicsData.size = entity.physicsData.size * (10 / 50);
+        thing1.positionData.x = (entity.physicsData.size - thing1.physicsData.size) / 2;
+
+        const thing2 = entity.createChild(false);
+        thing2.defaults();
+        thing2.styleData.color = 1;
+        thing2.styleData.showsAboveParent = true;
+        thing2.physicsData.sides = 2;
+        thing2.physicsData.width = entity.physicsData.width * 1.25;
+        thing2.physicsData.size = entity.physicsData.size * (35 / 50);
+        thing2.positionData.x = (-entity.physicsData.size + thing2.physicsData.size) / 2;
     }
 }
 
