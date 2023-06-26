@@ -133,7 +133,7 @@ export default class Client {
     public send(data: Uint8Array) {
         const ws = this.ws;
         if (!ws) throw new Error("Can't write to a closed websocket - shouldn't be referencing a closed client");
-        ws.send(data, true);
+        ws.send(data, true, true);
     }
 
     /** Handles close event. */
