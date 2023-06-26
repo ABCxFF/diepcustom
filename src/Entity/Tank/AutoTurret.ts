@@ -129,6 +129,8 @@ export default class AutoTurret extends ObjectEntity {
     public tick(tick: number) {
         if (this.inputs !== this.ai.inputs) this.inputs = this.ai.inputs;
 
+        this.relationsData.values.team = this.owner.relationsData.values.team;
+
         if (this.ai.state === AIState.hasTarget) this.ai.passiveRotation = Math.random() < .5 ? AI.PASSIVE_ROTATION : -AI.PASSIVE_ROTATION;
 
         this.physicsData.size = this.baseSize * this.sizeFactor;
