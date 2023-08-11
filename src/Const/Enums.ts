@@ -236,7 +236,7 @@ export const enum StyleFlags {
     isFlashing         = 1 << 2,
     renderFirst        = 1 << 3,
     isStar             = 1 << 4,
-    isTrap             = 1 << 5,
+    isCachable         = 1 << 5,
     showsAboveParent   = 1 << 6,
     hasNoDmgIndicator  = 1 << 7
 }
