@@ -89,20 +89,20 @@ app.get("/*", (res, req) => {
     if (ENABLE_API && req.getUrl().startsWith(`/${config.apiLocation}`)) {
         switch (req.getUrl().slice(config.apiLocation.length + 1)) {
             case "/":
-                res.writeStatus("200 OK");
-                return res.end();
+                res.writeStatus("200 OK").end();
+                return;
             case "/tanks":
-                res.writeStatus("200 OK");
-                return res.end(JSON.stringify(TankDefinitions));
+                res.writeStatus("200 OK").end(JSON.stringify(TankDefinitions));
+                return;
             case "/servers":
-                res.writeStatus("200 OK");
-                return res.end(JSON.stringify(games.map(({ gamemode, name }) => ({ gamemode, name }))));
+                res.writeStatus("200 OK").end(JSON.stringify(games.map(({ gamemode, name }) => ({ gamemode, name }))));
+                return;
             case "/commands":
-                res.writeStatus("200 OK");
-                return res.end(JSON.stringify(config.enableCommands ? Object.values(commandDefinitions) : []));
+                res.writeStatus("200 OK").end(JSON.stringify(config.enableCommands ? Object.values(commandDefinitions) : []));
+                return;
             case "/colors":
-                res.writeStatus("200 OK");
-                return res.end(JSON.stringify(ColorsHexCode));
+                res.writeStatus("200 OK").end(JSON.stringify(ColorsHexCode));
+                return;
         }
     }
 
@@ -135,12 +135,12 @@ app.get("/*", (res, req) => {
         res.writeHeader("Content-Type", contentType + "; charset=utf-8");
 
         if (file && fs.existsSync(file)) {
-            res.writeStatus("200 OK");
-            return res.end(fs.readFileSync(file));
+            res.writeStatus("200 OK").end(fs.readFileSync(file));
+            return;
         }
 
-        res.writeStatus("404 Not Found");
-        return res.end(fs.readFileSync(config.clientLocation + "/404.html"));
+        res.writeStatus("404 Not Found").end(fs.readFileSync(config.clientLocation + "/404.html"));
+        return;
     } 
 });
 

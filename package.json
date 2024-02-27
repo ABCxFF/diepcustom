@@ -26,7 +26,7 @@
   "dependencies": {
     "chalk": "^4.1.1",
     "tweetnacl": "^1.0.3",
-    "uWebSockets.js": "uNetworking/uWebSockets.js#v20.19.0"
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v20.42.0"
   },
   "devDependencies": {
     "@types/node": "^16.4.0",
