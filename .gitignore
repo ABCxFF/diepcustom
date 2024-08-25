@@ -8,4 +8,3 @@ ext/
 package/
 client/public/
 replit.nix
-yarn.lock
